@@ -195,6 +195,9 @@ setblock 89 200 10 create:mechanical_pump[facing=west]
 setblock 89 200 11 create:cogwheel[axis=x]
 setblock 90 200 11 create:creative_motor[facing=west]
 setblock 88 201 10 create:basin
+say CHECK natural oil
+execute positioned 300 100 300 run cdg oil get
+execute positioned 5 200 0 run cdg oil locate
 tick sprint 40
 setblock 54 201 10 createdieselgenerators:basin_lid[on_a_basin=true,facing=south]
 data merge block 70 202 10 {Tanks:[{TankContent:{id:"create:chocolate",amount:81000}}]}

@@ -22,12 +22,21 @@ cmd data get block 38 201 10
 cmd tp @a 42.5 200 6.5 -0.0 1.7
 sleep 4
 shot
-cmd tp @a -1.5 201 12.5 -90.0 2.3
+cmd tp @a -1.5 200 12.5 -90.0 -16.3
 sleep 4
 shot
 cmd tp @a 9.5 200 8.5 -0.0 2.3
 sleep 4
 shot
+cmd item replace entity @a hotbar.1 with createdieselgenerators:engine_turbocharger
+key 2
+sleep 2
+rclick 640 360
+sleep 2
+shot
+cmd say CHECK client S2 engine
+cmd data get block 9 201 11
+key 1
 cmd tp @a 13.5 200 12.5 -90.0 2.3
 sleep 4
 shot
