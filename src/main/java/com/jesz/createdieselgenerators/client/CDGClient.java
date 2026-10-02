@@ -5,6 +5,24 @@ import com.jesz.createdieselgenerators.CDGBlocks;
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.CDGFluids;
 import com.jesz.createdieselgenerators.ClientHooks;
+import com.jesz.createdieselgenerators.CDGEntityTypes;
+import com.jesz.createdieselgenerators.CDGMenuTypes;
+import com.jesz.createdieselgenerators.CreateDieselGenerators;
+import com.jesz.createdieselgenerators.client.gui.EntityFilterScreen;
+import com.jesz.createdieselgenerators.client.gui.TrackLayersBagClientComponent;
+import com.jesz.createdieselgenerators.client.handler.AndesiteGirderWrenchHandler;
+import com.jesz.createdieselgenerators.client.handler.TrackLayersBagPlacementClient;
+import com.jesz.createdieselgenerators.client.tooltip.CDGItemTooltips;
+import com.jesz.createdieselgenerators.content.track_layers_bag.TrackLayersBagComponent;
+import com.zurrtum.create.client.AllItemTooltips;
+import com.zurrtum.create.client.AllMenuScreens;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.ClientTooltipComponentCallback;
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.entity.NoopRenderer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import com.jesz.createdieselgenerators.client.ct.BulkFermenterCTBehavior;
 import com.jesz.createdieselgenerators.client.ct.ModularDieselEngineCTBehavior;
 import com.jesz.createdieselgenerators.client.ct.OilBarrelCTBehavior;
@@ -68,6 +86,27 @@ public class CDGClient implements ClientModInitializer {
         registerRenderers();
         registerBehaviours();
         registerHooks();
+        registerEvents();
+    }
+
+    private static void registerEvents() {
+        EntityRenderers.register(CDGEntityTypes.CHEMICAL_SPRAYER_PROJECTILE.get(), NoopRenderer::new);
+        AllMenuScreens.register(CDGMenuTypes.ENTITY_FILTER, EntityFilterScreen::create);
+
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            if (mc.player == null || mc.level == null)
+                return;
+            AndesiteGirderWrenchHandler.tick(mc);
+            TrackLayersBagPlacementClient.clientTick(mc);
+        });
+        ClientTooltipComponentCallback.EVENT.register(data ->
+                data instanceof TrackLayersBagComponent component ? new TrackLayersBagClientComponent(component) : null);
+        ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> CDGItemTooltips.addToItemTooltip(stack, lines));
+
+        // item descriptions (hold Shift) and kinetic stats, as Registrate attached to every item of the mod
+        for (Item item : BuiltInRegistries.ITEM)
+            if (BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(CreateDieselGenerators.ID))
+                AllItemTooltips.register(item);
     }
 
     private static void fluid(FluidEntry entry, Identifier still, Identifier flow) {

@@ -16,6 +16,9 @@
     "UseOnContextInvoker"
   ],
   "client": [
+    "client.BasinRenderStateMixin",
+    "client.BasinRendererMixin",
+    "client.TurretOperatorHatMixin"
   ],
   "injectors": {
     "defaultRequire": 1

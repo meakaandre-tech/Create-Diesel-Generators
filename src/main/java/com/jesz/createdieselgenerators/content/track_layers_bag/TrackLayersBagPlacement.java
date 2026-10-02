@@ -42,11 +42,11 @@ public class TrackLayersBagPlacement {
             this.trackMaterial = material;
         }
 
-        BezierConnection curve = null;
-        boolean valid = false;
-        int end1Extent = 0;
-        int end2Extent = 0;
-        String message = null;
+        public BezierConnection curve = null;
+        public boolean valid = false;
+        public int end1Extent = 0;
+        public int end2Extent = 0;
+        public String message = null;
 
         public int requiredTracks = 0;
         public boolean hasRequiredTracks = false;
@@ -55,12 +55,12 @@ public class TrackLayersBagPlacement {
         public boolean hasRequiredPavement = false;
         public final TrackMaterial trackMaterial;
 
-        Vec3 end1;
-        Vec3 end2;
-        Vec3 normal1;
-        Vec3 normal2;
-        Vec3 axis1;
-        Vec3 axis2;
+        public Vec3 end1;
+        public Vec3 end2;
+        public Vec3 normal1;
+        public Vec3 normal2;
+        public Vec3 axis1;
+        public Vec3 axis2;
         BlockPos pos1;
         BlockPos pos2;
 
