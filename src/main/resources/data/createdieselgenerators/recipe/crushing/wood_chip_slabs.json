@@ -1,24 +1,18 @@
 {
   "type": "create:crushing",
-  "ingredients": [
-    {
-      "type": "neoforge:difference",
-      "base": [
-        {
-          "tag": "minecraft:wooden_slabs"
-        },
-        {
-          "item": "minecraft:bamboo_mosaic_slab"
-        },
-        {
-          "item": "createdieselgenerators:chip_wood_block"
-        }
-      ],
-      "subtracted": {
-        "item": "createdieselgenerators:chip_wood_slab"
-      }
-    }
-  ],
+  "ingredient": {
+    "fabric:type": "fabric:difference",
+    "base": {
+      "fabric:type": "fabric:any",
+      "ingredients": [
+        "#minecraft:wooden_slabs",
+        "minecraft:bamboo_mosaic_slab",
+        "createdieselgenerators:chip_wood_block"
+      ]
+    },
+    "subtracted": "createdieselgenerators:chip_wood_slab"
+  },
+  "processing_time": 100,
   "results": [
     {
       "id": "createdieselgenerators:wood_chip",

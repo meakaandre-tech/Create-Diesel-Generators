@@ -1,10 +1,7 @@
 {
   "type": "create:cutting",
-  "ingredients": [
-    {
-      "tag": "c:plates/iron"
-    }
-  ],
+  "ingredient": "#c:plates/iron",
+  "processing_time": 100,
   "results": [
     {
       "id": "createdieselgenerators:mold",

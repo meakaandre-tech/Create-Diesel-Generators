@@ -1,25 +1,19 @@
 {
   "type": "create:mixing",
+  "heat_requirement": "heated",
   "ingredients": [
-    {
-      "item": "minecraft:gravel"
-    },
-    {
-      "item": "minecraft:gravel"
-    },
-    {
-      "item": "minecraft:sand"
-    },
-    {
-      "item": "minecraft:sand"
-    },
+    "minecraft:gravel",
+    "minecraft:gravel",
+    "minecraft:sand",
+    "minecraft:sand"
+  ],
+  "fluid_ingredients": [
     {
       "type": "fluid_tag",
-      "fluid_tag": "c:crude_oil",
-      "amount": 100
+      "amount": 8100,
+      "fluid_tag": "#c:crude_oil"
     }
   ],
-  "heatRequirement": "heated",
   "results": [
     {
       "id": "createdieselgenerators:asphalt_block",

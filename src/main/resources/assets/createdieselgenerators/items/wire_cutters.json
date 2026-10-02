@@ -1,0 +1,8 @@
+{
+  "model": {
+    "type": "createdieselgenerators:model/processing_tool",
+    "model": "createdieselgenerators:item/wire_cutters",
+    "open_model": "createdieselgenerators:item/wire_cutters_cut",
+    "tool": "wire_cutters"
+  }
+}

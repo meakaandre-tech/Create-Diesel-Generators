@@ -50,7 +50,7 @@ public class CDGTooltips {
 
         @Override
         public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-            return containedFluidTooltip(tooltip, isPlayerSneaking, blockEntity.tank.getCapability());
+            return containedFluidTooltip(tooltip, isPlayerSneaking, blockEntity.tank);
         }
     }
 

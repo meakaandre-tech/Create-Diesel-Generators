@@ -1,0 +1,814 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "minecraft:custom_name",
+    "cases": [
+      {
+        "when": [
+          "sussy",
+          "Sussy",
+          "SUSSY"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/sussy_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/sussy_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/sussy"
+          }
+        }
+      },
+      {
+        "when": [
+          "fire",
+          "Fire",
+          "FIRE"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/fire_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/fire_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/fire"
+          }
+        }
+      },
+      {
+        "when": [
+          "heavier",
+          "Heavier",
+          "HEAVIER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/heavier_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/heavier_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/heavier"
+          }
+        }
+      },
+      {
+        "when": [
+          "willows",
+          "Willows",
+          "WILLOWS"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/willows_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/willows_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/willows"
+          }
+        }
+      },
+      {
+        "when": [
+          "soul",
+          "Soul",
+          "SOUL"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/soul_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/soul_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/soul"
+          }
+        }
+      },
+      {
+        "when": [
+          "creeper",
+          "Creeper",
+          "CREEPER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/creeper_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/creeper_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/creeper"
+          }
+        }
+      },
+      {
+        "when": [
+          "titanium",
+          "Titanium",
+          "TITANIUM"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/titanium_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/titanium_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/titanium"
+          }
+        }
+      },
+      {
+        "when": [
+          "arc",
+          "Arc",
+          "ARC"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/arc_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/arc_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/arc"
+          }
+        }
+      },
+      {
+        "when": [
+          "glass",
+          "Glass",
+          "GLASS"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/glass_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/glass_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/glass"
+          }
+        }
+      },
+      {
+        "when": [
+          "diamond",
+          "Diamond",
+          "DIAMOND"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/diamond_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/diamond_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/diamond"
+          }
+        }
+      },
+      {
+        "when": [
+          "dragon",
+          "Dragon",
+          "DRAGON"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/dragon_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/dragon_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/dragon"
+          }
+        }
+      },
+      {
+        "when": [
+          "obsidian",
+          "Obsidian",
+          "OBSIDIAN"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/obsidian_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/obsidian_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/obsidian"
+          }
+        }
+      },
+      {
+        "when": [
+          "sussy lighter",
+          "Sussy lighter",
+          "Sussy Lighter",
+          "SUSSY LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/sussy_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/sussy_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/sussy"
+          }
+        }
+      },
+      {
+        "when": [
+          "fire lighter",
+          "Fire lighter",
+          "Fire Lighter",
+          "FIRE LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/fire_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/fire_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/fire"
+          }
+        }
+      },
+      {
+        "when": [
+          "heavier lighter",
+          "Heavier lighter",
+          "Heavier Lighter",
+          "HEAVIER LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/heavier_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/heavier_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/heavier"
+          }
+        }
+      },
+      {
+        "when": [
+          "willows lighter",
+          "Willows lighter",
+          "Willows Lighter",
+          "WILLOWS LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/willows_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/willows_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/willows"
+          }
+        }
+      },
+      {
+        "when": [
+          "soul lighter",
+          "Soul lighter",
+          "Soul Lighter",
+          "SOUL LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/soul_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/soul_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/soul"
+          }
+        }
+      },
+      {
+        "when": [
+          "creeper lighter",
+          "Creeper lighter",
+          "Creeper Lighter",
+          "CREEPER LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/creeper_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/creeper_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/creeper"
+          }
+        }
+      },
+      {
+        "when": [
+          "titanium lighter",
+          "Titanium lighter",
+          "Titanium Lighter",
+          "TITANIUM LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/titanium_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/titanium_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/titanium"
+          }
+        }
+      },
+      {
+        "when": [
+          "arc lighter",
+          "Arc lighter",
+          "Arc Lighter",
+          "ARC LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/arc_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/arc_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/arc"
+          }
+        }
+      },
+      {
+        "when": [
+          "glass lighter",
+          "Glass lighter",
+          "Glass Lighter",
+          "GLASS LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/glass_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/glass_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/glass"
+          }
+        }
+      },
+      {
+        "when": [
+          "diamond lighter",
+          "Diamond lighter",
+          "Diamond Lighter",
+          "DIAMOND LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/diamond_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/diamond_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/diamond"
+          }
+        }
+      },
+      {
+        "when": [
+          "dragon lighter",
+          "Dragon lighter",
+          "Dragon Lighter",
+          "DRAGON LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/dragon_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/dragon_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/dragon"
+          }
+        }
+      },
+      {
+        "when": [
+          "obsidian lighter",
+          "Obsidian lighter",
+          "Obsidian Lighter",
+          "OBSIDIAN LIGHTER"
+        ],
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:component",
+          "component": "createdieselgenerators:lighter_state",
+          "cases": [
+            {
+              "when": "open",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/obsidian_open"
+              }
+            },
+            {
+              "when": "open_ignited",
+              "model": {
+                "type": "minecraft:model",
+                "model": "createdieselgenerators:item/lighter/obsidian_ignited"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter/obsidian"
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:select",
+      "property": "minecraft:component",
+      "component": "createdieselgenerators:lighter_state",
+      "cases": [
+        {
+          "when": "open",
+          "model": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter_open"
+          }
+        },
+        {
+          "when": "open_ignited",
+          "model": {
+            "type": "minecraft:model",
+            "model": "createdieselgenerators:item/lighter_ignited"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "createdieselgenerators:item/lighter"
+      }
+    }
+  }
+}

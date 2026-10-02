@@ -1,10 +1,7 @@
 {
   "type": "create:crushing",
-  "ingredients": [
-    {
-      "item": "minecraft:ladder"
-    }
-  ],
+  "ingredient": "minecraft:ladder",
+  "processing_time": 100,
   "results": [
     {
       "id": "createdieselgenerators:wood_chip",

@@ -1,24 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "create:andesite_alloy",
+    "S": "#c:plates/iron",
+    "W": "#minecraft:wool",
+    "P": "create:fluid_pipe"
+  },
   "pattern": [
     "SWA",
     "WPW",
     " WS"
   ],
-  "key": {
-    "A": {
-      "item": "create:andesite_alloy"
-    },
-    "S": {
-      "tag": "c:plates/iron"
-    },
-    "W": {
-      "tag": "minecraft:wool"
-    },
-    "P": {
-      "item": "create:fluid_pipe"
-    }
-  },
   "result": {
     "id": "createdieselgenerators:engine_silencer"
   }

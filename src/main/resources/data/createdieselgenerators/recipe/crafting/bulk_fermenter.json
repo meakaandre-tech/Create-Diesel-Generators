@@ -1,16 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "#c:barrels/wooden",
+    "A": "create:andesite_alloy"
+  },
   "pattern": [
     "ABA"
   ],
-  "key": {
-    "B": {
-      "tag": "c:barrels/wooden"
-    },
-    "A": {
-      "item": "create:andesite_alloy"
-    }
-  },
   "result": {
     "id": "createdieselgenerators:bulk_fermenter"
   }

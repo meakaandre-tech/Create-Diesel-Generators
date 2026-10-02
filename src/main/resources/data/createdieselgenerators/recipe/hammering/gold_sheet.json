@@ -1,10 +1,6 @@
 {
   "type": "createdieselgenerators:hammering",
-  "ingredients": [
-    {
-      "tag": "c:ingots/gold"
-    }
-  ],
+  "ingredient": "#c:ingots/gold",
   "results": [
     {
       "id": "create:golden_sheet"

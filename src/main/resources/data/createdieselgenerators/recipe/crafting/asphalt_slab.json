@@ -1,13 +1,11 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "createdieselgenerators:asphalt_block"
+  },
   "pattern": [
     "AAA"
   ],
-  "key": {
-    "A": {
-      "item": "createdieselgenerators:asphalt_block"
-    }
-  },
   "result": {
     "id": "createdieselgenerators:asphalt_slab",
     "count": 6

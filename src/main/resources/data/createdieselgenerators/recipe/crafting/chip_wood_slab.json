@@ -1,13 +1,11 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "createdieselgenerators:chip_wood_block"
+  },
   "pattern": [
     "AAA"
   ],
-  "key": {
-    "A": {
-      "item": "createdieselgenerators:chip_wood_block"
-    }
-  },
   "result": {
     "id": "createdieselgenerators:chip_wood_slab",
     "count": 6

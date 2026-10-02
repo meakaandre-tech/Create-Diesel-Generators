@@ -1,0 +1,41 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "createdieselgenerators:mold_type",
+    "cases": [
+      {
+        "when": "createdieselgenerators:bar",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createdieselgenerators:item/mold/bar"
+        }
+      },
+      {
+        "when": "createdieselgenerators:bowl",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createdieselgenerators:item/mold/bowl"
+        }
+      },
+      {
+        "when": "createdieselgenerators:chain",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createdieselgenerators:item/mold/chain"
+        }
+      },
+      {
+        "when": "createdieselgenerators:lines",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createdieselgenerators:item/mold/lines"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "createdieselgenerators:item/mold"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "createdieselgenerators:model/processing_tool",
+    "model": "createdieselgenerators:item/hammer",
+    "tool": "hammer"
+  }
+}

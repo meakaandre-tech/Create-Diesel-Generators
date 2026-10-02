@@ -1,14 +1,10 @@
 {
   "type": "create:crushing",
-  "ingredients": [
-    {
-      "item": "createdieselgenerators:chip_wood_stairs"
-    }
-  ],
+  "ingredient": "createdieselgenerators:chip_wood_stairs",
+  "processing_time": 100,
   "results": [
     {
-      "id": "createdieselgenerators:wood_chip",
-      "count": 1
+      "id": "createdieselgenerators:wood_chip"
     },
     {
       "id": "createdieselgenerators:wood_chip",

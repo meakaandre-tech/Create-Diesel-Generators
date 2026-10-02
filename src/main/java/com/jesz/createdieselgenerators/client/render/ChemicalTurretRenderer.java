@@ -27,7 +27,7 @@ public class ChemicalTurretRenderer extends KineticPartsRenderer<ChemicalTurretB
         BlockState state = be.getBlockState();
 
         // the entity filter in its slot
-        Vec3 camera = Minecraft.getInstance().gameRenderer.getMainCamera().position();
+        Vec3 camera = Minecraft.getInstance().gameRenderer.mainCamera().position();
         double distance = be.isVirtual() ? -1 : camera.distanceToSqr(VecHelper.getCenterOf(be.getBlockPos()));
         FilteringRenderer.FilterRenderState filter = FilteringRenderer.getFilterRenderState(be, state, itemModelManager, distance);
         if (filter != null) {

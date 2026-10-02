@@ -1,48 +1,40 @@
 {
   "type": "createdieselgenerators:basin_fermenting",
+  "processing_time": 400,
   "ingredients": [
-    {
-      "item": "minecraft:apple"
-    },
-    {
-      "tag": "c:ingots/gold"
-    },
-    {
-      "tag": "c:ingots/gold"
-    },
-    {
-      "tag": "c:ingots/gold"
-    },
-    {
-      "tag": "c:ingots/gold"
-    },
-    {
-      "tag": "c:ingots/gold"
-    },
+    "minecraft:apple",
+    "#c:ingots/gold",
+    "#c:ingots/gold",
+    "#c:ingots/gold",
+    "#c:ingots/gold",
+    "#c:ingots/gold"
+  ],
+  "fluid_ingredients": [
     {
       "type": "fluid_stack",
+      "amount": 20250,
       "fluid": "create:potion",
       "components": {
         "minecraft:potion_contents": {
           "potion": "minecraft:awkward"
         }
-      },
-      "amount": 250
+      }
     }
   ],
-  "processing_time": 400,
   "results": [
     {
       "id": "minecraft:golden_apple"
-    },
+    }
+  ],
+  "fluid_results": [
     {
       "id": "create:potion",
+      "amount": 20250,
       "components": {
         "minecraft:potion_contents": {
           "potion": "minecraft:awkward"
         }
-      },
-      "amount": 250
+      }
     }
   ]
 }

@@ -1,10 +1,7 @@
 {
   "type": "create:crushing",
-  "ingredients": [
-    {
-      "item": "create:water_wheel"
-    }
-  ],
+  "ingredient": "create:water_wheel",
+  "processing_time": 100,
   "results": [
     {
       "id": "createdieselgenerators:wood_chip",

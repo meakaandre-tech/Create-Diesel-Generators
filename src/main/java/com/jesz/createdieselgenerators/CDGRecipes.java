@@ -2,6 +2,7 @@ package com.jesz.createdieselgenerators;
 
 import com.jesz.createdieselgenerators.content.basin_lid.BasinFermentingRecipe;
 import com.jesz.createdieselgenerators.content.bulk_fermenter.BulkFermentingRecipe;
+import com.jesz.createdieselgenerators.content.compacting.FluidCompactingRecipe;
 import com.jesz.createdieselgenerators.content.distillation.DistillationRecipe;
 import com.jesz.createdieselgenerators.content.molds.CastingRecipe;
 import com.jesz.createdieselgenerators.content.molds.CompressionMoldingRecipe;
@@ -31,6 +32,7 @@ import java.util.Locale;
 public enum CDGRecipes {
 
     BASIN_FERMENTING(BasinFermentingRecipe.SERIALIZER),
+    COMPACTING(FluidCompactingRecipe.SERIALIZER),
     BULK_FERMENTING(BulkFermentingRecipe.SERIALIZER),
     DISTILLATION(DistillationRecipe.SERIALIZER),
     COMPRESSION_MOLDING(CompressionMoldingRecipe.SERIALIZER),

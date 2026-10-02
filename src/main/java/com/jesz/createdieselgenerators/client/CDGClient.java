@@ -8,7 +8,9 @@ import com.jesz.createdieselgenerators.ClientHooks;
 import com.jesz.createdieselgenerators.client.ct.BulkFermenterCTBehavior;
 import com.jesz.createdieselgenerators.client.ct.ModularDieselEngineCTBehavior;
 import com.jesz.createdieselgenerators.client.ct.OilBarrelCTBehavior;
+import com.jesz.createdieselgenerators.client.model.ChemicalSprayerModel;
 import com.jesz.createdieselgenerators.client.model.DistillationTankModel;
+import com.jesz.createdieselgenerators.client.model.ProcessingToolModel;
 import com.jesz.createdieselgenerators.client.model.SheetMetalPanelModel;
 import com.jesz.createdieselgenerators.client.render.BasinLidRenderer;
 import com.jesz.createdieselgenerators.client.render.BulkFermenterRenderer;
@@ -85,6 +87,8 @@ public class CDGClient implements ClientModInitializer {
     }
 
     private static void registerModels() {
+        AllModels.register(ChemicalSprayerModel.ID, ChemicalSprayerModel.Unbaked.CODEC);
+        AllModels.register(ProcessingToolModel.ID, ProcessingToolModel.Unbaked.CODEC);
         AllModels.register(CDGBlocks.MODULAR_DIESEL_ENGINE.get(), CTModel.of(new ModularDieselEngineCTBehavior()));
         AllModels.register(CDGBlocks.BULK_FERMENTER.get(), CTModel.of(new BulkFermenterCTBehavior()));
         AllModels.register(CDGBlocks.OIL_BARREL.get(), CTModel.of(new OilBarrelCTBehavior()));

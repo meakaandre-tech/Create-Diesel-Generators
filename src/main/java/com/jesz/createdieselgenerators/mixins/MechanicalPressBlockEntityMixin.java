@@ -15,7 +15,8 @@ public class MechanicalPressBlockEntityMixin {
     public void matchStaticFilters(RecipeHolder<? extends Recipe<?>> recipe, CallbackInfoReturnable<Boolean> cir){
         if (cir.getReturnValue())
             return;
-        if (recipe.value().getType() == CDGRecipes.COMPRESSION_MOLDING.getType())
+        if (recipe.value().getType() == CDGRecipes.COMPRESSION_MOLDING.getType()
+                || recipe.value().getType() == CDGRecipes.COMPACTING.getType())
             cir.setReturnValue(true);
     }
 }
