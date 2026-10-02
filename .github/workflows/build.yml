@@ -66,6 +66,7 @@ jobs:
           if [ -f .github/dump-data ]; then
             mkdir -p /tmp/ci-data
             jars=$(find ~/.gradle/caches/fabric-loom .gradle/loom-cache -name '*.jar' 2>/dev/null | grep -iE 'minecraft' | grep -v sources || true)
+            jars="$jars $(find ~/.gradle/caches/modules-2 -name 'fabric-*.jar' 2>/dev/null | grep -v sources | tr '\n' ' ')"
             for j in $jars; do
               while read -r pattern; do
                 [ -z "$pattern" ] && continue
