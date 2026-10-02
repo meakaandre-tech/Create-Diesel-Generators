@@ -1,7 +1,6 @@
 package com.jesz.createdieselgenerators.content.bulk_fermenter;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 public class BulkFermenterInventoryWrapper implements IItemHandlerModifiable {
     private IItemHandlerModifiable itemHandler;

@@ -4,10 +4,12 @@ import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.CDGTags;
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
 import com.jesz.createdieselgenerators.compat.kubejs.CDGKubeJSPlugin;
-import net.createmod.catnip.nbt.NBTHelper;
+import com.zurrtum.create.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
@@ -20,7 +22,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.fml.ModList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +58,7 @@ public class OilChunksSavedData extends SavedData {
 
         sd.chunks = new HashMap<>();
         NBTHelper.iterateCompoundList(tag.getList("OilChunks", Tag.TAG_COMPOUND), c -> {
-            sd.chunks.put(new ChunkPos(c.getInt("x"), c.getInt("z")), c.contains("Amountmb") ? c.getInt("Amountmb") : c.getInt("Amount") * 1000);
+            sd.chunks.put(new ChunkPos(c.getIntOr("x", 0), c.getIntOr("z", 0)), c.contains("Amountmb") ? c.getIntOr("Amountmb", 0) : c.getIntOr("Amount", 0) * 1000);
         });
 
         return sd;

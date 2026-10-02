@@ -5,78 +5,84 @@ import com.jesz.createdieselgenerators.content.bulk_fermenter.BulkFermentingReci
 import com.jesz.createdieselgenerators.content.distillation.DistillationRecipe;
 import com.jesz.createdieselgenerators.content.molds.CastingRecipe;
 import com.jesz.createdieselgenerators.content.molds.CompressionMoldingRecipe;
-import com.jesz.createdieselgenerators.content.molds.MoldRecipeParams;
 import com.jesz.createdieselgenerators.content.tools.hammer.HammerRecipe;
 import com.jesz.createdieselgenerators.content.tools.wire_cutters.WireCuttingRecipe;
-import com.simibubi.create.content.kinetics.deployer.ItemApplicationRecipe;
-import com.simibubi.create.content.kinetics.deployer.ItemApplicationRecipeParams;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
-import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
-import com.simibubi.create.foundation.utility.CreateLang;
+import com.jesz.createdieselgenerators.content.tools.hammer.HammerItem;
+import com.jesz.createdieselgenerators.content.tools.wire_cutters.WireCuttersItem;
+import com.zurrtum.create.AllRecipeSets;
+import com.zurrtum.create.foundation.recipe.RecipeFinder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.RecipePropertySet;
+import java.util.Optional;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
-public enum CDGRecipes implements IRecipeTypeInfo {
+public enum CDGRecipes {
 
-    BASIN_FERMENTING(BasinFermentingRecipe::new),
-    BULK_FERMENTING(BulkFermentingRecipe::new),
-    DISTILLATION(DistillationRecipe::new),
-    COMPRESSION_MOLDING(CompressionMoldingRecipe.Serializer::new),
-    CASTING(CastingRecipe.Serializer::new),
-    WIRE_CUTTING(WireCuttingRecipe::new),
-    HAMMERING(HammerRecipe::new);
+    BASIN_FERMENTING(BasinFermentingRecipe.SERIALIZER),
+    BULK_FERMENTING(BulkFermentingRecipe.SERIALIZER),
+    DISTILLATION(DistillationRecipe.SERIALIZER),
+    COMPRESSION_MOLDING(CompressionMoldingRecipe.SERIALIZER),
+    CASTING(CastingRecipe.SERIALIZER),
+    WIRE_CUTTING(WireCuttingRecipe.SERIALIZER),
+    HAMMERING(HammerRecipe.SERIALIZER);
 
-    private final ResourceLocation id;
-    private final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> serializerObject;
-    @Nullable
-    private final DeferredHolder<RecipeType<?>, RecipeType<?>> typeObject;
-    private final Supplier<RecipeType<?>> type;
+    private final Identifier id;
+    private final RecipeSerializer<?> serializer;
+    private final RecipeType<?> type;
 
-    CDGRecipes(Supplier<RecipeSerializer<?>> serializerSupplier) {
-        String name = CreateLang.asId(name());
+    CDGRecipes(RecipeSerializer<?> serializer) {
+        String name = name().toLowerCase(Locale.ROOT);
         id = CreateDieselGenerators.rl(name);
-        serializerObject = Registers.SERIALIZER_REGISTER.register(name, serializerSupplier);
-        typeObject = Registers.TYPE_REGISTER.register(name, () -> RecipeType.simple(id));
-        type = typeObject;
+        this.serializer = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, id, serializer);
+        this.type = Registry.register(BuiltInRegistries.RECIPE_TYPE, id, new RecipeType<Recipe<?>>() {
+            @Override
+            public String toString() {
+                return id.toString();
+            }
+        });
     }
 
-    CDGRecipes(StandardProcessingRecipe.Factory<?> processingFactory) {
-        this(() -> new StandardProcessingRecipe.Serializer<>(processingFactory));
+    public static void register() {
+        AllRecipeSets.ALL.put(HammerItem.INPUTS, recipe -> recipe instanceof HammerRecipe r ? Optional.of(r.ingredient()) : Optional.empty());
+        AllRecipeSets.ALL.put(WireCuttersItem.INPUTS, recipe -> recipe instanceof WireCuttingRecipe r ? Optional.of(r.ingredient()) : Optional.empty());
     }
 
-    public static void register(IEventBus modEventBus) {
-        Registers.SERIALIZER_REGISTER.register(modEventBus);
-        Registers.TYPE_REGISTER.register(modEventBus);
+    public static ResourceKey<RecipePropertySet> propertySet(String name) {
+        return ResourceKey.create(RecipePropertySet.TYPE_KEY, CreateDieselGenerators.rl(name));
     }
 
-    @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
     public <T extends RecipeSerializer<?>> T getSerializer() {
-        return (T) serializerObject.get();
+        return (T) serializer;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
     public <I extends RecipeInput, R extends Recipe<I>> RecipeType<R> getType() {
-        return (RecipeType<R>) type.get();
+        return (RecipeType<R>) type;
     }
 
-    private static class Registers {
-        private static final DeferredRegister<RecipeSerializer<?>> SERIALIZER_REGISTER = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, CreateDieselGenerators.ID);
-        private static final DeferredRegister<RecipeType<?>> TYPE_REGISTER = DeferredRegister.create(BuiltInRegistries.RECIPE_TYPE, CreateDieselGenerators.ID);
+    /** All loaded recipes of this type. Recipes only exist on the server in this game version. */
+    @SuppressWarnings("unchecked")
+    public <R extends Recipe<?>> List<RecipeHolder<R>> getAll(ServerLevel level) {
+        List<RecipeHolder<R>> list = new ArrayList<>();
+        for (RecipeHolder<?> holder : RecipeFinder.get(this, level, r -> r.value().getType() == type))
+            list.add((RecipeHolder<R>) holder);
+        return list;
     }
 }

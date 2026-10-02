@@ -8,17 +8,17 @@ import com.jesz.createdieselgenerators.content.molds.MoldType;
 import com.jesz.createdieselgenerators.content.tools.lighter.LighterModel;
 import com.jesz.createdieselgenerators.packets.CDGPackets;
 import com.jesz.createdieselgenerators.ponder.CDGPonderPlugin;
-import com.simibubi.create.compat.Mods;
+import com.zurrtum.create.compat.Mods;
 import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.simibubi.create.foundation.item.ItemDescription;
-import com.simibubi.create.foundation.item.KineticStats;
-import com.simibubi.create.foundation.item.TooltipModifier;
-import net.createmod.catnip.lang.FontHelper;
+import com.zurrtum.create.client.foundation.item.ItemDescription;
+import com.zurrtum.create.client.foundation.item.KineticStats;
+import com.zurrtum.create.client.foundation.item.TooltipModifier;
+import com.zurrtum.create.client.catnip.lang.FontHelper;
 import net.createmod.catnip.platform.CatnipServices;
-import net.createmod.ponder.foundation.PonderIndex;
+import com.zurrtum.create.client.ponder.foundation.PonderIndex;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -74,8 +74,8 @@ public class CreateDieselGenerators
         modEventBus.addListener(LighterModel::onModelBake);
     }
 
-    public static ResourceLocation rl(String path){
-        return ResourceLocation.fromNamespaceAndPath(ID, path);
+    public static Identifier rl(String path){
+        return Identifier.fromNamespaceAndPath(ID, path);
     }
 
     public static Component lang(String path, Object... args) {

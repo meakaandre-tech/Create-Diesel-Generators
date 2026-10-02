@@ -5,17 +5,19 @@ import com.jesz.createdieselgenerators.CDGRegistries;
 import com.jesz.createdieselgenerators.compat.computercraft.CCProxy;
 import com.jesz.createdieselgenerators.content.tools.ChemicalSprayerProjectileEntity;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.compat.Mods;
-import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
-import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.compat.Mods;
+import com.zurrtum.create.compat.computercraft.AbstractComputerBehaviour;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.client.foundation.blockEntity.behaviour.ValueBoxTransform;
+import com.zurrtum.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import dan200.computercraft.api.peripheral.PeripheralCapability;
-import net.createmod.catnip.math.VecHelper;
+import com.zurrtum.create.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -23,10 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 import java.util.List;
 
@@ -88,13 +87,13 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
     public void tick() {
         super.tick();
 
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             lastCogRotation = cogRotation;
             if (wasShootingLastTick)
                 cogRotation += getSpeed() * 3 / 10f;
         }
 
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             boolean wasShooting = wasShootingLastTick;
             wasShootingLastTick = false;
 
@@ -119,18 +118,18 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
     }
 
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket);
-        lighterUpgrade = compound.getBoolean("LighterUpgrade");
-        redstoneSignal = compound.getInt("RedstoneSignal");
+    protected void read(ValueInput compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        lighterUpgrade = compound.getBooleanOr("LighterUpgrade", false);
+        redstoneSignal = compound.getIntOr("RedstoneSignal", 0);
 
         if (clientPacket)
-            wasShootingLastTick = compound.getBoolean("WasShooting");
+            wasShootingLastTick = compound.getBooleanOr("WasShooting", false);
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    protected void write(ValueOutput compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
         compound.putBoolean("LighterUpgrade", lighterUpgrade);
         compound.putInt("RedstoneSignal", redstoneSignal);
 
@@ -139,7 +138,7 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         behaviours.add(computerBehaviour = CCProxy.behaviour(this));
         tank = SmartFluidTankBehaviour.single(this, 1000);
         behaviours.add(tank);
@@ -153,7 +152,7 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
 
         float shootingForce = getShootingForce();
 
-        if (!level.isClientSide && !tank.isEmpty()) {
+        if (!level.isClientSide() && !tank.isEmpty()) {
             wasShootingLastTick = true;
             sendData();
 
@@ -176,7 +175,7 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
 
             level.addFreshEntity(projectile);
             if (t == 1) {
-                tank.getPrimaryHandler().drain(3, IFluidHandler.FluidAction.EXECUTE);
+                tank.getPrimaryHandler().drain(3, false);
             }
         }
     }

@@ -4,16 +4,16 @@ import com.jesz.createdieselgenerators.CDGDataComponents;
 import com.jesz.createdieselgenerators.CDGItems;
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
 import com.jesz.createdieselgenerators.mixins.UseOnContextInvoker;
-import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllDataComponents;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.content.trains.track.ITrackBlock;
-import com.simibubi.create.content.trains.track.TrackBlockItem;
-import com.simibubi.create.content.trains.track.TrackPlacement;
-import com.simibubi.create.foundation.utility.CreateLang;
+import com.zurrtum.create.AllBlocks;
+import com.zurrtum.create.AllDataComponents;
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.content.trains.track.ITrackBlock;
+import com.zurrtum.create.content.trains.track.TrackBlockItem;
+import com.zurrtum.create.content.trains.track.TrackPlacement;
+import com.zurrtum.create.client.foundation.utility.CreateLang;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateItemModelProvider;
-import net.createmod.catnip.data.Pair;
+import com.zurrtum.create.catnip.data.Pair;
 import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.BlockPos;
@@ -38,8 +38,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 import java.util.Optional;
 
@@ -201,13 +199,13 @@ public class TrackLayersBagItem extends Item {
         }
 
         ItemStack offhandItem = player.getOffhandItem();
-        boolean hasGirder = AllBlocks.METAL_GIRDER.isIn(offhandItem);
+        boolean hasGirder = offhandItem.is(AllBlocks.METAL_GIRDER.asItem());
 
         TrackLayersBagPlacement.PlacementInfo info = TrackLayersBagPlacement.tryConnect(
                 level, player, pos, state, bag, hasGirder, false
         );
 
-        if (info.message != null && !level.isClientSide)
+        if (info.message != null && !level.isClientSide())
             player.displayClientMessage(CreateLang.translateDirect(info.message), true);
 
         if (!info.valid) {
@@ -215,7 +213,7 @@ public class TrackLayersBagItem extends Item {
             return InteractionResult.FAIL;
         }
 
-        if (level.isClientSide)
+        if (level.isClientSide())
             return InteractionResult.SUCCESS;
 
         bag.remove(AllDataComponents.TRACK_CONNECTING_FROM);
@@ -241,13 +239,13 @@ public class TrackLayersBagItem extends Item {
     }
 
     public static InteractionResultHolder<ItemStack> clearSelection(ItemStack stack, Level level, Player player) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             level.playSound(player, player.blockPosition(), SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.75f, 1.0f);
         } else {
             player.displayClientMessage(CreateLang.translateDirect("track.selection_cleared"), true);
             stack.remove(AllDataComponents.TRACK_CONNECTING_FROM);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
 
     public static boolean select(LevelAccessor world, BlockPos pos, Vec3 lookVec, ItemStack heldItem) {

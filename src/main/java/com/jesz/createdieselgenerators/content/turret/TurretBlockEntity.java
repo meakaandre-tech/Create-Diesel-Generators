@@ -4,17 +4,19 @@ import com.jesz.createdieselgenerators.CreateDieselGenerators;
 import com.jesz.createdieselgenerators.content.entity_filter.EntityFilterItem;
 import com.jesz.createdieselgenerators.content.entity_filter.EntityFilteringBehaviour;
 import com.jesz.createdieselgenerators.mixin_interfaces.IEntity;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
-import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
-import com.simibubi.create.foundation.utility.CreateLang;
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.content.contraptions.actors.seat.SeatEntity;
+import com.zurrtum.create.content.kinetics.base.KineticBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.client.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
+import com.zurrtum.create.client.foundation.utility.CreateLang;
 import dev.ryanhcode.sable.companion.SableCompanion;
-import net.createmod.catnip.math.AngleHelper;
+import com.zurrtum.create.catnip.math.AngleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -264,29 +266,29 @@ public class TurretBlockEntity extends KineticBlockEntity {
     }
 
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket);
-        targetedVerticalRotation = compound.getFloat("VerticalRotation");
-        targetedHorizontalRotation = compound.getFloat("HorizontalRotation");
+    protected void read(ValueInput compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        targetedVerticalRotation = compound.getFloatOr("VerticalRotation", 0);
+        targetedHorizontalRotation = compound.getFloatOr("HorizontalRotation", 0);
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    protected void write(ValueOutput compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
         compound.putFloat("VerticalRotation", targetedVerticalRotation);
         compound.putFloat("HorizontalRotation", targetedHorizontalRotation);
     }
 
     private FilteringBehaviour filtering;
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         filtering = new EntityFilteringBehaviour(this, new ChemicalTurretBlockEntity.ChemicalTurretValueBox());
         behaviours.add(filtering);
     }
 
     public void setControllingPlayer(Player player){
         BlockPos worldPos = BlockPos.containing(getWorldPos());
-        if(level.isClientSide)
+        if(level.isClientSide())
             AllSoundEvents.CONTROLLER_CLICK.play(level, player, worldPos);
         BlockPos tPos = ((IEntity)player).getTurretPos();
         if(tPos != null && level.getBlockEntity(tPos) instanceof TurretBlockEntity be)
@@ -304,7 +306,7 @@ public class TurretBlockEntity extends KineticBlockEntity {
 
     public void removePlayer() {
         BlockPos worldPos = BlockPos.containing(getWorldPos());
-        if(level.isClientSide)
+        if(level.isClientSide())
             AllSoundEvents.CONTROLLER_CLICK.play(level, controllingPlayer, worldPos);
         if(controllingPlayer instanceof ServerPlayer sp)
             sp.connection.send(new ClientboundSetActionBarTextPacket(CreateDieselGenerators.lang("actionbar.turret.stopped_controlling", Component.translatable(getBlockState().getBlock().getDescriptionId()))));

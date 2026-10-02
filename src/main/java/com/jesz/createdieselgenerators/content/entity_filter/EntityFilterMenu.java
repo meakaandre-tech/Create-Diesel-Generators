@@ -1,10 +1,10 @@
 package com.jesz.createdieselgenerators.content.entity_filter;
 
 import com.jesz.createdieselgenerators.CDGDataComponents;
-import com.simibubi.create.AllDataComponents;
-import com.simibubi.create.content.logistics.filter.AbstractFilterMenu;
-import com.simibubi.create.content.logistics.filter.AttributeFilterWhitelistMode;
-import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
+import com.zurrtum.create.AllDataComponents;
+import com.zurrtum.create.content.logistics.filter.AbstractFilterMenu;
+import com.zurrtum.create.infrastructure.component.AttributeFilterWhitelistMode;
+import com.zurrtum.create.content.logistics.item.filter.attribute.ItemAttribute;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -16,8 +16,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;

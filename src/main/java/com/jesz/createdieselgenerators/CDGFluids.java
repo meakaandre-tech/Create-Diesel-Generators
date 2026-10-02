@@ -2,151 +2,78 @@ package com.jesz.createdieselgenerators;
 
 import com.jesz.createdieselgenerators.content.concrete.ConcreteBucketItem;
 import com.jesz.createdieselgenerators.content.concrete.ConcreteFluid;
-import com.tterrag.registrate.util.entry.FluidEntry;
+import com.jesz.createdieselgenerators.registry.entry.FluidEntry;
+import com.zurrtum.create.AllFluidItemInventory;
+import com.zurrtum.create.infrastructure.fluids.BucketFluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FlowableFluid;
+import com.zurrtum.create.infrastructure.fluids.FluidBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
-import net.minecraft.world.item.*;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.DispensibleContainerItem;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.material.FlowingFluid;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid;
-import org.apache.commons.lang3.StringUtils;
-import org.jspecify.annotations.NonNull;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.jesz.createdieselgenerators.CreateDieselGenerators.REGISTRATE;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
 
 public class CDGFluids {
+    /** Create Fly counts fluids in droplets (81000 per bucket); the mod's numbers are millibuckets. */
+    public static final int MB = 81;
 
-    public static final FluidEntry<BaseFlowingFluid.Flowing> PLANT_OIL = REGISTRATE.fluid("plant_oil",
-                    CreateDieselGenerators.rl("block/fluid/plant_oil_still"),
-                    CreateDieselGenerators.rl("block/fluid/plant_oil_flow"))
-            .properties(b -> b.viscosity(1500)
-                    .density(500))
-            .fluidProperties(p -> p.levelDecreasePerBlock(2)
-                    .tickRate(25)
-                    .slopeFindDistance(3)
-                    .explosionResistance(100f))
-            .source(BaseFlowingFluid.Source::new)
-            .block()
-            .build()
-            .bucket()
-            .onRegister(CDGFluids::registerFluidDispenseBehavior)
-            .build()
-            .register();
+    public static final List<FluidEntry> ALL = new ArrayList<>();
 
-    public static final FluidEntry<BaseFlowingFluid.Flowing> CRUDE_OIL = REGISTRATE.fluid("crude_oil",
-                            CreateDieselGenerators.rl("block/crude_oil_still"),
-                            CreateDieselGenerators.rl("block/crude_oil_flow"))
-            .properties(b -> b.viscosity(1500)
-                    .density(100))
-            .fluidProperties(p -> p.levelDecreasePerBlock(3)
-                    .tickRate(25)
-                    .slopeFindDistance(2)
-                    .explosionResistance(100f))
-            .source(BaseFlowingFluid.Source::new)
-            .block()
-            .build()
-            .bucket()
-            .onRegister(CDGFluids::registerFluidDispenseBehavior)
-            .build()
-            .register();
+    public static final FluidEntry PLANT_OIL = register("plant_oil", new FluidEntry(2, 25, 3), BucketItem::new);
+    public static final FluidEntry CRUDE_OIL = register("crude_oil", new FluidEntry(3, 25, 2), BucketItem::new);
+    public static final FluidEntry BIODIESEL = register("biodiesel", new FluidEntry(2, 25, 3), BucketItem::new);
+    public static final FluidEntry DIESEL = register("diesel", new FluidEntry(2, 25, 3), BucketItem::new);
+    public static final FluidEntry GASOLINE = register("gasoline", new FluidEntry(2, 25, 3), BucketItem::new);
+    public static final FluidEntry ETHANOL = register("ethanol", new FluidEntry(2, 25, 5), BucketItem::new);
 
-    public static final FluidEntry<BaseFlowingFluid.Flowing> BIODIESEL = REGISTRATE.fluid("biodiesel",
-                    CreateDieselGenerators.rl("block/biodiesel_still"),
-                    CreateDieselGenerators.rl("block/biodiesel_flow"))
-            .properties(b -> b.viscosity(1500)
-                    .density(500))
-            .fluidProperties(p -> p.levelDecreasePerBlock(2)
-                    .tickRate(25)
-                    .slopeFindDistance(3)
-                    .explosionResistance(100f))
-            .source(BaseFlowingFluid.Source::new)
-            .block()
-            .build()
-            .bucket()
-            .onRegister(CDGFluids::registerFluidDispenseBehavior)
-            .build()
-            .register();
-
-    public static final FluidEntry<BaseFlowingFluid.Flowing> DIESEL = REGISTRATE.fluid("diesel",
-                    CreateDieselGenerators.rl("block/diesel_still"),
-                    CreateDieselGenerators.rl("block/diesel_flow"))
-            .properties(b -> b.viscosity(1500)
-                    .density(500))
-            .fluidProperties(p -> p.levelDecreasePerBlock(2)
-                    .tickRate(25)
-                    .slopeFindDistance(3)
-                    .explosionResistance(100f))
-            .source(BaseFlowingFluid.Source::new)
-            .block()
-            .build()
-            .bucket()
-            .onRegister(CDGFluids::registerFluidDispenseBehavior)
-            .build()
-            .register();
-
-    public static final FluidEntry<BaseFlowingFluid.Flowing> GASOLINE = REGISTRATE.fluid("gasoline",
-                    CreateDieselGenerators.rl("block/gasoline_still"),
-                    CreateDieselGenerators.rl("block/gasoline_flow"))
-            .properties(b -> b.viscosity(1500)
-                    .density(500))
-            .fluidProperties(p -> p.levelDecreasePerBlock(2)
-                    .tickRate(25)
-                    .slopeFindDistance(3)
-                    .explosionResistance(100f))
-            .source(BaseFlowingFluid.Source::new)
-            .block()
-            .build()
-            .bucket()
-            .onRegister(CDGFluids::registerFluidDispenseBehavior)
-            .build()
-            .register();
-
-    public static final FluidEntry<BaseFlowingFluid.Flowing> ETHANOL = REGISTRATE.fluid("ethanol",
-                            CreateDieselGenerators.rl("block/fluid/ethanol_still"),
-                            CreateDieselGenerators.rl("block/fluid/ethanol_flow"))
-            .properties(b -> b.viscosity(1500)
-                    .density(500))
-            .fluidProperties(p -> p.levelDecreasePerBlock(2)
-                    .tickRate(25)
-                    .slopeFindDistance(5)
-                    .explosionResistance(100f))
-            .source(BaseFlowingFluid.Source::new)
-            .block()
-            .build()
-            .bucket()
-            .onRegister(CDGFluids::registerFluidDispenseBehavior)
-            .build()
-            .register();
-
-    @SuppressWarnings("unchecked")
-    public static final FluidEntry<BaseFlowingFluid.Flowing>[] CONCRETE = new FluidEntry[DyeColor.values().length];
+    public static final FluidEntry[] CONCRETE = new FluidEntry[DyeColor.values().length];
 
     static {
         for (DyeColor color : DyeColor.values()) {
-            CONCRETE[color.ordinal()] =
-                    REGISTRATE.fluid(color.getName() + "_cement",
-                                    CreateDieselGenerators.rl("block/cement/" + color.getName() + "_still"),
-                                    CreateDieselGenerators.rl("block/cement/" + color.getName() + "_flow"))
-                            .lang(StringUtils.capitalize(color.getName()) + " Concrete")
-                    .properties(b -> b.viscosity(1500)
-                            .density(500))
-                    .fluidProperties(p -> p.levelDecreasePerBlock(8)
-                            .tickRate(12)
-                            .slopeFindDistance(1)
-                            .explosionResistance(100f)).source(p -> new ConcreteFluid(p, color))
-                    .block()
-                            .build()
-                    .bucket((f, p) -> new ConcreteBucketItem(color, f, p))
-                            .onRegister(CDGFluids::registerFluidDispenseBehavior)
-                            .build()
-                    .register();
+            CONCRETE[color.ordinal()] = register(color.getName() + "_cement", new FluidEntry(8, 12, 1) {
+                @Override
+                protected FlowableFluid createStill() {
+                    return new ConcreteFluid(this, color);
+                }
+            }, (f, p) -> new ConcreteBucketItem(color, f, p));
         }
+    }
+
+    private static FluidEntry register(String name, FluidEntry entry, BiFunction<FlowableFluid, Item.Properties, BucketItem> bucketFactory) {
+        Identifier id = CreateDieselGenerators.rl(name);
+        Registry.register(BuiltInRegistries.FLUID, id, entry.still);
+        Registry.register(BuiltInRegistries.FLUID, CreateDieselGenerators.rl("flowing_" + name), entry.flowing);
+
+        ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, id);
+        entry.block = Registry.register(BuiltInRegistries.BLOCK, blockKey,
+                new FluidBlock(entry.still, BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noLootTable().setId(blockKey)));
+
+        ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, CreateDieselGenerators.rl(name + "_bucket"));
+        entry.bucket = Registry.register(BuiltInRegistries.ITEM, itemKey,
+                bucketFactory.apply(entry.still, new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1).setId(itemKey)));
+        DispenserBlock.registerBehavior(entry.bucket, DISPENSE_FLUID);
+        AllFluidItemInventory.ALL.put(entry.bucket, new AllFluidItemInventory.Entry(BucketFluidInventory::new));
+        ALL.add(entry);
+        return entry;
     }
 
     public static void register() {}
@@ -154,20 +81,16 @@ public class CDGFluids {
     // from Create
 
     private static final DispenseItemBehavior DEFAULT = new DefaultDispenseItemBehavior();
-    private static final DispenseItemBehavior DISPENSE_FLUID = new DefaultDispenseItemBehavior(){
+    private static final DispenseItemBehavior DISPENSE_FLUID = new DefaultDispenseItemBehavior() {
         @Override
-        protected @NonNull ItemStack execute(BlockSource pSource, ItemStack pStack) {
+        protected ItemStack execute(BlockSource pSource, ItemStack pStack) {
             DispensibleContainerItem dispensibleContainerItem = (DispensibleContainerItem) pStack.getItem();
             BlockPos pos = pSource.pos().relative(pSource.state().getValue(DispenserBlock.FACING));
             Level level = pSource.level();
-            if (dispensibleContainerItem.emptyContents(null, level, pos, null, pStack)) {
+            if (dispensibleContainerItem.emptyContents(null, level, pos, null)) {
                 return new ItemStack(Items.BUCKET);
             }
             return DEFAULT.dispense(pSource, pStack);
         }
     };
-
-    private static void registerFluidDispenseBehavior(BucketItem bucket) {
-        DispenserBlock.registerBehavior(bucket, DISPENSE_FLUID);
-    }
 }

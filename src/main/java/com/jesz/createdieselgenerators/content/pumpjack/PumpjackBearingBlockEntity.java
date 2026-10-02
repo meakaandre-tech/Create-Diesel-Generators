@@ -1,12 +1,12 @@
 package com.jesz.createdieselgenerators.content.pumpjack;
 
-import com.simibubi.create.content.contraptions.AssemblyException;
-import com.simibubi.create.content.contraptions.ControlledContraptionEntity;
-import com.simibubi.create.content.contraptions.bearing.BearingBlock;
-import com.simibubi.create.content.contraptions.bearing.BearingContraption;
-import com.simibubi.create.content.contraptions.bearing.MechanicalBearingBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import net.createmod.catnip.math.AngleHelper;
+import com.zurrtum.create.content.contraptions.AssemblyException;
+import com.zurrtum.create.content.contraptions.ControlledContraptionEntity;
+import com.zurrtum.create.content.contraptions.bearing.BearingBlock;
+import com.zurrtum.create.content.contraptions.bearing.BearingContraption;
+import com.zurrtum.create.content.contraptions.bearing.MechanicalBearingBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.catnip.math.AngleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.simibubi.create.content.kinetics.base.DirectionalKineticBlock.FACING;
+import static com.zurrtum.create.content.kinetics.base.DirectionalKineticBlock.FACING;
 
 public class PumpjackBearingBlockEntity extends MechanicalBearingBlockEntity {
 
@@ -112,10 +112,10 @@ public class PumpjackBearingBlockEntity extends MechanicalBearingBlockEntity {
     @Override
     public void tick() {
         prevAngle = angle;
-        if (level.isClientSide)
+        if (level.isClientSide())
             clientAngleDiff /= 2;
 
-        if (!level.isClientSide && assembleNextTick) {
+        if (!level.isClientSide() && assembleNextTick) {
             assembleNextTick = false;
             if (running) {
                 if (movedContraption == null || movedContraption.getContraption().getBlocks().isEmpty()) {
@@ -189,12 +189,7 @@ public class PumpjackBearingBlockEntity extends MechanicalBearingBlockEntity {
         return movedContraption.isStalled();
     }
     @Override
-    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return false;
-    }
-
-    @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {}
 
     @Override
     public void attach(ControlledContraptionEntity contraption) {
@@ -208,7 +203,7 @@ public class PumpjackBearingBlockEntity extends MechanicalBearingBlockEntity {
         setChanged();
         BlockPos anchor = worldPosition.relative(blockState.getValue(FACING));
         movedContraption.setPos(anchor.getX(), anchor.getY(), anchor.getZ());
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             this.running = true;
             sendData();
         }

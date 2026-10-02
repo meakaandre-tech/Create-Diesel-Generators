@@ -4,10 +4,9 @@ import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.CDGRegistries;
 import com.jesz.createdieselgenerators.content.diesel_engine.normal.DieselEngineBlock;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
-import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import com.zurrtum.create.content.kinetics.base.GeneratingKineticBlockEntity;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 public interface IEngine {
 
@@ -36,8 +35,8 @@ public interface IEngine {
     }
 
     default FuelType getFuelType() {
-        FluidStack current = getTank().getFluid();
-        if (!FluidStack.isSameFluid(current, getLastCachedFluid())) {
+        FluidStack current = fs();
+        if (current.getFluid() != getLastCachedFluid().getFluid()) {
             setLastCachedFluid(current.copy());
             FuelType type = FuelType.getTypeFor(
                     self().getLevel().registryAccess().lookupOrThrow(CDGRegistries.FUEL_TYPE),
@@ -57,9 +56,7 @@ public interface IEngine {
         return getFuelType() != FuelType.EMPTY;
     }
 
-    default FluidStack fs() {
-        return getTank().getFluid();
-    }
+    FluidStack fs();
 
     default float getFuelSpeed() { getFuelType(); return getCachedFuelSpeed(); }
     default float getFuelCapacity() { getFuelType(); return getCachedFuelCapacity(); }
@@ -79,8 +76,6 @@ public interface IEngine {
     }
 
     SmartBlockEntity self();
-
-    FluidTank getTank();
 
     EngineUpgrades getUpgrade();
     void setUpgrade(EngineUpgrades upgrade);

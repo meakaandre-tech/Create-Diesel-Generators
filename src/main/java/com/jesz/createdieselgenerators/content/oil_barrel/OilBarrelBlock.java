@@ -1,16 +1,15 @@
 package com.jesz.createdieselgenerators.content.oil_barrel;
 
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
-import com.simibubi.create.api.connectivity.ConnectivityHandler;
-import com.simibubi.create.content.equipment.wrench.IWrenchable;
-import com.simibubi.create.foundation.block.IBE;
+import com.zurrtum.create.api.connectivity.ConnectivityHandler;
+import com.zurrtum.create.content.equipment.wrench.IWrenchable;
+import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -29,7 +28,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.common.util.DeferredSoundType;
 
 import java.util.Locale;
 
@@ -90,9 +88,9 @@ public class OilBarrelBlock extends Block implements IBE<OilBarrelBlockEntity>, 
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (!(stack.getItem() instanceof DyeItem di))
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         OilBarrelColor color = OilBarrelColor.getForDyeColor(di.getDyeColor());
 
         if (state.getValue(OIL_BARREL_COLOR) == color) {
@@ -117,16 +115,16 @@ public class OilBarrelBlock extends Block implements IBE<OilBarrelBlockEntity>, 
                         }
                     }
                     if (successful)
-                        return ItemInteractionResult.SUCCESS;
+                        return InteractionResult.SUCCESS;
                 }
             }
         } else {
             level.setBlockAndUpdate(pos, state.setValue(OIL_BARREL_COLOR, color));
             if (!player.isCreative())
                 stack.shrink(1);
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Override

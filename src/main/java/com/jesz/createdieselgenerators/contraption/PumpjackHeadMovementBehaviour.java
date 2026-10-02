@@ -3,33 +3,18 @@ package com.jesz.createdieselgenerators.contraption;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackBearingBBlock;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackBearingBlockEntity;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackHoleBlockEntity;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
-import com.simibubi.create.content.contraptions.ControlledContraptionEntity;
-import com.simibubi.create.content.contraptions.bearing.BearingContraption;
-import com.simibubi.create.content.contraptions.behaviour.MovementContext;
-import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
-import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
-import net.createmod.catnip.animation.AnimationTickHolder;
-import net.createmod.catnip.nbt.NBTHelper;
-import net.createmod.catnip.render.CachedBuffers;
-import net.createmod.catnip.render.SuperByteBuffer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import com.zurrtum.create.api.behaviour.movement.MovementBehaviour;
+import com.zurrtum.create.content.contraptions.bearing.BearingContraption;
+import com.zurrtum.create.content.contraptions.behaviour.MovementContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-import static com.jesz.createdieselgenerators.CDGPartialModels.PUMPJACK_ROPE;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
 
-public class PumpjackHeadMovementBehaviour implements MovementBehaviour {
+public class PumpjackHeadMovementBehaviour extends MovementBehaviour {
     @Nullable
     @Override
     public ItemStack canBeDisabledVia(MovementContext context) {
@@ -44,59 +29,11 @@ public class PumpjackHeadMovementBehaviour implements MovementBehaviour {
             return false;
         return context.world.getBlockEntity(context.contraption.anchor.relative(((BearingContraption) context.contraption).getFacing().getOpposite())) instanceof PumpjackBearingBlockEntity;
     }
-
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    public void renderInContraption(MovementContext context, VirtualRenderWorld renderWorld, ContraptionMatrices matrices, MultiBufferSource buffer) {
-        BlockPos hole = NBTHelper.readBlockPos(context.data, "HolePos");
-        if (!(context.world.getBlockEntity(hole) instanceof PumpjackHoleBlockEntity))
-            return;
-        PumpjackBearingBlockEntity bearing = null;
-        if (context.world.getBlockEntity(context.contraption.anchor.relative(((BearingContraption) context.contraption).getFacing().getOpposite())) instanceof PumpjackBearingBlockEntity be)
-            bearing = be;
-        if (bearing == null)
-            return;
-        float partialTicks = AnimationTickHolder.getPartialTicks();
-
-        SuperByteBuffer cover = CachedBuffers.partial(PUMPJACK_ROPE, context.state);
-        if (((BearingContraption) context.contraption).getFacing().getOpposite().getAxis() == Direction.Axis.X) {
-            Vec3 prevPos = context.position.subtract(context.motion);
-
-            double zDst = Mth.lerp(partialTicks, prevPos.z, context.position.z) - hole.getZ()-0.5f;
-            double yDst = Mth.lerp(partialTicks, prevPos.y, context.position.y) - hole.getY()-0.8f;
-            float distanceFromHole = (float) Math.sqrt(zDst*zDst + yDst*yDst);
-            double angle = -((ControlledContraptionEntity) context.contraption.entity).getAngle(partialTicks)-(180 * Math.atan2(yDst,zDst)/Math.PI)+90;
-            PoseStack ms = matrices.getModel();
-            cover.transform(ms)
-                    .translate(0.5, 0.5,  0.5)
-                    .rotateXDegrees((float) angle)
-                    .scale(1, distanceFromHole, 1)
-                    .useLevelLight(context.world, matrices.getWorld())
-                    .renderInto(matrices.getViewProjection(), buffer.getBuffer(RenderType.cutoutMipped()));
-            return;
-        }
-
-        Vec3 prevPos = context.position.subtract(context.motion);
-
-        double xDst = Mth.lerp(partialTicks, prevPos.x, context.position.x) - hole.getX()-0.5;
-        double yDst = Mth.lerp(partialTicks, prevPos.y, context.position.y) - hole.getY()-0.8f;
-
-        float distanceFromHole = (float) Math.sqrt(xDst*xDst + yDst*yDst);
-        double angle = -((ControlledContraptionEntity) context.contraption.entity).getAngle(partialTicks)+(180 * Math.atan2(yDst,xDst)/Math.PI)-90;
-        PoseStack ms = matrices.getModel();
-        cover.transform(ms)
-                .translate(0.5, 0.5,  0.5)
-                .rotateZDegrees((float) angle)
-                .scale(1, distanceFromHole, 1)
-                .useLevelLight(context.world, matrices.getWorld())
-                .renderInto(matrices.getViewProjection(), buffer.getBuffer(RenderType.cutoutMipped()));
-    }
-
     BlockPos holePos;
     BlockPos headPos;
     @Override
     public void tick(MovementContext context) {
-        MovementBehaviour.super.tick(context);
+        super.tick(context);
         PumpjackBearingBlockEntity bearing = null;
         if (context.world.getBlockEntity(context.contraption.anchor.relative(((BearingContraption) context.contraption).getFacing().getOpposite())) instanceof PumpjackBearingBlockEntity be)
             bearing = be;
@@ -117,11 +54,11 @@ public class PumpjackHeadMovementBehaviour implements MovementBehaviour {
         if (context.world.getBlockEntity(holePos) instanceof PumpjackHoleBlockEntity holeBE && bearing.crankSpeed >= 8) {
             holeBE.headPos = bearing.getBlockState().getValue(FACING).getAxis() == Direction.Axis.X ? context.localPos.getZ() : context.localPos.getX();
             holeBE.bearingPos = bearing.getBlockState().getValue(FACING).getAxis() == Direction.Axis.X ? bearing.bearingBPos.getZ() : bearing.bearingBPos.getX();
-            if ((bearing.crankAngle + 270) % 360 < (context.data.getFloat("OldCrankAngle") + 270) % 360)
+            if ((bearing.crankAngle + 270) % 360 < (context.data.getFloatOr("OldCrankAngle", 0) + 270) % 360)
                 holeBE.pumpjackRotation(bearing.isLarge);
         }
         context.data.putFloat("OldCrankAngle", bearing.crankAngle);
 
-        context.data.put("HolePos", NbtUtils.writeBlockPos(holePos));
+        context.data.store("HolePos", BlockPos.CODEC, holePos);
     }
 }

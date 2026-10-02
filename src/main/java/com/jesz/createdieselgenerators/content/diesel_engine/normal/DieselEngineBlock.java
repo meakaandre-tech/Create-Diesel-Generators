@@ -1,26 +1,37 @@
 package com.jesz.createdieselgenerators.content.diesel_engine.normal;
 
+import com.jesz.createdieselgenerators.CDGFluids;
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
+import com.zurrtum.create.AllFluids;
+import com.zurrtum.create.foundation.block.RedStoneConnectBlock;
+import com.zurrtum.create.foundation.fluid.FluidHelper;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider;
+import com.zurrtum.create.infrastructure.fluids.FluidItemInventory;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.redstone.Orientation;
+
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGBlocks;
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.content.diesel_engine.EngineUpgrades;
-import com.simibubi.create.api.schematic.requirement.SpecialBlockItemRequirement;
-import com.simibubi.create.content.equipment.wrench.IWrenchable;
-import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
-import com.simibubi.create.content.schematics.requirement.ItemRequirement;
-import com.simibubi.create.foundation.block.IBE;
-import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.api.schematic.requirement.SpecialBlockItemRequirement;
+import com.zurrtum.create.content.equipment.wrench.IWrenchable;
+import com.zurrtum.create.content.kinetics.base.DirectionalKineticBlock;
+import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
+import com.zurrtum.create.foundation.block.IBE;
+import com.zurrtum.create.foundation.block.ProperWaterloggedBlock;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MilkBucketItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
@@ -34,19 +45,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.NeoForgeMod;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
-import org.jetbrains.annotations.Nullable;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +61,8 @@ import java.util.List;
 import static net.minecraft.core.Direction.NORTH;
 import static net.minecraft.core.Direction.SOUTH;
 
-public class DieselEngineBlock extends DirectionalKineticBlock implements SpecialBlockItemRequirement, IBE<DieselEngineBlockEntity>, ProperWaterloggedBlock {
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+public class DieselEngineBlock extends DirectionalKineticBlock implements SpecialBlockItemRequirement, IBE<DieselEngineBlockEntity>, ProperWaterloggedBlock, RedStoneConnectBlock, FluidInventoryProvider<DieselEngineBlockEntity> {
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
@@ -74,7 +81,7 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, @Nullable Direction direction) {
+    public boolean canConnectRedstone(BlockState state, @Nullable Direction direction) {
         return true;
     }
 
@@ -82,7 +89,7 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
     public InteractionResult onWrenched(BlockState state, UseOnContext context) {
         withBlockEntityDo(context.getLevel(), context.getClickedPos(), be -> {
             if(be.upgrade != EngineUpgrades.EMPTY){
-                if(!context.getLevel().isClientSide) {
+                if(!context.getLevel().isClientSide()) {
                     if (!context.getPlayer().isCreative())
                         context.getPlayer().getInventory().placeItemBackInInventory(be.upgrade.getItem());
                     be.upgrade = EngineUpgrades.EMPTY;
@@ -105,14 +112,14 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState,
-                                  LevelAccessor level, BlockPos pos, BlockPos otherPos) {
-        updateWater(level, state, pos);
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickView, BlockPos pos, Direction direction,
+                                  BlockPos otherPos, BlockState otherState, RandomSource random) {
+        updateWater(level, tickView, state, pos);
         return state;
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos otherPos, boolean moving) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean moving) {
         boolean powered = level.hasNeighborSignal(pos);
 
         if (state.getValue(POWERED) != powered) {
@@ -125,7 +132,7 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
             engine.setSignalChanged(true);
         }
 
-        super.neighborChanged(state, level, pos, block, otherPos, moving);
+        super.neighborChanged(state, level, pos, block, orientation, moving);
     }
 
     @Override
@@ -155,7 +162,7 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         for (EngineUpgrades upgrade : EngineUpgrades.allUpgrades) {
             if (upgrade == EngineUpgrades.EMPTY)
                 continue;
@@ -171,35 +178,65 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
                     be.upgrade = upgrade;
                     IWrenchable.playRotateSound(level, pos);
                 });
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
 
         if(!CDGConfig.ENGINES_FILLED_WITH_ITEMS.get() || stack.isEmpty() || !(level.getBlockEntity(pos) instanceof SmartBlockEntity be))
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
 
-        IFluidHandler tank = level.getCapability(Capabilities.FluidHandler.BLOCK, be.getBlockPos(), null);
+        return fillFromItem(stack, level, be, player, hand);
+    }
+
+    /** Shared by all three engine blocks: fills the engine from a bucket or any fluid container item. */
+    public static InteractionResult fillFromItem(ItemStack stack, Level level, SmartBlockEntity be, Player player, InteractionHand hand) {
+        FluidInventory tank = FluidHelper.getFluidInventory(level, be.getBlockPos(), null, be, null);
         if(tank == null)
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
 
-        if (stack.getItem() instanceof BucketItem || stack.getItem() instanceof MilkBucketItem) {
-            Fluid fluid = stack.getItem() instanceof BucketItem bi ? bi.content : NeoForgeMod.MILK.get();
+        if (stack.getItem() instanceof BucketItem || stack.is(Items.MILK_BUCKET)) {
+            Fluid fluid = stack.getItem() instanceof BucketItem bi ? bi.getContent() : AllFluids.MILK;
 
-            if (!tank.getFluidInTank(0).isEmpty())
-                return ItemInteractionResult.FAIL;
+            if (!FluidUtil.getFluidInTank(tank, 0).isEmpty())
+                return InteractionResult.FAIL;
 
-            tank.fill(new FluidStack(fluid, 1000), IFluidHandler.FluidAction.EXECUTE);
+            FluidUtil.fill(tank, new FluidStack(fluid, 1000 * CDGFluids.MB), false);
             if (!player.isCreative())
                 player.setItemInHand(hand, new ItemStack(Items.BUCKET));
 
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        IFluidHandlerItem itemTank = Capabilities.FluidHandler.ITEM.getCapability(stack, null);
-        if(itemTank == null)
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        itemTank.drain(tank.fill(itemTank.getFluidInTank(0), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-        return ItemInteractionResult.SUCCESS;
+        try (FluidItemInventory itemTank = FluidHelper.getFluidInventory(stack)) {
+            if (itemTank == null)
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
+            FluidStack inItem = FluidUtil.getFluidInTank(itemTank, 0);
+            if (!inItem.isEmpty()) {
+                int filled = FluidUtil.fill(tank, inItem.copy(), false);
+                if (filled > 0)
+                    itemTank.extract(inItem.copy(), filled);
+            }
+            player.setItemInHand(hand, itemTank.getContainer());
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public @Nullable FluidInventory getFluidInventory(LevelAccessor world, BlockPos pos, BlockState state, DieselEngineBlockEntity be, @Nullable Direction side) {
+        if (side == null)
+            return be.tank.getCapability();
+        Direction facing = state.getValue(FACING);
+        if (facing.getAxis().isVertical()) {
+            Direction.Axis portAxis = (facing == Direction.DOWN)
+                    ? Direction.Axis.X
+                    : Direction.Axis.Z;
+            if (side.getAxis() == portAxis)
+                return be.tank.getCapability();
+        } else {
+            if (side == Direction.DOWN)
+                return be.tank.getCapability();
+        }
+        return null;
     }
 
     @Override
@@ -238,15 +275,5 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
                 list.add(upgradeItem);
         }
         return new ItemRequirement(ItemRequirement.ItemUseType.CONSUME, list);
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock())&& !isMoving)
-            withBlockEntityDo(level, pos, be -> {
-                if (be.upgrade != EngineUpgrades.EMPTY)
-                    popResource(level, pos, be.upgrade.getItem());
-            });
-        super.onRemove(state, level, pos, newState, isMoving);
     }
 }

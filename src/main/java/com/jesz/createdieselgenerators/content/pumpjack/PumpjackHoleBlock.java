@@ -1,8 +1,8 @@
 package com.jesz.createdieselgenerators.content.pumpjack;
 
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
-import com.simibubi.create.content.equipment.wrench.IWrenchable;
-import com.simibubi.create.foundation.block.IBE;
+import com.zurrtum.create.content.equipment.wrench.IWrenchable;
+import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.context.UseOnContext;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.*;
 
-public class PumpjackHoleBlock extends Block implements IBE<PumpjackHoleBlockEntity>, IWrenchable {
+public class PumpjackHoleBlock extends Block implements IBE<PumpjackHoleBlockEntity>, IWrenchable, com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider<PumpjackHoleBlockEntity> {
     public PumpjackHoleBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState()
@@ -53,5 +53,10 @@ public class PumpjackHoleBlock extends Block implements IBE<PumpjackHoleBlockEnt
     @Override
     public BlockEntityType<? extends PumpjackHoleBlockEntity> getBlockEntityType() {
         return CDGBlockEntityTypes.PUMPJACK_HOLE.get();
+    }
+
+    @Override
+    public com.zurrtum.create.infrastructure.fluids.FluidInventory getFluidInventory(net.minecraft.world.level.LevelAccessor world, net.minecraft.core.BlockPos pos, BlockState state, PumpjackHoleBlockEntity be, Direction side) {
+        return be.getFluidInventory(side);
     }
 }

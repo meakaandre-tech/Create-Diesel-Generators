@@ -3,30 +3,28 @@ package com.jesz.createdieselgenerators.content.oil_barrel;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.content.distillation.DistillationTankBlockEntity;
-import com.simibubi.create.AllBlockEntityTypes;
-import com.simibubi.create.api.connectivity.ConnectivityHandler;
-import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.AllBlockEntityTypes;
+import com.zurrtum.create.api.connectivity.ConnectivityHandler;
+import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
+import com.zurrtum.create.foundation.blockEntity.IMultiBlockEntityContainer;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.fluid.SmartFluidTank;
-import com.simibubi.create.infrastructure.config.AllConfigs;
-import net.createmod.catnip.nbt.NBTHelper;
+import com.zurrtum.create.infrastructure.config.AllConfigs;
+import com.zurrtum.create.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.IFluidTank;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
+import com.zurrtum.create.foundation.fluid.FluidTank;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +57,7 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
 
     }
 
@@ -69,7 +67,7 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
 
     public void updateConnectivity() {
         updateConnectivity = false;
-        if (level.isClientSide)
+        if (level.isClientSide())
             return;
         if (!isController())
             return;
@@ -141,7 +139,7 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
             }
         }
 
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             setChanged();
             sendData();
         }
@@ -162,11 +160,11 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
         tankInventory.setCapacity(blocks * getCapacityMultiplier());
         int overflow = tankInventory.getFluidAmount() - tankInventory.getCapacity();
         if (overflow > 0)
-            tankInventory.drain(overflow, IFluidHandler.FluidAction.EXECUTE);
+            tankInventory.drain(overflow, false);
     }
 
     public void removeController(boolean keepFluids) {
-        if (level.isClientSide)
+        if (level.isClientSide())
             return;
         updateConnectivity = true;
         if (!keepFluids)
@@ -194,7 +192,7 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
     }
     @Override
     public void setController(BlockPos controller) {
-        if (level.isClientSide && !isVirtual())
+        if (level.isClientSide() && !isVirtual())
             return;
         if (controller.equals(this.controller))
             return;
@@ -229,8 +227,8 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
                 level.getCapability(Capabilities.FluidHandler.BLOCK, controllerBE.getBlockPos(), null));
     }
     @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
+    protected void read(ValueInput tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
 
         BlockPos controllerBefore = controller;
         int prevSize = width;
@@ -243,15 +241,15 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
         if (tag.contains("LastKnownPos"))
             lastKnownPos = NBTHelper.readBlockPos(tag,"LastKnownPos");
         if (tag.contains("Controller"))
-            controller = NBTHelper.readBlockPos(tag, "Controller");
+            controller = tag.read("Controller", BlockPos.CODEC).orElse(null);
 
         if (isController()) {
-            width = tag.getInt("Size");
-            height = tag.getInt("Height");
+            width = tag.getIntOr("Size", 0);
+            height = tag.getIntOr("Height", 0);
             tankInventory.setCapacity(getTotalTankSize() * getCapacityMultiplier());
-            tankInventory.readFromNBT(registries, tag.getCompound("TankContent"));
+            tankInventory.readFrom(tag, "TankContent");
 //            if (tankInventory.getSpace() < 0)
-//                tankInventory.drain(-tankInventory.getSpace(), IFluidHandler.FluidAction.EXECUTE);
+//                tankInventory.drain(-tankInventory.getSpace(), false);
         }
 
         updateCapability = true;
@@ -271,17 +269,17 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
+    protected void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
 
         if (updateConnectivity)
             tag.putBoolean("Uninitialized", true);
         if (lastKnownPos != null)
-            tag.put("LastKnownPos", NbtUtils.writeBlockPos(lastKnownPos));
+            tag.store("LastKnownPos", BlockPos.CODEC, lastKnownPos);
         if (!isController())
-            tag.put("Controller", NbtUtils.writeBlockPos(getController()));
+            tag.store("Controller", BlockPos.CODEC, getController());
         if (isController()) {
-            tag.put("TankContent", tankInventory.writeToNBT(registries, new CompoundTag()));
+            tankInventory.writeTo(tag, "TankContent");
             tag.putInt("Size", width);
             tag.putInt("Height", height);
         }

@@ -4,21 +4,21 @@ import com.jesz.createdieselgenerators.content.pumpjack.PumpjackBearingBBlock;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackBearingBlock;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackBearingBlockEntity;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackCrankBlockEntity;
-import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
-import com.simibubi.create.content.contraptions.bearing.BearingBlock;
-import com.simibubi.create.content.contraptions.bearing.BearingContraption;
-import com.simibubi.create.content.contraptions.behaviour.MovementContext;
+import com.zurrtum.create.api.behaviour.movement.MovementBehaviour;
+import com.zurrtum.create.content.contraptions.bearing.BearingBlock;
+import com.zurrtum.create.content.contraptions.bearing.BearingContraption;
+import com.zurrtum.create.content.contraptions.behaviour.MovementContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 
 import static net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING;
 
-public class PumpjackBearingBMovementBehaviour implements MovementBehaviour {
+public class PumpjackBearingBMovementBehaviour extends MovementBehaviour {
     @Nullable
     @Override
     public ItemStack canBeDisabledVia(MovementContext context) {
@@ -35,7 +35,7 @@ public class PumpjackBearingBMovementBehaviour implements MovementBehaviour {
     }
     @Override
     public void tick(MovementContext context) {
-        MovementBehaviour.super.tick(context);
+        super.tick(context);
         PumpjackBearingBlockEntity bearing = null;
         if (context.world.getBlockEntity(context.contraption.anchor.relative(((BearingContraption) context.contraption).getFacing().getOpposite())) instanceof PumpjackBearingBlockEntity be)
             bearing = be;

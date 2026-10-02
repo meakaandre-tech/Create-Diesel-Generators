@@ -1,9 +1,9 @@
 package com.jesz.createdieselgenerators.content.items;
 
-import com.simibubi.create.api.connectivity.ConnectivityHandler;
-import com.simibubi.create.foundation.block.IBE;
-import com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer;
-import net.createmod.catnip.math.VecHelper;
+import com.zurrtum.create.api.connectivity.ConnectivityHandler;
+import com.zurrtum.create.foundation.block.IBE;
+import com.zurrtum.create.foundation.blockEntity.IMultiBlockEntityContainer;
+import com.zurrtum.create.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -13,7 +13,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
+import com.zurrtum.create.content.fluids.tank.FluidTankItem;
+import com.zurrtum.create.foundation.item.ItemPlacementSoundContext;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -44,15 +46,15 @@ public class MultiBlockContainerBlockItem extends BlockItem {
         MinecraftServer minecraftserver = level.getServer();
         if (minecraftserver == null)
             return false;
-        CustomData blockEntityData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        TypedEntityData<BlockEntityType<?>> blockEntityData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
 
         if (blockEntityData != null) {
-            CompoundTag nbt = blockEntityData.copyTag();
+            CompoundTag nbt = blockEntityData.copyTagWithoutId();
             nbt.remove("Size");
             nbt.remove("Height");
             nbt.remove("Controller");
             nbt.remove("LastKnownPos");
-            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(nbt));
+            stack.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(((IBE<?>) getBlock()).getBlockEntityType(), nbt));
         }
         return super.updateCustomBlockEntityTag(pos, level, player, stack, state);
     }
@@ -61,7 +63,7 @@ public class MultiBlockContainerBlockItem extends BlockItem {
         Player player = ctx.getPlayer();
         if (player == null)
             return;
-        if (player.isSteppingCarefully())
+        if (player.isShiftKeyDown())
             return;
         Direction face = ctx.getClickedFace();
         ItemStack stack = ctx.getItemInHand();
@@ -114,6 +116,8 @@ public class MultiBlockContainerBlockItem extends BlockItem {
         if (!player.isCreative() && stack.getCount() < tanksToPlace)
             return;
 
+        // placed in batch, so less noisy (as Create's tanks do)
+        ItemPlacementSoundContext context = new ItemPlacementSoundContext(ctx, 0.1f, 1.5f, FluidTankItem.SILENCED_METAL.getPlaceSound());
         for (int xOffset = 0; xOffset < width; xOffset++) {
             for (int zOffset = 0; zOffset < width; zOffset++) {
                 BlockPos offsetPos = blockAxis == Direction.Axis.X ? startPos.offset(0, xOffset, zOffset)
@@ -122,12 +126,7 @@ public class MultiBlockContainerBlockItem extends BlockItem {
                 BlockState blockState = world.getBlockState(offsetPos);
                 if (blockState.getBlock() == getBlock())
                     continue;
-                BlockPlaceContext context = BlockPlaceContext.at(ctx, offsetPos, face);
-                player.getPersistentData()
-                        .putBoolean("SilenceTankSound", true);
-                super.place(context);
-                player.getPersistentData()
-                        .remove("SilenceTankSound");
+                super.place(context.offset(offsetPos, face));
             }
         }
     }

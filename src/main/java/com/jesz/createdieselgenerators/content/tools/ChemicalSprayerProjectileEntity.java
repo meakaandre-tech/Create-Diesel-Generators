@@ -3,9 +3,9 @@ package com.jesz.createdieselgenerators.content.tools;
 import com.jesz.createdieselgenerators.CDGEntityTypes;
 import com.jesz.createdieselgenerators.CDGRegistries;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
-import com.simibubi.create.AllFluids;
-import com.simibubi.create.content.fluids.FluidFX;
-import com.simibubi.create.foundation.fluid.FluidHelper;
+import com.zurrtum.create.AllFluids;
+import com.zurrtum.create.client.content.fluids.FluidFX;
+import com.zurrtum.create.foundation.fluid.FluidHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -34,8 +34,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
     public FluidStack stack;
@@ -74,7 +73,7 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
             if (hit.getEntity().getType() == EntityType.ENDERMAN)
                 hit.getEntity().hurt(damageSources().generic(), 0.5f);
         }
-        else if (stack.getFluid().isSame(AllFluids.POTION.get())) {
+        else if (stack.getFluid().isSame(AllFluids.POTION)) {
             if (hit.getEntity() instanceof LivingEntity le && le.isAffectedByPotions()) {
                 PotionContents potionContents = stack.get(DataComponents.POTION_CONTENTS);
                 if (potionContents != null)
@@ -130,10 +129,10 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
 
     @Override
     public void tick() {
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             stack = FluidStack.parseOptional(level().registryAccess(), getEntityData().get(DATA).getCompound("FluidStack"));
-            fire = getEntityData().get(DATA).getBoolean("Fire");
-            cooling = getEntityData().get(DATA).getBoolean("Cooling");
+            fire = getEntityData().get(DATA).getBooleanOr("Fire", false);
+            cooling = getEntityData().get(DATA).getBooleanOr("Cooling", false);
             if (stack != null && !stack.isEmpty() && !fire)
                 level().addParticle(FluidFX.getFluidParticle(stack), position().x+random.nextDouble()-0.5, position().y+0.3, position().z+random.nextDouble()-0.5, getDeltaMovement().x, getDeltaMovement().y - 0.1, getDeltaMovement().z);
             if (t >= 1) {
@@ -164,7 +163,7 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
 
 
         Entity entity = this.getOwner();
-        if (this.level().isClientSide || (entity == null || !entity.isRemoved()) && this.level().hasChunkAt(this.blockPosition())) {
+        if (this.level().isClientSide() || (entity == null || !entity.isRemoved()) && this.level().hasChunkAt(this.blockPosition())) {
             if (this.shouldBurn()) {
                 this.setRemainingFireTicks(1);
             }
@@ -199,7 +198,7 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
     @Override
     protected void onHitBlock(BlockHitResult hit) {
         super.onHitBlock(hit);
-        if (level().isClientSide) return;
+        if (level().isClientSide()) return;
 
         BlockPos facePos = hit.getBlockPos().relative(hit.getDirection());
 

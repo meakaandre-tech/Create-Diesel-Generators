@@ -1,33 +1,26 @@
 package com.jesz.createdieselgenerators.content.burner;
 
-import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
+import com.jesz.createdieselgenerators.CDGFluids;
 import com.jesz.createdieselgenerators.CDGRegistries;
+import com.jesz.createdieselgenerators.fluid.SmartFluidTank;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
-import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
-import com.simibubi.create.foundation.fluid.SmartFluidTank;
+import com.zurrtum.create.content.kinetics.base.KineticBlockEntity;
+import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-
-import java.util.List;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class BurnerBlockEntity extends KineticBlockEntity {
     public float heat = -1;
     public int redstoneOutput = 0;
-    SmartFluidTank tank = new SmartFluidTank(100, f -> {});
+    public SmartFluidTank tank = new SmartFluidTank(100 * CDGFluids.MB, f -> {});
 
     public float valveState = 0.2f;
     public float prevValveState;
@@ -41,6 +34,8 @@ public class BurnerBlockEntity extends KineticBlockEntity {
     public void tick() {
         tick = (tick + 1) & 0xFFFF;
         super.tick();
+        if (level.isClientSide())
+            tickAudio();
 
         prevValveState = valveState;
         valveState = Mth.clamp(valveState + getSpeed() / 5000, 0, 1);
@@ -54,7 +49,7 @@ public class BurnerBlockEntity extends KineticBlockEntity {
 
         if (valveState == 0 || !containsValidFuel) {
             heat = -1;
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 if (ignited)
                     level.playSound(null, worldPosition, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.3f, level.getRandom().nextFloat() * 0.4F + 0.7F);
 
@@ -64,7 +59,7 @@ public class BurnerBlockEntity extends KineticBlockEntity {
         }
         if (containsValidFuel && valveOrRedstoneState != 0) {
             heat = (valveOrRedstoneState + 1) * multiplier;
-            if (level.isClientSide)
+            if (level.isClientSide())
                 return;
             if (tick % 5 == 0) {
                 if(!ignited){
@@ -75,12 +70,12 @@ public class BurnerBlockEntity extends KineticBlockEntity {
                 }
             }
             if ((int)(tick % (10 / valveOrRedstoneState)) == 0) {
-                tank.drain(1, IFluidHandler.FluidAction.EXECUTE);
+                tank.drain(CDGFluids.MB, false);
                 sendData();
                 setChanged();
             }
         }
-        if (level.isClientSide)
+        if (level.isClientSide())
             return;
         if (getBlockState().getValue(BurnerBlock.HEAT_LEVEL) != calculateHeatLevel(heat)) {
             level.setBlockAndUpdate(worldPosition, getBlockState().setValue(BurnerBlock.HEAT_LEVEL, calculateHeatLevel(heat)).setValue(BurnerBlock.LIT, heat > 0));
@@ -110,9 +105,7 @@ public class BurnerBlockEntity extends KineticBlockEntity {
         return level.getRandom().nextInt(bound) != 1;
     }
 
-    @Override
     public void tickAudio() {
-        super.tickAudio();
         float valveOrRedstoneState = Math.min(3, redstonePower != 0 ? 10 : this.valveState);
         if (valveOrRedstoneState == 0 || heat == -1)
             return;
@@ -159,44 +152,25 @@ public class BurnerBlockEntity extends KineticBlockEntity {
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+    protected void write(ValueOutput tag, boolean clientPacket) {
         tag.putFloat("ValveState", valveState);
         tag.putFloat("Heat", heat);
         tag.putInt("Tick", tick);
-        tag.put("FluidContent", tank.writeToNBT(registries, new CompoundTag()));
+        tank.writeTo(tag, "FluidContent");
         tag.putInt("RedstonePower", redstonePower);
         tag.putByte("RedstoneOutput", (byte) redstoneOutput);
-        super.write(tag, registries, clientPacket);
+        super.write(tag, clientPacket);
     }
 
     @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        valveState = tag.getFloat("ValveState");
-        heat = tag.getFloat("Heat");
-        tick = tag.getInt("Tick");
-        tank.readFromNBT(registries, tag.getCompound("FluidContent"));
-        redstonePower = tag.getInt("RedstonePower");
-        if (tag.getBoolean("RedstonePower"))
-            redstonePower = 15;
-        redstoneOutput = tag.getByte("RedstoneOutput");
-        super.read(tag, registries, clientPacket);
-    }
-
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                CDGBlockEntityTypes.BURNER.get(),
-                (be, context) -> {
-                    if (context != Direction.UP)
-                        return be.tank;
-                    return null;
-                }
-        );
-    }
-
-    @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        return containedFluidTooltip(tooltip, isPlayerSneaking, tank);
+    protected void read(ValueInput tag, boolean clientPacket) {
+        valveState = tag.getFloatOr("ValveState", 0);
+        heat = tag.getFloatOr("Heat", 0);
+        tick = tag.getIntOr("Tick", 0);
+        tank.readFrom(tag, "FluidContent");
+        redstonePower = tag.getIntOr("RedstonePower", 0);
+        redstoneOutput = tag.getByteOr("RedstoneOutput", (byte) 0);
+        super.read(tag, clientPacket);
     }
 
     public BurnerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {

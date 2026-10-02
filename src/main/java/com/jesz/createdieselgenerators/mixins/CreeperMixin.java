@@ -10,9 +10,6 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,7 +30,7 @@ public abstract class CreeperMixin extends Monster {
         IFluidHandlerItem fluid = stackInHand.getCapability(Capabilities.FluidHandler.ITEM, null);
         if (fluid == null || fluid.getFluidInTank(0).isEmpty())
             return;
-        fluid.drain(1, IFluidHandler.FluidAction.EXECUTE);
+        fluid.drain(1, false);
         ignite();
         this.level().playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
 

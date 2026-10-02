@@ -2,132 +2,99 @@ package com.jesz.createdieselgenerators.content.tools;
 
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.CDGDataComponents;
-import com.jesz.createdieselgenerators.CDGItems;
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
 import com.jesz.createdieselgenerators.world.OilChunksSavedData;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.foundation.item.TooltipHelper;
-import com.tterrag.registrate.providers.DataGenContext;
-import com.tterrag.registrate.providers.RegistrateItemModelProvider;
-import net.createmod.catnip.platform.CatnipServices;
+import com.zurrtum.create.AllSoundEvents;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 public class OilScannerItem extends Item {
     public OilScannerItem(Properties properties) {
         super(properties.stacksTo(1));
     }
 
+    /** Same bar as Create's TooltipHelper.makeProgressBar, which only exists on the client in Create Fly. */
+    private static String makeProgressBar(int length, int filledLength) {
+        StringBuilder bar = new StringBuilder(" ");
+        int emptySpaces = length - filledLength;
+        for (int i = 0; i < filledLength; i++)
+            bar.append("█");
+        for (int i = 0; i < emptySpaces; i++)
+            bar.append("▒");
+        return bar + " ";
+    }
+
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
 
         if (player.getY() < CDGConfig.MAX_OIL_SCANNER_LEVEL.get()) {
             stack.set(CDGDataComponents.OIL_SCANNER_PROGRESS, 20);
             stack.set(CDGDataComponents.OIL_SCANNER_STATE, 0);
-            if (level.isClientSide)
-                player.displayClientMessage(CreateDieselGenerators.lang("actionbar.oil_scanner.searching"), true);
+            if (level.isClientSide())
+                player.sendOverlayMessage(CreateDieselGenerators.lang("actionbar.oil_scanner.searching"));
 
         } else {
             level.playLocalSound(player.getX(), player.getY(), player.getZ(), AllSoundEvents.DENY.getMainEvent(), SoundSource.PLAYERS, 1.2f, 1, true);
-            if (level.isClientSide)
-                player.displayClientMessage(CreateDieselGenerators.lang("actionbar.oil_scanner.too_high_up"), true);
+            if (level.isClientSide())
+                player.sendOverlayMessage(CreateDieselGenerators.lang("actionbar.oil_scanner.too_high_up"));
         }
-        return InteractionResultHolder.success(stack);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerLevel sl, Entity entity, EquipmentSlot slot) {
         if (!stack.has(CDGDataComponents.OIL_SCANNER_PROGRESS))
             return;
         if (stack.getOrDefault(CDGDataComponents.OIL_SCANNER_STATE, 1) != 0)
             return;
 
-        if (level instanceof ServerLevel sl) {
-            if (stack.get(CDGDataComponents.OIL_SCANNER_PROGRESS) == 0) {
-                stack.set(CDGDataComponents.OIL_SCANNER_PROGRESS, 20);
+        if (stack.get(CDGDataComponents.OIL_SCANNER_PROGRESS) == 0) {
+            stack.set(CDGDataComponents.OIL_SCANNER_PROGRESS, 20);
 
-                ChunkPos chunk = new ChunkPos(new BlockPos(entity.getBlockX(), 0, entity.getBlockZ()));
+            ChunkPos chunk = ChunkPos.containing(new BlockPos(entity.getBlockX(), 0, entity.getBlockZ()));
 
-                int amount = OilChunksSavedData.getChunkOilAmount(sl, chunk);
+            int amount = OilChunksSavedData.getChunkOilAmount(sl, chunk);
 
+            if (amount <= 0)
+                stack.set(CDGDataComponents.OIL_SCANNER_STATE, 1);
+            else if (amount >= (CDGConfig.OIL_CHUNK_THRESHOLD.get() + CDGConfig.OIL_CHUNK_INFINITE_THRESHOLD.get()) / 2)
+                stack.set(CDGDataComponents.OIL_SCANNER_STATE, 3);
+            else
+                stack.set(CDGDataComponents.OIL_SCANNER_STATE, 2);
+            if (entity instanceof ServerPlayer sp) {
                 if (amount <= 0)
-                    stack.set(CDGDataComponents.OIL_SCANNER_STATE, 1);
+                    sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_none", makeProgressBar(3, 0)).withStyle(ChatFormatting.GRAY)));
+                else if (amount == Integer.MAX_VALUE)
+                    sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_bottomless", makeProgressBar(3, 3)).withStyle(ChatFormatting.GOLD)));
                 else if (amount >= (CDGConfig.OIL_CHUNK_THRESHOLD.get() + CDGConfig.OIL_CHUNK_INFINITE_THRESHOLD.get()) / 2)
-                    stack.set(CDGDataComponents.OIL_SCANNER_STATE, 3);
+                    sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_high", makeProgressBar(3, 2)).withStyle(ChatFormatting.YELLOW)));
                 else
-                    stack.set(CDGDataComponents.OIL_SCANNER_STATE, 2);
-                if (entity instanceof ServerPlayer sp) {
-                    if (amount <= 0)
-                        sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_none", TooltipHelper.makeProgressBar(3, 0)).withStyle(ChatFormatting.GRAY)));
-                    else if (amount == Integer.MAX_VALUE)
-                        sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_bottomless", TooltipHelper.makeProgressBar(3, 3)).withStyle(ChatFormatting.GOLD)));
-                    else if (amount >= (CDGConfig.OIL_CHUNK_THRESHOLD.get() + CDGConfig.OIL_CHUNK_INFINITE_THRESHOLD.get()) / 2)
-                        sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_high", TooltipHelper.makeProgressBar(3, 2)).withStyle(ChatFormatting.YELLOW)));
-                    else
-                        sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_low", TooltipHelper.makeProgressBar(3, 1)).withStyle(ChatFormatting.GREEN)));
-
-                }
+                    sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("createdieselgenerators.actionbar.oil_scanner.oil_low", makeProgressBar(3, 1)).withStyle(ChatFormatting.GREEN)));
 
             }
-            stack.set(CDGDataComponents.OIL_SCANNER_PROGRESS, stack.getOrDefault(CDGDataComponents.OIL_SCANNER_PROGRESS, 20) - 1);
-        } else
-            level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), AllSoundEvents.SCROLL_VALUE.getMainEvent(), SoundSource.PLAYERS, 0.2f, 1, true);
 
-        super.inventoryTick(stack, level, entity, slot, selected);
-    }
-
-    public void registerModelOverrides() {
-        CatnipServices.PLATFORM.executeOnClientOnly(() -> () -> {
-            ItemProperties.register(CDGItems.OIL_SCANNER.get(), CreateDieselGenerators.rl("oil_scanner_state"),
-                    (stack, level, entity, seed) -> stack.getOrDefault(CDGDataComponents.OIL_SCANNER_STATE, 0));
-        });
-    }
-
-    public static ItemModelBuilder addOverrideModels(DataGenContext<Item, OilScannerItem> c,
-                                                     RegistrateItemModelProvider p) {
-        ItemModelBuilder builder = p.generated(c::getEntry, p.modLoc("item/oil_scanner_rotating"));
-
-        builder.override()
-                .predicate(CreateDieselGenerators.rl("oil_scanner_state"), 0.0f)
-                .model(p.getBuilder(c.getName())
-                        .parent(new ModelFile.UncheckedModelFile("item/generated"))
-                        .texture("layer0", CreateDieselGenerators.rl("item/oil_scanner_rotating")))
-                .end();
-        builder.override()
-                .predicate(CreateDieselGenerators.rl("oil_scanner_state"), 1.0f)
-                .model(p.getBuilder(c.getName() + "_none")
-                        .parent(new ModelFile.UncheckedModelFile("item/generated"))
-                        .texture("layer0", CreateDieselGenerators.rl("item/oil_scanner_none")))
-                .end();
-        builder.override()
-                .predicate(CreateDieselGenerators.rl("oil_scanner_state"), 2.0f)
-                .model(p.getBuilder(c.getName() + "_medium")
-                        .parent(new ModelFile.UncheckedModelFile("item/generated"))
-                        .texture("layer0", CreateDieselGenerators.rl("item/oil_scanner_medium")))
-                .end();
-        builder.override()
-                .predicate(CreateDieselGenerators.rl("oil_scanner_state"), 3.0f)
-                .model(p.getBuilder(c.getName() + "_high")
-                        .parent(new ModelFile.UncheckedModelFile("item/generated"))
-                        .texture("layer0", CreateDieselGenerators.rl("item/oil_scanner_high")))
-                .end();
-        return builder;
+        }
+        stack.set(CDGDataComponents.OIL_SCANNER_PROGRESS, stack.getOrDefault(CDGDataComponents.OIL_SCANNER_PROGRESS, 20) - 1);
+        // the ticking sound was played from the client side of inventoryTick, which no longer exists
+        if (entity instanceof ServerPlayer sp)
+            sp.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(AllSoundEvents.SCROLL_VALUE.getMainEvent()),
+                    SoundSource.PLAYERS, entity.getX(), entity.getY(), entity.getZ(), 0.2f, 1, sl.getRandom().nextLong()));
     }
 }

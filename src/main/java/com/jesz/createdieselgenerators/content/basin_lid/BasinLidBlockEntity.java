@@ -1,11 +1,13 @@
 package com.jesz.createdieselgenerators.content.basin_lid;
 
 import com.jesz.createdieselgenerators.CDGRecipes;
-import com.simibubi.create.content.processing.basin.BasinBlockEntity;
-import com.simibubi.create.content.processing.basin.BasinOperatingBlockEntity;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.zurrtum.create.content.processing.basin.BasinBlockEntity;
+import com.zurrtum.create.content.processing.basin.BasinOperatingBlockEntity;
+import com.zurrtum.create.foundation.recipe.TimedRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -29,6 +31,8 @@ public class BasinLidBlockEntity extends BasinOperatingBlockEntity {
     public int processingTime;
     public boolean running;
     public float progress;
+    /** Total duration of the running recipe; synced, because recipes are not known to the client. */
+    public int processingDuration;
 
 
     public BasinLidBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -36,21 +40,23 @@ public class BasinLidBlockEntity extends BasinOperatingBlockEntity {
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    protected void write(ValueOutput compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
 
         compound.putInt("ProcessingTime", this.processingTime);
         compound.putBoolean("Running", this.running);
         compound.putBoolean("SteamInside", this.steamInside);
+        compound.putInt("ProcessingDuration", this.processingDuration);
     }
 
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket);
+    protected void read(ValueInput compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
 
-        this.processingTime = compound.getInt("ProcessingTime");
-        this.running = compound.getBoolean("Running");
-        this.steamInside = compound.getBoolean("SteamInside");
+        this.processingTime = compound.getIntOr("ProcessingTime", 0);
+        this.running = compound.getBooleanOr("Running", false);
+        this.steamInside = compound.getBooleanOr("SteamInside", false);
+        this.processingDuration = compound.getIntOr("ProcessingDuration", 0);
     }
 
     @Override
@@ -64,19 +70,21 @@ public class BasinLidBlockEntity extends BasinOperatingBlockEntity {
     @Override
     public void tick() {
         super.tick();
-        if (currentRecipe != null)
-            progress = (float) processingTime /((BasinFermentingRecipe)currentRecipe).getProcessingDuration();
+        if (level.isClientSide()) {
+            progress = running && processingDuration > 0 ? (float) processingTime / processingDuration : 0;
+        } else if (currentRecipe != null)
+            progress = (float) processingTime / Math.max(1, ((BasinFermentingRecipe) currentRecipe).time());
         else {
             if (processingTime != -1) {
-                List<Recipe<?>> recipes = this.getMatchingRecipes();
-                if (!recipes.isEmpty())
-                    this.currentRecipe = recipes.get(0);
+                Recipe<?> recipe = this.getMatchingRecipes();
+                if (recipe != null)
+                    this.currentRecipe = recipe;
                 else
                     processingTime = -1;
             }
             progress = 0;
         }
-        if ((!level.isClientSide && (currentRecipe == null || processingTime == -1)) || getBlockState().getValue(OPEN) || !getBlockState().getValue(ON_A_BASIN)) {
+        if ((!level.isClientSide() && (currentRecipe == null || processingTime == -1)) || getBlockState().getValue(OPEN) || !getBlockState().getValue(ON_A_BASIN)) {
             this.running = false;
             this.processingTime = -1;
             this.basinChecker.scheduleUpdate();
@@ -84,12 +92,12 @@ public class BasinLidBlockEntity extends BasinOperatingBlockEntity {
         if (running)
             steamInside = true;
         if (running && level != null) {
-            if (!level.isClientSide && this.processingTime <= 0) {
+            if (!level.isClientSide() && this.processingTime <= 0) {
                 this.processingTime = -1;
                 this.applyBasinRecipe();
                 this.sendData();
             }
-            if (!level.isClientSide && processingTime % 20 == 0 && new Random().nextInt() % 4 == 0)
+            if (!level.isClientSide() && processingTime % 20 == 0 && new Random().nextInt() % 4 == 0)
                 level.playSound(null, worldPosition, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
                         SoundSource.BLOCKS, .15f, speed < 65 ? .75f : 1.5f);
 
@@ -107,9 +115,10 @@ public class BasinLidBlockEntity extends BasinOperatingBlockEntity {
         if (this.level == null) return true;
         if (this.getBasin().filter(BasinBlockEntity::canContinueProcessing).isEmpty()) return true;
 
-        List<Recipe<?>> recipes = this.getMatchingRecipes();
-        if (recipes.isEmpty()) return true;
-        this.currentRecipe = recipes.get(0);
+        if (level.isClientSide()) return true;
+        Recipe<?> recipe = this.getMatchingRecipes();
+        if (recipe == null) return true;
+        this.currentRecipe = recipe;
         this.startProcessingBasin();
         this.sendData();
         return true;
@@ -120,7 +129,8 @@ public class BasinLidBlockEntity extends BasinOperatingBlockEntity {
         if (this.running && this.processingTime > 0) return;
         super.startProcessingBasin();
         this.running = true;
-        this.processingTime = this.currentRecipe instanceof ProcessingRecipe<?, ?> processed ? processed.getProcessingDuration() : 20;
+        this.processingTime = this.currentRecipe instanceof TimedRecipe processed ? processed.time() : 20;
+        this.processingDuration = this.processingTime;
     }
 
     @Override

@@ -1,15 +1,13 @@
 package com.jesz.createdieselgenerators.content.diesel_engine.huge;
 
-import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
-import net.createmod.catnip.data.Couple;
-import net.createmod.catnip.data.Pair;
-import net.createmod.catnip.nbt.NBTHelper;
+import com.zurrtum.create.content.kinetics.base.GeneratingKineticBlockEntity;
+import com.zurrtum.create.catnip.data.Couple;
+import com.zurrtum.create.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -18,12 +16,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jesz.createdieselgenerators.content.diesel_engine.huge.HugeDieselEngineBlock.FACING;
-import static com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock.AXIS;
+import static com.zurrtum.create.content.kinetics.base.RotatedPillarKineticBlock.AXIS;
 
 public class PoweredEngineShaftBlockEntity extends GeneratingKineticBlockEntity {
     float stressCapacity;
     float speed;
-    int movementDirection;
+    public int movementDirection;
     BlockPos lastKnownPos = worldPosition;
 
     public PoweredEngineShaftBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
@@ -106,40 +104,40 @@ public class PoweredEngineShaftBlockEntity extends GeneratingKineticBlockEntity 
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
+    protected void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
 
         tag.putInt("Direction", movementDirection);
-        ListTag engineList = new ListTag();
+        ValueOutput.ValueOutputList engineList = tag.childrenList("Engines");
 
         for (Pair<BlockPos, Couple<Float>> engine : List.copyOf(engines)) {
-            CompoundTag engineTag = new CompoundTag();
+            ValueOutput engineTag = engineList.addChild();
             engineTag.putFloat("Capacity", engine.getSecond().getFirst());
             engineTag.putFloat("Speed", engine.getSecond().getSecond());
-            engineTag.put("Pos", NbtUtils.writeBlockPos(engine.getFirst()));
-            engineList.add(engineTag);
-        };
+            engineTag.store("Pos", BlockPos.CODEC, engine.getFirst());
+        }
         tag.putFloat("GeneratedSpeed", speed);
-        tag.put("Engines", engineList);
-        tag.put("LastKnownPos", NbtUtils.writeBlockPos(lastKnownPos));
+        tag.store("LastKnownPos", BlockPos.CODEC, lastKnownPos);
     }
 
     @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
-        movementDirection = tag.getInt("Direction");
+    protected void read(ValueInput tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        movementDirection = tag.getIntOr("Direction", 0);
 
-        ListTag engineList = tag.getList("Engines", CompoundTag.TAG_COMPOUND);
         List<Pair<BlockPos, Couple<Float>>> newEngines = new ArrayList<>();
-        for (int i = 0; i < engineList.size(); i++) {
-            newEngines.add(Pair.of(NBTHelper.readBlockPos(engineList.getCompound(i), "Pos"),
-                    Couple.create(engineList.getCompound(i).getFloat("Capacity"),
-                            engineList.getCompound(i).getFloat("Speed"))));
+        for (ValueInput engineTag : tag.childrenListOrEmpty("Engines")) {
+            BlockPos pos = engineTag.read("Pos", BlockPos.CODEC).orElse(null);
+            if (pos == null)
+                continue;
+            newEngines.add(Pair.of(pos,
+                    Couple.create(engineTag.getFloatOr("Capacity", 0),
+                            engineTag.getFloatOr("Speed", 0))));
         }
         engines = newEngines;
 
-        speed = tag.getFloat("GeneratedSpeed");
-        lastKnownPos = NBTHelper.readBlockPos(tag, "LastKnownPos");
+        speed = tag.getFloatOr("GeneratedSpeed", 0);
+        lastKnownPos = tag.read("LastKnownPos", BlockPos.CODEC).orElse(worldPosition);
     }
 
     @Override

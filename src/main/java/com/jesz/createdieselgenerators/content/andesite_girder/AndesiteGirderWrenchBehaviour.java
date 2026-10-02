@@ -1,14 +1,14 @@
 package com.jesz.createdieselgenerators.content.andesite_girder;
 
 import com.jesz.createdieselgenerators.CDGBlocks;
-import com.simibubi.create.AllItems;
-import com.simibubi.create.content.decoration.girder.GirderBlock;
-import net.createmod.catnip.data.Iterate;
-import net.createmod.catnip.data.Pair;
-import net.createmod.catnip.math.VecHelper;
-import net.createmod.catnip.outliner.Outliner;
-import net.createmod.catnip.placement.IPlacementHelper;
-import net.createmod.catnip.theme.Color;
+import com.zurrtum.create.AllItems;
+import com.zurrtum.create.content.decoration.girder.GirderBlock;
+import com.zurrtum.create.catnip.data.Iterate;
+import com.zurrtum.create.catnip.data.Pair;
+import com.zurrtum.create.catnip.math.VecHelper;
+import com.zurrtum.create.client.catnip.outliner.Outliner;
+import com.zurrtum.create.catnip.placement.IPlacementHelper;
+import com.zurrtum.create.catnip.theme.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -21,16 +21,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class AndesiteGirderWrenchBehaviour {
-    @OnlyIn(Dist.CLIENT)
     public static void tick() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || !(mc.hitResult instanceof BlockHitResult result))
@@ -47,7 +44,7 @@ public class AndesiteGirderWrenchBehaviour {
         if (!CDGBlocks.ANDESITE_GIRDER.has(world.getBlockState(pos)))
             return;
 
-        if (!AllItems.WRENCH.isIn(heldItem))
+        if (!heldItem.is(AllItems.WRENCH))
             return;
 
         Pair<Direction, Action> dirPair = getDirectionAndAction(result, world, pos);
@@ -159,7 +156,7 @@ public class AndesiteGirderWrenchBehaviour {
         Pair<Direction, Action> dirPair = getDirectionAndAction(result, level, pos);
         if (dirPair == null)
             return false;
-        if (level.isClientSide)
+        if (level.isClientSide())
             return true;
         if (!state.getValue(GirderBlock.X) && !state.getValue(GirderBlock.Z))
             return false;

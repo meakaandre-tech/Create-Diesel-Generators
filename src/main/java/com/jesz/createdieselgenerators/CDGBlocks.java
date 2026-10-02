@@ -30,11 +30,11 @@ import com.jesz.createdieselgenerators.content.turret.ChemicalTurretBlock;
 import com.jesz.createdieselgenerators.contraption.DieselEngineMovementBehaviour;
 import com.jesz.createdieselgenerators.contraption.PumpjackBearingBMovementBehaviour;
 import com.jesz.createdieselgenerators.contraption.PumpjackHeadMovementBehaviour;
-import com.simibubi.create.AllBlocks;
+import com.zurrtum.create.AllBlocks;
 import com.simibubi.create.AllTags;
-import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
-import com.simibubi.create.api.boiler.BoilerHeater;
-import com.simibubi.create.api.stress.BlockStressValues;
+import com.zurrtum.create.api.behaviour.movement.MovementBehaviour;
+import com.zurrtum.create.api.boiler.BoilerHeater;
+import com.zurrtum.create.api.stress.BlockStressValues;
 import com.simibubi.create.foundation.data.AssetLookup;
 import com.simibubi.create.foundation.data.BlockStateGen;
 import com.simibubi.create.foundation.data.CreateRegistrate;
@@ -43,7 +43,7 @@ import com.tterrag.registrate.providers.loot.RegistrateBlockLootTables;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullConsumer;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.DyeColor;
@@ -64,7 +64,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.jesz.createdieselgenerators.CreateDieselGenerators.REGISTRATE;
-import static com.simibubi.create.api.contraption.storage.fluid.MountedFluidStorageType.mountedFluidStorage;
+import static com.zurrtum.create.api.contraption.storage.fluid.MountedFluidStorageType.mountedFluidStorage;
 import static com.simibubi.create.foundation.data.CreateRegistrate.connectedTextures;
 import static com.simibubi.create.foundation.data.TagGen.axeOnly;
 import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
@@ -375,7 +375,7 @@ public class CDGBlocks {
                         .blockstate((c, p) -> {
                             MultiPartBlockStateBuilder builder = p.getMultipartBuilder(c.get());
                             builder.part()
-                                    .modelFile(p.models().getExistingFile(ResourceLocation.withDefaultNamespace("block/" + color.getName() + "_concrete")))
+                                    .modelFile(p.models().getExistingFile(Identifier.withDefaultNamespace("block/" + color.getName() + "_concrete")))
                                     .addModel()
                                     .end();
 

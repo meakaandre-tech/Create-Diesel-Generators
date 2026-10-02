@@ -1,146 +1,156 @@
 package com.jesz.createdieselgenerators;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import net.fabricmc.loader.api.FabricLoader;
 
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * JSON-backed replacement for the NeoForge config spec. Values keep their get() call.
+ * Three files are written to the config folder: createdieselgenerators-client.json, -server.json and -common.json.
+ */
 public class CDGConfig {
-    public static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
-    public static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
-    public static final ModConfigSpec.Builder COMMON_BUILDER = new ModConfigSpec.Builder();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static final ModConfigSpec SERVER_SPEC;
-    public static final ModConfigSpec CLIENT_SPEC;
-    public static final ModConfigSpec COMMON_SPEC;
+    public static final class ConfigValue<T> {
+        private final String key;
+        private final String comment;
+        private T value;
+        private final Double min, max;
 
-    public static final ModConfigSpec.ConfigValue<Double> TURBOCHARGED_ENGINE_MULTIPLIER;
-    public static final ModConfigSpec.ConfigValue<Double> TURBOCHARGED_ENGINE_BURN_RATE_MULTIPLIER;
+        private ConfigValue(String key, String comment, T defaultValue, Double min, Double max) {
+            this.key = key;
+            this.comment = comment;
+            this.value = defaultValue;
+            this.min = min;
+            this.max = max;
+        }
 
-    public static final ModConfigSpec.ConfigValue<Boolean> ENGINES_EMIT_SOUND_ON_TRAINS;
+        public T get() {
+            return value;
+        }
 
-    public static final ModConfigSpec.ConfigValue<Boolean> CANISTER_SPOUT_FILLING;
-    public static final ModConfigSpec.ConfigValue<Integer> CANISTER_CAPACITY;
-    public static final ModConfigSpec.ConfigValue<Integer> CANISTER_CAPACITY_ENCHANTMENT;
+        public void set(T value) {
+            this.value = value;
+        }
 
-    public static final ModConfigSpec.ConfigValue<Integer> TOOL_CAPACITY;
-    public static final ModConfigSpec.ConfigValue<Integer> TOOL_CAPACITY_ENCHANTMENT;
+        @SuppressWarnings("unchecked")
+        private void read(JsonObject json) {
+            if (!json.has(key))
+                return;
+            JsonElement e = json.get(key);
+            try {
+                if (value instanceof Boolean)
+                    value = (T) (Boolean) e.getAsBoolean();
+                else if (value instanceof Integer) {
+                    int v = e.getAsInt();
+                    if (min != null)
+                        v = (int) Math.max(min, Math.min(max, v));
+                    value = (T) (Integer) v;
+                } else if (value instanceof Double)
+                    value = (T) (Double) e.getAsDouble();
+            } catch (Exception ex) {
+                CreateDieselGenerators.LOGGER.warn("Invalid config value for '{}', keeping default", key);
+            }
+        }
 
-    public static final ModConfigSpec.ConfigValue<Integer> MAX_OIL_SCANNER_LEVEL;
-    public static final ModConfigSpec.ConfigValue<Integer> MAX_OIL_BARREL_WIDTH;
-    public static final ModConfigSpec.ConfigValue<Integer> MAX_OIL_BARREL_LENGTH_PER_WIDTH;
-
-    public static final ModConfigSpec.ConfigValue<Integer> OIL_CHUNK_INFINITE_THRESHOLD;
-    public static final ModConfigSpec.ConfigValue<Integer> OIL_CHUNK_THRESHOLD;
-
-    public static final ModConfigSpec.ConfigValue<Boolean> DISABLE_NORMAL_OIL_CHUNKS;
-    public static final ModConfigSpec.ConfigValue<Boolean> DISABLE_HIGH_OIL_CHUNKS;
-
-    public static final ModConfigSpec.ConfigValue<Double> OIL_CHUNK_SCALE;
-    public static final ModConfigSpec.ConfigValue<Double> OIL_MULTIPLIER;
-    public static final ModConfigSpec.ConfigValue<Double> HIGH_OIL_MULTIPLIER;
-
-    public static final ModConfigSpec.ConfigValue<Boolean> FUEL_TOOLTIPS;
-    public static final ModConfigSpec.ConfigValue<Boolean> DIESEL_ENGINE_IN_JEI;
-
-    public static final ModConfigSpec.ConfigValue<Boolean> COMBUSTIBLES_BLOW_UP;
-
-    public static final ModConfigSpec.ConfigValue<Boolean> NORMAL_ENGINES;
-    public static final ModConfigSpec.ConfigValue<Boolean> MODULAR_ENGINES;
-    public static final ModConfigSpec.ConfigValue<Boolean> HUGE_ENGINES;
-    public static final ModConfigSpec.ConfigValue<Boolean> ENGINES_FILLED_WITH_ITEMS;
-    public static final ModConfigSpec.ConfigValue<Boolean> ENGINES_DISABLED_WITH_REDSTONE;
-    public static final ModConfigSpec.ConfigValue<Boolean> ANALOG_SPEED_CONTROL;
-
-    public static final ModConfigSpec.ConfigValue<Integer> DISTILLATION_MIN_HEIGHT;
-
-    static {
-
-        CLIENT_BUILDER.push("Client Configs");
-
-        FUEL_TOOLTIPS = CLIENT_BUILDER.comment("Fuel type tooltip on Buckets")
-            .define("Fuel tooltips",true);
-        DIESEL_ENGINE_IN_JEI = CLIENT_BUILDER.comment("Whenever Diesel Engines display in JEI")
-                .define("Diesel Engine JEI Config",true);
-        ENGINES_EMIT_SOUND_ON_TRAINS = CLIENT_BUILDER.comment("Diesel Engines emit sounds on trains")
-                .define("Diesel Engines emit sounds on trains",true);
-        CLIENT_BUILDER.pop();
-        CLIENT_SPEC = CLIENT_BUILDER.build();
-
-        SERVER_BUILDER.push("Server Configs");
-        SERVER_BUILDER.push("Diesel Engines");
-
-            TURBOCHARGED_ENGINE_MULTIPLIER = SERVER_BUILDER.comment("Turbocharged Diesel Engine Speed Multiplier")
-                    .define("Turbocharged Diesel Engine Speed Multiplier", 2d);
-            TURBOCHARGED_ENGINE_BURN_RATE_MULTIPLIER = SERVER_BUILDER.comment("Turbocharged Diesel Engine Burn Rate Multiplier")
-                    .define("Turbocharged Diesel Engine Burn Rate Multiplier", 1d);
-
-            NORMAL_ENGINES = SERVER_BUILDER.comment("Whenever Normal Diesel Engines are enabled")
-                    .define("Normal Diesel Engines", true);
-            MODULAR_ENGINES = SERVER_BUILDER.comment("Whenever Modular Diesel Engines are enabled")
-                    .define("Modular Diesel Engines", true);
-            HUGE_ENGINES = SERVER_BUILDER.comment("Whenever Huge Diesel Engines are enabled")
-                    .define("Huge Diesel Engines", true);
-
-            ENGINES_FILLED_WITH_ITEMS = SERVER_BUILDER.comment("Whenever Diesel Engines can be filled with an Item")
-                    .define("Engines filled with a bucket", false);
-            ENGINES_DISABLED_WITH_REDSTONE = SERVER_BUILDER.comment("Whenever Diesel Engines can be disabled with redstone")
-                    .define("Engines disabled with redstone", true);
-
-            ANALOG_SPEED_CONTROL = SERVER_BUILDER.comment("If Diesel Engines can be controlled with a analog lever.")
-                    .define("Engines controlled by analog lever", true);
-
-        SERVER_BUILDER.pop();
-
-        SERVER_BUILDER.push("Oil Config");
-            OIL_CHUNK_INFINITE_THRESHOLD = SERVER_BUILDER.comment()
-                    .define("Infinite oil chunk threshold", 10_000_000);
-            OIL_CHUNK_THRESHOLD = SERVER_BUILDER.comment()
-                    .define("Oil chunk threshold", 4_000_000);
-            DISABLE_NORMAL_OIL_CHUNKS = SERVER_BUILDER.comment()
-                    .define("Disable normal oil chunks", false);
-            DISABLE_HIGH_OIL_CHUNKS = SERVER_BUILDER.comment()
-                    .define("Disable high oil chunks", false);
-            OIL_MULTIPLIER = SERVER_BUILDER.comment()
-                    .define("Normal oil chunks oil amount multiplier", 1.3d);
-            HIGH_OIL_MULTIPLIER = SERVER_BUILDER.comment()
-                    .define("High oil chunks oil amount multiplier", 2d);
-            OIL_CHUNK_SCALE = SERVER_BUILDER.comment()
-                    .define("Oil chunk map scale", 1.0d);
-            MAX_OIL_SCANNER_LEVEL = SERVER_BUILDER.comment()
-                .define("Max Oil Scanner Level", 10000);
-
-        SERVER_BUILDER.pop();
-
-        MAX_OIL_BARREL_WIDTH = SERVER_BUILDER.comment("Maximum width of Oil Barrels")
-                .define("Max Oil Barrel Width", 3);
-        MAX_OIL_BARREL_LENGTH_PER_WIDTH = SERVER_BUILDER.comment("Maximum Oil Barrel length for each unit of width")
-                .define("Max Oil Barrel Length (per width)", 4);
-
-
-        CANISTER_SPOUT_FILLING = SERVER_BUILDER.comment("Canister can be filled by spouts")
-                .define("Canister can be filled by spouts",true);
-
-        COMBUSTIBLES_BLOW_UP = SERVER_BUILDER.comment("Combustibles do boom boom when on fire")
-                .define("Combustibles blow up",true);
-
-        DISTILLATION_MIN_HEIGHT = SERVER_BUILDER.comment("Minimum height of the Distillation Tower required to process recipes")
-                .defineInRange("Distillation Tower Minimum Height", 3, 2, 7);
-
-        SERVER_BUILDER.pop();
-        SERVER_SPEC = SERVER_BUILDER.build();
-
-        COMMON_BUILDER.push("Common Config");
-            TOOL_CAPACITY = COMMON_BUILDER.comment("Capacity of Tools requiring Fluids in mB")
-                    .define("Capacity of Tools requiring Fluids",200);
-            TOOL_CAPACITY_ENCHANTMENT = COMMON_BUILDER.comment("Tool Capacity Enchantment Capacity Addition in mB")
-                    .define("Capacity Addition of Tools with Capacity Enchantment",100);
-        CANISTER_CAPACITY = COMMON_BUILDER.comment("Canister Capacity in mB")
-                .define("Capacity of Canisters",4000);
-        CANISTER_CAPACITY_ENCHANTMENT = COMMON_BUILDER.comment("Canister Capacity Enchantment Capacity Addition in mB")
-                .define("Capacity Addition of Capacity Enchantment in Canisters",1000);
-
-        COMMON_BUILDER.pop();
-        COMMON_SPEC = COMMON_BUILDER.build();
-
+        private void write(JsonObject json) {
+            if (comment != null && !comment.isEmpty())
+                json.addProperty("_comment: " + key, comment);
+            if (value instanceof Boolean b)
+                json.addProperty(key, b);
+            else if (value instanceof Number n)
+                json.addProperty(key, n);
+        }
     }
 
+    private static final List<ConfigValue<?>> CLIENT = new ArrayList<>();
+    private static final List<ConfigValue<?>> SERVER = new ArrayList<>();
+    private static final List<ConfigValue<?>> COMMON = new ArrayList<>();
 
+    private static <T> ConfigValue<T> define(List<ConfigValue<?>> list, String comment, String key, T def) {
+        ConfigValue<T> v = new ConfigValue<>(key, comment, def, null, null);
+        list.add(v);
+        return v;
+    }
+
+    private static ConfigValue<Integer> defineInRange(List<ConfigValue<?>> list, String comment, String key, int def, int min, int max) {
+        ConfigValue<Integer> v = new ConfigValue<>(key, comment, def, (double) min, (double) max);
+        list.add(v);
+        return v;
+    }
+
+    public static final ConfigValue<Boolean> FUEL_TOOLTIPS = define(CLIENT, "Fuel type tooltip on Buckets", "Fuel tooltips", true);
+    public static final ConfigValue<Boolean> DIESEL_ENGINE_IN_JEI = define(CLIENT, "Whenever Diesel Engines display in JEI", "Diesel Engine JEI Config", true);
+    public static final ConfigValue<Boolean> ENGINES_EMIT_SOUND_ON_TRAINS = define(CLIENT, "Diesel Engines emit sounds on trains", "Diesel Engines emit sounds on trains", true);
+
+    public static final ConfigValue<Double> TURBOCHARGED_ENGINE_MULTIPLIER = define(SERVER, "Turbocharged Diesel Engine Speed Multiplier", "Turbocharged Diesel Engine Speed Multiplier", 2d);
+    public static final ConfigValue<Double> TURBOCHARGED_ENGINE_BURN_RATE_MULTIPLIER = define(SERVER, "Turbocharged Diesel Engine Burn Rate Multiplier", "Turbocharged Diesel Engine Burn Rate Multiplier", 1d);
+    public static final ConfigValue<Boolean> NORMAL_ENGINES = define(SERVER, "Whenever Normal Diesel Engines are enabled", "Normal Diesel Engines", true);
+    public static final ConfigValue<Boolean> MODULAR_ENGINES = define(SERVER, "Whenever Modular Diesel Engines are enabled", "Modular Diesel Engines", true);
+    public static final ConfigValue<Boolean> HUGE_ENGINES = define(SERVER, "Whenever Huge Diesel Engines are enabled", "Huge Diesel Engines", true);
+    public static final ConfigValue<Boolean> ENGINES_FILLED_WITH_ITEMS = define(SERVER, "Whenever Diesel Engines can be filled with an Item", "Engines filled with a bucket", false);
+    public static final ConfigValue<Boolean> ENGINES_DISABLED_WITH_REDSTONE = define(SERVER, "Whenever Diesel Engines can be disabled with redstone", "Engines disabled with redstone", true);
+    public static final ConfigValue<Boolean> ANALOG_SPEED_CONTROL = define(SERVER, "If Diesel Engines can be controlled with a analog lever.", "Engines controlled by analog lever", true);
+
+    public static final ConfigValue<Integer> OIL_CHUNK_INFINITE_THRESHOLD = define(SERVER, "", "Infinite oil chunk threshold", 10_000_000);
+    public static final ConfigValue<Integer> OIL_CHUNK_THRESHOLD = define(SERVER, "", "Oil chunk threshold", 4_000_000);
+    public static final ConfigValue<Boolean> DISABLE_NORMAL_OIL_CHUNKS = define(SERVER, "", "Disable normal oil chunks", false);
+    public static final ConfigValue<Boolean> DISABLE_HIGH_OIL_CHUNKS = define(SERVER, "", "Disable high oil chunks", false);
+    public static final ConfigValue<Double> OIL_MULTIPLIER = define(SERVER, "", "Normal oil chunks oil amount multiplier", 1.3d);
+    public static final ConfigValue<Double> HIGH_OIL_MULTIPLIER = define(SERVER, "", "High oil chunks oil amount multiplier", 2d);
+    public static final ConfigValue<Double> OIL_CHUNK_SCALE = define(SERVER, "", "Oil chunk map scale", 1.0d);
+    public static final ConfigValue<Integer> MAX_OIL_SCANNER_LEVEL = define(SERVER, "", "Max Oil Scanner Level", 10000);
+
+    public static final ConfigValue<Integer> MAX_OIL_BARREL_WIDTH = define(SERVER, "Maximum width of Oil Barrels", "Max Oil Barrel Width", 3);
+    public static final ConfigValue<Integer> MAX_OIL_BARREL_LENGTH_PER_WIDTH = define(SERVER, "Maximum Oil Barrel length for each unit of width", "Max Oil Barrel Length (per width)", 4);
+    public static final ConfigValue<Boolean> CANISTER_SPOUT_FILLING = define(SERVER, "Canister can be filled by spouts", "Canister can be filled by spouts", true);
+    public static final ConfigValue<Boolean> COMBUSTIBLES_BLOW_UP = define(SERVER, "Combustibles do boom boom when on fire", "Combustibles blow up", true);
+    public static final ConfigValue<Integer> DISTILLATION_MIN_HEIGHT = defineInRange(SERVER, "Minimum height of the Distillation Tower required to process recipes", "Distillation Tower Minimum Height", 3, 2, 7);
+
+    public static final ConfigValue<Integer> TOOL_CAPACITY = define(COMMON, "Capacity of Tools requiring Fluids in mB", "Capacity of Tools requiring Fluids", 200);
+    public static final ConfigValue<Integer> TOOL_CAPACITY_ENCHANTMENT = define(COMMON, "Tool Capacity Enchantment Capacity Addition in mB", "Capacity Addition of Tools with Capacity Enchantment", 100);
+    public static final ConfigValue<Integer> CANISTER_CAPACITY = define(COMMON, "Canister Capacity in mB", "Capacity of Canisters", 4000);
+    public static final ConfigValue<Integer> CANISTER_CAPACITY_ENCHANTMENT = define(COMMON, "Canister Capacity Enchantment Capacity Addition in mB", "Capacity Addition of Capacity Enchantment in Canisters", 1000);
+
+    public static void loadCommon() {
+        load(CreateDieselGenerators.ID + "-server.json", SERVER);
+        load(CreateDieselGenerators.ID + "-common.json", COMMON);
+    }
+
+    public static void loadClient() {
+        load(CreateDieselGenerators.ID + "-client.json", CLIENT);
+    }
+
+    private static void load(String fileName, List<ConfigValue<?>> values) {
+        Path path = FabricLoader.getInstance().getConfigDir().resolve(fileName);
+        JsonObject json = new JsonObject();
+        if (Files.exists(path)) {
+            try (Reader reader = Files.newBufferedReader(path)) {
+                JsonObject read = GSON.fromJson(reader, JsonObject.class);
+                if (read != null)
+                    json = read;
+            } catch (Exception e) {
+                CreateDieselGenerators.LOGGER.error("Could not read {}, using defaults", fileName, e);
+            }
+        }
+        JsonObject out = new JsonObject();
+        for (ConfigValue<?> v : values) {
+            v.read(json);
+            v.write(out);
+        }
+        try (Writer writer = Files.newBufferedWriter(path)) {
+            GSON.toJson(out, writer);
+        } catch (Exception e) {
+            CreateDieselGenerators.LOGGER.error("Could not write {}", fileName, e);
+        }
+    }
 }

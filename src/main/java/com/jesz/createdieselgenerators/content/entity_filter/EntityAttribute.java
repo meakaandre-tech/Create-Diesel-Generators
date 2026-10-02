@@ -10,7 +10,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 
 public interface EntityAttribute {
     Codec<EntityAttribute> CODEC = RecordCodecBuilder.create(i -> i.group(
-            ResourceLocation.CODEC.fieldOf("id").forGetter(EntityAttribute::getId),
+            Identifier.CODEC.fieldOf("id").forGetter(EntityAttribute::getId),
             CompoundTag.CODEC.optionalFieldOf("data", new CompoundTag()).forGetter(EntityAttribute::write)
     ).apply(i,  (id, data) -> {
         EntityAttribute attribute = EntityAttribute.getById(id);
@@ -34,7 +34,7 @@ public interface EntityAttribute {
     }));
 
     StreamCodec<ByteBuf, EntityAttribute> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, EntityAttribute::getId,
+            Identifier.STREAM_CODEC, EntityAttribute::getId,
             ByteBufCodecs.COMPOUND_TAG, EntityAttribute::write,
             (id, data) -> {
                 EntityAttribute attribute = EntityAttribute.getById(id);
@@ -53,7 +53,7 @@ public interface EntityAttribute {
         return attribute;
     }
 
-    static EntityAttribute getById(ResourceLocation id) {
+    static EntityAttribute getById(Identifier id) {
         for (EntityAttribute attribute : ALL) {
             if(attribute.getId().equals(id))
                 return attribute;
@@ -61,7 +61,7 @@ public interface EntityAttribute {
         return null;
     }
 
-    ResourceLocation getId();
+    Identifier getId();
 
     boolean test(Entity entity);
 
@@ -113,7 +113,7 @@ public interface EntityAttribute {
         }
 
         @Override
-        public ResourceLocation getId() {
+        public Identifier getId() {
             return CreateDieselGenerators.rl(name().toLowerCase(Locale.ROOT));
         }
 
@@ -138,7 +138,7 @@ public interface EntityAttribute {
         public EntityAttribute read(CompoundTag tag) {
             EntityAttribute attribute = null;
             for(EntityAttribute possibleAttribute : values()){
-                if(possibleAttribute.getId().toString().equals(tag.getString("TraitType")))
+                if(possibleAttribute.getId().toString().equals(tag.getStringOr("TraitType", "")))
                     attribute = possibleAttribute;
             }
             return attribute;
@@ -167,7 +167,7 @@ public interface EntityAttribute {
             this.type = type;
         }
         @Override
-        public ResourceLocation getId() {
+        public Identifier getId() {
             return CreateDieselGenerators.rl("is_mob");
         }
 
@@ -184,7 +184,7 @@ public interface EntityAttribute {
         }
         @Override
         public EntityAttribute read(CompoundTag tag) {
-            return new IsMob(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(tag.getString("Entity"))));
+            return new IsMob(BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(tag.getStringOr("Entity", ""))));
         }
 
         @Override

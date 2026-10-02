@@ -2,23 +2,25 @@ package com.jesz.createdieselgenerators.content.bulk_fermenter;
 
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGRecipes;
-import com.simibubi.create.api.connectivity.ConnectivityHandler;
-import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.content.processing.basin.BasinBlockEntity;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.api.connectivity.ConnectivityHandler;
+import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
+import com.zurrtum.create.content.processing.basin.BasinBlockEntity;
+import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedInventoryWrapper;
 import com.simibubi.create.foundation.fluid.SmartFluidTank;
-import com.simibubi.create.foundation.recipe.RecipeFinder;
-import com.simibubi.create.foundation.utility.CreateLang;
-import com.simibubi.create.infrastructure.config.AllConfigs;
-import net.createmod.catnip.lang.LangBuilder;
-import net.createmod.catnip.nbt.NBTHelper;
+import com.zurrtum.create.foundation.recipe.RecipeFinder;
+import com.zurrtum.create.client.foundation.utility.CreateLang;
+import com.zurrtum.create.infrastructure.config.AllConfigs;
+import com.zurrtum.create.client.catnip.lang.LangBuilder;
+import com.zurrtum.create.catnip.nbt.NBTHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -36,20 +38,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.IFluidTank;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
+import com.zurrtum.create.foundation.fluid.FluidTank;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -99,7 +90,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
                     startProcessing();
                 }
 
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     setChanged();
                     sendData();
                 }
@@ -109,7 +100,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
 
     }
 
@@ -120,7 +111,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     public void updateConnectivity() {
         assert level != null;
         updateConnectivity = false;
-        if (level.isClientSide)
+        if (level.isClientSide())
             return;
         if (!isController())
             return;
@@ -139,7 +130,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
 
         if (isController()) {
             if (processingTime >= 0) {
-                if (!level.isClientSide && processingTime % 20 == 0 && new Random().nextInt() % 4 == 0)
+                if (!level.isClientSide() && processingTime % 20 == 0 && new Random().nextInt() % 4 == 0)
                     level.playSound(null, worldPosition.offset(width / 2, height/2, width / 2), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
                         SoundSource.BLOCKS, .15f, .75f);
 
@@ -154,7 +145,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
                     else
                         currentRecipe = (BulkFermentingRecipe) r.get(0);
                 } else {
-                   if (processingTime == 0 && !level.isClientSide) {
+                   if (processingTime == 0 && !level.isClientSide()) {
                        for (int i = 0; i < width * width; i++) {
                             if (!currentRecipe.apply(this, true))
                                 break;
@@ -180,7 +171,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
                         startProcessing();
                     }
 
-                    if (!level.isClientSide) {
+                    if (!level.isClientSide()) {
                         setChanged();
                         sendData();
                     }
@@ -277,7 +268,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
             }
         }
 
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             setChanged();
             sendData();
         }
@@ -310,7 +301,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     @Override
     public void removeController(boolean keepContents) {
         assert level != null;
-        if (level.isClientSide)
+        if (level.isClientSide())
             return;
         updateConnectivity = true;
         if (!keepContents)
@@ -339,7 +330,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     @Override
     public void setController(BlockPos controller) {
         assert level != null;
-        if (level.isClientSide && !isVirtual())
+        if (level.isClientSide() && !isVirtual())
             return;
         if (controller.equals(this.controller))
             return;
@@ -381,7 +372,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
 
         itemHandler = new VersionedInventoryWrapper(new CombinedInvWrapper(inventories) {
             @Override
-            public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+            public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
                 if (stack.isEmpty())
                     return ItemStack.EMPTY;
 
@@ -434,9 +425,9 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     }
 
     @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+    protected void read(ValueInput tag, boolean clientPacket) {
         assert level != null;
-        super.read(tag, registries, clientPacket);
+        super.read(tag, clientPacket);
 
         BlockPos controllerBefore = controller;
         int prevSize = width;
@@ -447,18 +438,18 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         lastKnownPos = null;
 
         if (tag.contains("LastKnownPos"))
-            lastKnownPos = NBTHelper.readBlockPos(tag, "LastKnownPos");
+            lastKnownPos = tag.read("LastKnownPos", BlockPos.CODEC).orElse(null);
         if (tag.contains("Controller"))
-            controller = NBTHelper.readBlockPos(tag, "Controller");
+            controller = tag.read("Controller", BlockPos.CODEC).orElse(null);
 
         if (isController()) {
-            width = tag.getInt("Size");
-            height = tag.getInt("Height");
-            highestHeatLevel = BlazeBurnerBlock.HeatLevel.values()[tag.getInt("Heat")];
+            width = tag.getIntOr("Size", 0);
+            height = tag.getIntOr("Height", 0);
+            highestHeatLevel = BlazeBurnerBlock.HeatLevel.values()[tag.getIntOr("Heat", 0)];
             tankInventory.setCapacity(getTotalTankSize() * getCapacityMultiplier());
-            tankInventory.readFromNBT(registries, tag.getCompound("TankContent"));
+            tankInventory.readFrom(tag, "TankContent");
 
-            processingTime = tag.getInt("ProcessingTime");
+            processingTime = tag.getIntOr("ProcessingTime", 0);
         }
 
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
@@ -483,17 +474,17 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
+    protected void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
 
         if (updateConnectivity)
             tag.putBoolean("Uninitialized", true);
         if (lastKnownPos != null)
-            tag.put("LastKnownPos", NbtUtils.writeBlockPos(lastKnownPos));
+            tag.store("LastKnownPos", BlockPos.CODEC, lastKnownPos);
         if (!isController())
-            tag.put("Controller", NbtUtils.writeBlockPos(controller));
+            tag.store("Controller", BlockPos.CODEC, controller);
         if (isController()) {
-            tag.put("TankContent", tankInventory.writeToNBT(registries, new CompoundTag()));
+            tankInventory.writeTo(tag, "TankContent");
             tag.putInt("Size", width);
             tag.putInt("Height", height);
             tag.putInt("ProcessingTime", processingTime);
@@ -712,7 +703,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
             startProcessing();
         }
 
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             setChanged();
             sendData();
         }
@@ -736,7 +727,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         }
 
         @Override
-        public @NonNull FluidStack getFluidInTank(int tank) {
+        public FluidStack getFluidInTank(int tank) {
             return tanks.get(tank).getFluid();
         }
 
@@ -746,12 +737,12 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         }
 
         @Override
-        public boolean isFluidValid(int tank, @NonNull FluidStack stack) {
+        public boolean isFluidValid(int tank, FluidStack stack) {
             return true;
         }
 
         @Override
-        public int fill(@NonNull FluidStack resource, @NonNull FluidAction action) {
+        public int fill(FluidStack resource, FluidAction action) {
             for (FluidTank tank : tanks) {
                 if (FluidStack.isSameFluidSameComponents(tank.getFluid(), resource)) {
                     int result = tank.fill(resource, action);
@@ -773,7 +764,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         }
 
         @Override
-        public @NonNull FluidStack drain(@NonNull FluidStack resource, @NonNull FluidAction action) {
+        public FluidStack drain(FluidStack resource, FluidAction action) {
             for (FluidTank tank : tanks) {
                 if (FluidStack.isSameFluidSameComponents(tank.getFluid(), resource)) {
                     FluidStack result = tank.drain(resource, action);
@@ -786,7 +777,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         }
 
         @Override
-        public @NonNull FluidStack drain(int maxDrain, @NonNull FluidAction action) {
+        public FluidStack drain(int maxDrain, FluidAction action) {
             for (FluidTank tank : tanks) {
                 if (!tank.getFluid().isEmpty()) {
                     FluidStack result = tank.drain(maxDrain, action);
@@ -798,8 +789,8 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
             return FluidStack.EMPTY;
         }
 
-        @ParametersAreNonnullByDefault
-        public @NonNull CompoundTag writeToNBT(HolderLookup.Provider registries, CompoundTag compound) {
+        
+        public CompoundTag writeToNBT(HolderLookup.Provider registries, CompoundTag compound) {
             ListTag list = new ListTag();
             for (FluidTank tank : tanks)
                 list.add(tank.writeToNBT(registries, new CompoundTag()));
@@ -809,8 +800,8 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         }
 
         @Override
-        @ParametersAreNonnullByDefault
-        public @NonNull FluidTank readFromNBT(HolderLookup.Provider registries, CompoundTag tag) {
+        
+        public FluidTank readFromNBT(HolderLookup.Provider registries, CompoundTag tag) {
             for (int i = 0; i < tanks.size(); i++) {
                 FluidTank tank = tanks.get(i);
                 tank.readFromNBT(registries, tag.getList("Tanks", Tag.TAG_COMPOUND).getCompound(i));
@@ -819,7 +810,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         }
 
         @Override
-        public @NonNull FluidTank setCapacity(int capacity) {
+        public FluidTank setCapacity(int capacity) {
             for (FluidTank tank : tanks)
                 tank.setCapacity(capacity);
             return super.setCapacity(capacity);

@@ -1,22 +1,18 @@
 package com.jesz.createdieselgenerators.content.bulk_fermenter;
 
 import com.jesz.createdieselgenerators.CDGRecipes;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
-import com.simibubi.create.content.processing.recipe.ProcessingOutput;
+import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
+import com.zurrtum.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
 import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
-import net.createmod.catnip.data.Iterate;
+import com.zurrtum.create.catnip.data.Iterate;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
+import com.zurrtum.create.foundation.fluid.FluidTank;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -196,7 +192,7 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
             boolean filled = false;
             for (FluidTank tank : availableFluids.tanks) {
                 if (FluidStack.isSameFluidSameComponents(tank.getFluid(), result)) {
-                    if (tank.fill(result, IFluidHandler.FluidAction.SIMULATE) < result.getAmount())
+                    if (tank.fill(result, true) < result.getAmount())
                         return false;
                     else
                         filled = true;
@@ -209,7 +205,7 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
                     FluidTank tank = tanks.get(i);
 
                     if (tank.getFluid().isEmpty() && !emptyTanksFilled[i]) {
-                        if (tank.fill(result, IFluidHandler.FluidAction.SIMULATE) < result.getAmount())
+                        if (tank.fill(result, true) < result.getAmount())
                             return false;
                         else
                             emptyTanksFilled[i] = true;
@@ -227,7 +223,7 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
         }
 
         for (FluidStack output : outputFluids)
-            availableFluids.fill(output.copy(), IFluidHandler.FluidAction.EXECUTE);
+            availableFluids.fill(output.copy(), false);
 
         return true;
     }

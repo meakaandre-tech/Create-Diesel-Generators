@@ -1,17 +1,22 @@
 package com.jesz.createdieselgenerators.content.distillation;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.redstone.Orientation;
+import org.jspecify.annotations.Nullable;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGItems;
-import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.api.connectivity.ConnectivityHandler;
-import com.simibubi.create.api.schematic.requirement.SpecialBlockItemRequirement;
-import com.simibubi.create.content.equipment.wrench.IWrenchable;
-import com.simibubi.create.content.fluids.tank.FluidTankBlock;
-import com.simibubi.create.content.fluids.tank.FluidTankBlockEntity;
-import com.simibubi.create.content.schematics.requirement.ItemRequirement;
-import com.simibubi.create.foundation.block.IBE;
-import net.createmod.catnip.math.VecHelper;
+import com.zurrtum.create.AllBlocks;
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.api.connectivity.ConnectivityHandler;
+import com.zurrtum.create.api.schematic.requirement.SpecialBlockItemRequirement;
+import com.zurrtum.create.content.equipment.wrench.IWrenchable;
+import com.zurrtum.create.content.fluids.tank.FluidTankBlock;
+import com.zurrtum.create.content.fluids.tank.FluidTankBlockEntity;
+import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
+import com.zurrtum.create.foundation.block.IBE;
+import com.zurrtum.create.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -35,9 +40,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,9 +71,9 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
 
             for (int x = 0; x < width; x++) {
                 for (int z = 0; z < width; z++) {
-                    context.getLevel().setBlockAndUpdate(pos.offset(x, 0, z), AllBlocks.FLUID_TANK.getDefaultState());
-                    context.getLevel().updateNeighborsAt(pos.offset(x, 0, z), AllBlocks.FLUID_TANK.get());
-                    if (context.getLevel().isClientSide) {
+                    context.getLevel().setBlockAndUpdate(pos.offset(x, 0, z), AllBlocks.FLUID_TANK.defaultBlockState());
+                    context.getLevel().updateNeighborsAt(pos.offset(x, 0, z), AllBlocks.FLUID_TANK);
+                    if (context.getLevel().isClientSide()) {
                         for (int i = 0; i < 30; i++) {
                             Vec3 offset = VecHelper.offsetRandomly(VecHelper.getCenterOf(pos.offset(x, 0, z)), context.getLevel().getRandom(), .3f);
                             Vec3 motion = VecHelper.offsetRandomly(Vec3.ZERO, context.getLevel().getRandom(), .1f);
@@ -84,7 +87,7 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
             if (!stackInTank.isEmpty() && context.getLevel().getBlockEntity(pos) instanceof FluidTankBlockEntity be){
                 IFluidHandler fTank = context.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, be.getBlockPos(), null);
                 if (fTank != null)
-                    fTank.fill(stackInTank, IFluidHandler.FluidAction.EXECUTE);
+                    fTank.fill(stackInTank, false);
             }
             if (!context.getPlayer().isCreative())
                 context.getPlayer().getInventory().placeItemBackInInventory(DISTILLATION_CONTROLLER.asStack(width*width));
@@ -94,15 +97,15 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbourState, LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighbourPos, BlockState neighbourState, RandomSource random) {
         if (direction == Direction.DOWN && neighbourState.getBlock() != this)
             withBlockEntityDo(level, pos, DistillationTankBlockEntity::updateTemperature);
-        return super.updateShape(state, direction, neighbourState, level, pos, neighbourPos);
+        return super.updateShape(state, level, tickView, pos, direction, neighbourPos, neighbourState, random);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos otherPos, boolean p_60514_) {
-        super.neighborChanged(state, level, pos, block, otherPos, p_60514_);
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean p_60514_) {
+        super.neighborChanged(state, level, pos, block, orientation, p_60514_);
         withBlockEntityDo(level, pos, DistillationTankBlockEntity::updateVerticalMulti);
     }
 
@@ -138,7 +141,7 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        return AllBlocks.FLUID_TANK.asStack();
+        return new ItemStack(AllBlocks.FLUID_TANK);
     }
 
     @Override
@@ -184,7 +187,7 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
     @Override
     public ItemRequirement getRequiredItems(BlockState state, BlockEntity blockEntity) {
         List<ItemStack> list = new ArrayList<>();
-        list.add(AllBlocks.FLUID_TANK.asStack());
+        list.add(new ItemStack(AllBlocks.FLUID_TANK));
         list.add(DISTILLATION_CONTROLLER.asStack());
         return new ItemRequirement(ItemRequirement.ItemUseType.CONSUME, list);
     }

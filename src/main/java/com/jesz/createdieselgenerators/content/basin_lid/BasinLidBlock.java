@@ -1,13 +1,17 @@
 package com.jesz.createdieselgenerators.content.basin_lid;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.redstone.Orientation;
+import org.jspecify.annotations.Nullable;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
-import com.mojang.logging.LogUtils;
-import com.simibubi.create.AllItems;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.content.equipment.wrench.IWrenchable;
-import com.simibubi.create.content.processing.basin.BasinBlockEntity;
-import com.simibubi.create.foundation.block.IBE;
-import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
+import com.zurrtum.create.AllItems;
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.content.equipment.wrench.IWrenchable;
+import com.zurrtum.create.content.processing.basin.BasinBlockEntity;
+import com.zurrtum.create.foundation.block.IBE;
+import com.zurrtum.create.foundation.block.ProperWaterloggedBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,7 +19,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -29,7 +32,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -41,7 +44,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.Random;
 
 public class BasinLidBlock extends Block implements ProperWaterloggedBlock, IBE<BasinLidBlockEntity>, IWrenchable {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ON_A_BASIN = BooleanProperty.create("on_a_basin");
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -84,7 +87,7 @@ public class BasinLidBlock extends Block implements ProperWaterloggedBlock, IBE<
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos p_57551_, boolean p_57552_) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean p_57552_) {
         boolean flag = level.hasNeighborSignal(pos);
         if (level.getBlockEntity(pos.below()) instanceof BasinBlockEntity)
             state = state.setValue(ON_A_BASIN, true);
@@ -111,9 +114,9 @@ public class BasinLidBlock extends Block implements ProperWaterloggedBlock, IBE<
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (AllItems.WRENCH.isIn(stack))
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.is(AllItems.WRENCH))
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         boolean currentState = state.getValue(OPEN);
         if (!currentState && level.getBlockEntity(pos) instanceof BasinLidBlockEntity a && a.steamInside) {
@@ -126,13 +129,12 @@ public class BasinLidBlock extends Block implements ProperWaterloggedBlock, IBE<
             }
         }
         if (!level.isClientSide() && hand == InteractionHand.MAIN_HAND) {
-            LogUtils.getLogger().debug(level + "");
             level.setBlock(pos, state.setValue(OPEN, !currentState), 3);
             level.levelEvent(null, currentState ? 1037:1036, pos, 0);
         }
         level.playSound(null, pos, !currentState ? BlockSetType.IRON.trapdoorOpen() : BlockSetType.IRON.trapdoorClose(), SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.1F + 0.9F);
 
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -160,9 +162,8 @@ public class BasinLidBlock extends Block implements ProperWaterloggedBlock, IBE<
     }
 
     @Override
-    public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState,
-                                  LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-        updateWater(pLevel, pState, pCurrentPos);
+    public BlockState updateShape(BlockState pState, LevelReader pLevel, ScheduledTickAccess tickView, BlockPos pCurrentPos, Direction pDirection, BlockPos pNeighborPos, BlockState pNeighborState, RandomSource random) {
+        updateWater(pLevel, tickView, pState, pCurrentPos);
         return pState;
     }
 

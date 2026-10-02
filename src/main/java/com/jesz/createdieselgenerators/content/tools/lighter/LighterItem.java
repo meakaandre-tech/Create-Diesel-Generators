@@ -1,25 +1,31 @@
 package com.jesz.createdieselgenerators.content.tools.lighter;
 
+import com.jesz.createdieselgenerators.CDGFluids;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import java.util.function.Consumer;
+
 import com.jesz.createdieselgenerators.*;
 import com.jesz.createdieselgenerators.content.tools.FueledToolItem;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
-import com.simibubi.create.foundation.item.render.SimpleCustomRenderer;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -32,10 +38,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 import java.util.List;
 
@@ -45,13 +48,10 @@ public class LighterItem extends Item implements FueledToolItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, display, tooltipComponents, tooltipFlag);
         createTooltip(tooltipComponents, stack);
     }
-
-    @Override
-    public boolean isEnchantable(ItemStack stack) { return true; }
 
     @Override
     public int getBarColor(ItemStack stack) {
@@ -59,7 +59,7 @@ public class LighterItem extends Item implements FueledToolItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int p_41407_, boolean p_41408_) {
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot) {
         FluidStack fStack = readFluid(stack);
 
         var registry = level.registryAccess().lookupOrThrow(CDGRegistries.FUEL_TYPE);
@@ -72,7 +72,7 @@ public class LighterItem extends Item implements FueledToolItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stackInHand = player.getItemInHand(hand);
 
         level.playSound(player, player.blockPosition(), SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
@@ -81,7 +81,7 @@ public class LighterItem extends Item implements FueledToolItem {
                 stackInHand.get(CDGDataComponents.LIGHTER_STATE) == LighterState.CLOSED) {
             if (player.isShiftKeyDown()) {
                 stackInHand.set(CDGDataComponents.LIGHTER_STATE, LighterState.OPEN);
-                return InteractionResultHolder.success(stackInHand);
+                return InteractionResult.SUCCESS;
             }
             FluidStack fStack = readFluid(stackInHand);
 
@@ -91,14 +91,14 @@ public class LighterItem extends Item implements FueledToolItem {
             stackInHand.set(CDGDataComponents.LIGHTER_STATE, flammable ? LighterState.OPEN_IGNITED : LighterState.OPEN);
 
             if (flammable) {
-                fStack.setAmount(fStack.getAmount() - 1);
+                fStack.setAmount(Math.max(0, fStack.getAmount() - CDGFluids.MB));
                 writeFluid(stackInHand, fStack);
             }
-            return InteractionResultHolder.success(stackInHand);
+            return InteractionResult.SUCCESS;
         }
         stackInHand.set(CDGDataComponents.LIGHTER_STATE, LighterState.CLOSED);
 
-        return InteractionResultHolder.success(stackInHand);
+        return InteractionResult.SUCCESS;
 
     }
 
@@ -113,7 +113,7 @@ public class LighterItem extends Item implements FueledToolItem {
         ItemStack stack = context.getItemInHand();
 
         if (stack.get(CDGDataComponents.LIGHTER_STATE) != LighterState.OPEN_IGNITED)
-            return use(context.getLevel(), context.getPlayer(), context.getHand()).getResult();
+            return use(context.getLevel(), context.getPlayer(), context.getHand());
 
         var registry = level.registryAccess().lookupOrThrow(CDGRegistries.FUEL_TYPE);
 
@@ -137,12 +137,12 @@ public class LighterItem extends Item implements FueledToolItem {
 
                 boolean flammable = FuelType.getTypeFor(registry, fStack.getFluid()).normal().speed() != 0;
                 if (flammable && stack.get(CDGDataComponents.LIGHTER_STATE) == LighterState.OPEN_IGNITED) {
-                    fStack.setAmount(fStack.getAmount()-1);
+                    fStack.setAmount(Math.max(0, fStack.getAmount() - CDGFluids.MB));
                     writeFluid(stack, fStack);
                 }
-                return InteractionResult.sidedSuccess(level.isClientSide());
+                return InteractionResult.SUCCESS;
             } else {
-                return use(context.getLevel(), context.getPlayer(), context.getHand()).getResult();
+                return use(context.getLevel(), context.getPlayer(), context.getHand());
             }
         } else {
             level.playSound(player, blockpos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
@@ -159,7 +159,7 @@ public class LighterItem extends Item implements FueledToolItem {
             boolean flammable = FuelType.getTypeFor(registry, fStack.getFluid()).normal().speed() != 0;
 
             if (flammable && stack.get(CDGDataComponents.LIGHTER_STATE) == LighterState.OPEN_IGNITED) {
-                fStack.setAmount(fStack.getAmount()-1);
+                fStack.setAmount(Math.max(0, fStack.getAmount() - CDGFluids.MB));
                 writeFluid(stack, fStack);
             }
 
@@ -177,7 +177,7 @@ public class LighterItem extends Item implements FueledToolItem {
         return Math.round(13 * (float) getCurrentFillLevel(stack) / getCapacity(stack));
     }
 
-    @Override
+    /** Called every tick for a dropped lighter (from ItemEntityMixin, replacing NeoForge's onEntityItemUpdate). */
     public boolean onEntityItemUpdate(ItemStack stack, ItemEntity itemEntity) {
         ItemStack item = itemEntity.getItem();
         if (!item.is(CDGItems.LIGHTER.get()) ||
@@ -196,10 +196,5 @@ public class LighterItem extends Item implements FueledToolItem {
                 itemEntity.level().explode(null, null, null, entityPos.x, entityPos.y, entityPos.z, 1, true, Level.ExplosionInteraction.BLOCK);
         }
         return false;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public void registerExtension(RegisterClientExtensionsEvent event) {
-        event.registerItem(SimpleCustomRenderer.create(this, new LighterItemRenderer()), this);
     }
 }

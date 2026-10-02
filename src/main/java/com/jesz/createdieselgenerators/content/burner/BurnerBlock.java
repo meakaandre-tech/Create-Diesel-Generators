@@ -1,15 +1,20 @@
 package com.jesz.createdieselgenerators.content.burner;
 
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
-import com.simibubi.create.content.kinetics.base.HorizontalAxisKineticBlock;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
-import com.simibubi.create.foundation.block.IBE;
+import com.zurrtum.create.content.kinetics.base.HorizontalAxisKineticBlock;
+import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
+import com.zurrtum.create.foundation.block.IBE;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,10 +22,12 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 
-public class BurnerBlock extends HorizontalAxisKineticBlock implements IBE<BurnerBlockEntity> {
+public class BurnerBlock extends HorizontalAxisKineticBlock implements IBE<BurnerBlockEntity>, FluidInventoryProvider<BurnerBlockEntity> {
     public static EnumProperty<BlazeBurnerBlock.HeatLevel> HEAT_LEVEL = BlazeBurnerBlock.HEAT_LEVEL;
     public static BooleanProperty LIT = BlockStateProperties.LIT;
 
@@ -37,12 +44,13 @@ public class BurnerBlock extends HorizontalAxisKineticBlock implements IBE<Burne
         super.createBlockStateDefinition(builder);
     }
 
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (state.getValue(LIT) && entity instanceof LivingEntity) {
-            entity.hurt(level.damageSources().campfire(), 1);
+    @Override
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier applier, boolean intersects) {
+        if (state.getValue(LIT) && entity instanceof LivingEntity && level instanceof ServerLevel serverLevel) {
+            entity.hurtServer(serverLevel, level.damageSources().campfire(), 1);
         }
 
-        super.entityInside(state, level, pos, entity);
+        super.entityInside(state, level, pos, entity, applier, intersects);
     }
 
     @Override
@@ -51,7 +59,7 @@ public class BurnerBlock extends HorizontalAxisKineticBlock implements IBE<Burne
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos otherPos, boolean moved) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean moved) {
         if (level.getBlockEntity(pos) instanceof BurnerBlockEntity be)
             be.redstonePower = level.getBestNeighborSignal(pos);
     }
@@ -62,7 +70,7 @@ public class BurnerBlock extends HorizontalAxisKineticBlock implements IBE<Burne
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         if (level.getBlockEntity(pos) instanceof BurnerBlockEntity be)
             return be.redstoneOutput;
 
@@ -79,4 +87,10 @@ public class BurnerBlock extends HorizontalAxisKineticBlock implements IBE<Burne
         return CDGBlockEntityTypes.BURNER.get();
     }
 
+    @Override
+    public @Nullable FluidInventory getFluidInventory(LevelAccessor world, BlockPos pos, BlockState state, BurnerBlockEntity blockEntity, @Nullable Direction context) {
+        if (context != Direction.UP)
+            return blockEntity.tank;
+        return null;
+    }
 }

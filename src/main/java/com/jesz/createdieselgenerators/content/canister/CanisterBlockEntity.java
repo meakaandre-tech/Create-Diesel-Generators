@@ -3,22 +3,21 @@ package com.jesz.createdieselgenerators.content.canister;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.CDGDataComponents;
-import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
-import net.createmod.catnip.codecs.CatnipCodecUtils;
+import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.foundation.blockEntity.behaviour.BehaviourType;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
+import com.zurrtum.create.catnip.codecs.CatnipCodecUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.SimpleFluidContent;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +41,7 @@ public class CanisterBlockEntity extends SmartBlockEntity implements IHaveGoggle
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         tank = CapacityEnchantedFluidTankBehaviour.single(this, Math.abs((CDGConfig.CANISTER_CAPACITY.get())), CDGConfig.CANISTER_CAPACITY_ENCHANTMENT.get());
         behaviours.add(tank);
     }
@@ -56,17 +55,17 @@ public class CanisterBlockEntity extends SmartBlockEntity implements IHaveGoggle
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    protected void write(ValueOutput compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
         compound.putInt("CapacityEnchantment", capacityEnchantLevel);
         compound.put("Components", CatnipCodecUtils.encode(DataComponentPatch.CODEC, registries, componentPatch)
                 .orElse(new CompoundTag()));
     }
 
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket);
-        capacityEnchantLevel = compound.getInt("CapacityEnchantment");
+    protected void read(ValueInput compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        capacityEnchantLevel = compound.getIntOr("CapacityEnchantment", 0);
         componentPatch = CatnipCodecUtils.decode(DataComponentPatch.CODEC, registries, compound.getCompound("Components")).orElse(DataComponentPatch.EMPTY);
     }
 
@@ -104,10 +103,10 @@ public class CanisterBlockEntity extends SmartBlockEntity implements IHaveGoggle
         }
 
         @Override
-        public void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-            super.read(compound, registries, clientPacket);
+        public void read(ValueInput compound, boolean clientPacket) {
+            super.read(compound, clientPacket);
             if(compound.contains("CapacityEnchantment"))
-                getPrimaryHandler().setCapacity(baseCapacity + compound.getInt("CapacityEnchantment") * capacityAddition);
+                getPrimaryHandler().setCapacity(baseCapacity + compound.getIntOr("CapacityEnchantment", 0) * capacityAddition);
         }
 
     }

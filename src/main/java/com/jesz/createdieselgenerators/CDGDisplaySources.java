@@ -1,7 +1,7 @@
 package com.jesz.createdieselgenerators;
 
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackOilAmountDisplaySource;
-import com.simibubi.create.api.behaviour.display.DisplaySource;
+import com.zurrtum.create.api.behaviour.display.DisplaySource;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 
 import java.util.function.Supplier;

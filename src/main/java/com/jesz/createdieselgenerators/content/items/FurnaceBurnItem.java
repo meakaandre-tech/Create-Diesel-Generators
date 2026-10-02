@@ -1,17 +1,14 @@
 package com.jesz.createdieselgenerators.content.items;
 
+import com.zurrtum.create.AllFuelTimes;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
 
+/** An item with a furnace burn time, registered through Create Fly's fuel table. */
 public class FurnaceBurnItem extends Item {
-    int burnTime;
+    public final int burnTime;
     public FurnaceBurnItem(Properties properties, int burnTime) {
         super(properties);
         this.burnTime = burnTime;
-    }
-    @Override
-    public int getBurnTime(ItemStack stack, RecipeType<?> recipeType) {
-        return burnTime;
+        AllFuelTimes.ALL.put(this, burnTime);
     }
 }

@@ -1,16 +1,16 @@
 package com.jesz.createdieselgenerators.content.entity_filter;
 
-import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.content.logistics.filter.FilterItem;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
-import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
-import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
-import com.simibubi.create.foundation.item.ItemHelper;
-import com.simibubi.create.foundation.utility.CreateLang;
-import net.createmod.catnip.math.VecHelper;
+import com.zurrtum.create.AllBlocks;
+import com.zurrtum.create.AllItems;
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.content.logistics.filter.FilterItem;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.foundation.blockEntity.behaviour.BehaviourType;
+import com.zurrtum.create.client.foundation.blockEntity.behaviour.ValueBoxTransform;
+import com.zurrtum.create.client.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
+import com.zurrtum.create.foundation.item.ItemHelper;
+import com.zurrtum.create.client.foundation.utility.CreateLang;
+import com.zurrtum.create.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -22,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 public class EntityFilteringBehaviour extends FilteringBehaviour {
     public static final BehaviourType<FilteringBehaviour> TYPE = new BehaviourType<>();
@@ -43,9 +42,9 @@ public class EntityFilteringBehaviour extends FilteringBehaviour {
         ItemStack itemInHand = player.getItemInHand(hand);
         ItemStack toApply = itemInHand.copy();
 
-        if (AllItems.WRENCH.isIn(toApply))
+        if (toApply.is(AllItems.WRENCH))
             return;
-        if (AllBlocks.MECHANICAL_ARM.isIn(toApply))
+        if (toApply.is(AllBlocks.MECHANICAL_ARM.asItem()))
             return;
         if (level.isClientSide())
             return;
