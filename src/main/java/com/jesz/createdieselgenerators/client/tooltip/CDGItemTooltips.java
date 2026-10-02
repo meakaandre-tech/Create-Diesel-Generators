@@ -82,9 +82,9 @@ public class CDGItemTooltips {
 
         if (!(item instanceof BlockItem bi) ||
                 !IRotate.StressImpact.isEnabled() ||
-                !(CDGBlocks.DIESEL_ENGINE.is(bi) ||
-                        CDGBlocks.MODULAR_DIESEL_ENGINE.is(bi) ||
-                        CDGBlocks.HUGE_DIESEL_ENGINE.is(bi)))
+                !(CDGBlocks.DIESEL_ENGINE.is(bi.getBlock()) ||
+                        CDGBlocks.MODULAR_DIESEL_ENGINE.is(bi.getBlock()) ||
+                        CDGBlocks.HUGE_DIESEL_ENGINE.is(bi.getBlock())))
             return;
 
         tooltip.add(Component.empty());
@@ -95,15 +95,15 @@ public class CDGItemTooltips {
 
         for (var r : mc.level.registryAccess().lookupOrThrow(CDGRegistries.FUEL_TYPE).listElements().toList()) {
             FuelType type = r.value();
-            if (CDGBlocks.DIESEL_ENGINE.is(bi)) {
+            if (CDGBlocks.DIESEL_ENGINE.is(bi.getBlock())) {
                 highestRPM = (int) Math.max(highestRPM, type.normal().speed());
                 highestCapacity = (int) Math.max(highestCapacity, type.normal().strength() / type.normal().speed());
                 highestStressCapacity = (int) Math.max(highestStressCapacity, type.normal().strength());
-            } else if (CDGBlocks.MODULAR_DIESEL_ENGINE.is(bi)) {
+            } else if (CDGBlocks.MODULAR_DIESEL_ENGINE.is(bi.getBlock())) {
                 highestRPM = (int) Math.max(highestRPM, type.modular().speed());
                 highestCapacity = (int) Math.max(highestCapacity, type.modular().strength() / type.modular().speed());
                 highestStressCapacity = (int) Math.max(highestStressCapacity, type.modular().strength());
-            } else if (CDGBlocks.HUGE_DIESEL_ENGINE.is(bi)) {
+            } else if (CDGBlocks.HUGE_DIESEL_ENGINE.is(bi.getBlock())) {
                 highestRPM = (int) Math.max(highestRPM, type.huge().speed());
                 highestCapacity = (int) Math.max(highestCapacity, type.huge().strength() / type.huge().speed());
                 highestStressCapacity = (int) Math.max(highestStressCapacity, type.huge().strength());
