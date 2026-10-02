@@ -19,6 +19,8 @@ import com.zurrtum.create.client.ponder.foundation.PonderIndex;
 import com.jesz.createdieselgenerators.CDGItems;
 import com.zurrtum.create.client.AllExtensions;
 import net.minecraft.client.model.HumanoidModel;
+import com.jesz.createdieselgenerators.CDGDisplaySources;
+import com.zurrtum.create.client.content.redstone.displayLink.source.SingleLineDisplaySourceRender;
 import com.zurrtum.create.client.AllItemTooltips;
 import com.zurrtum.create.client.AllMenuScreens;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -163,6 +165,7 @@ public class CDGClient implements ClientModInitializer {
         AllBlockEntityRenders.visual(CDGBlockEntityTypes.ENCASED_GIRDER.get(), ShaftRenderer::new, SingleAxisRotatingVisual::shaft);
 
         CDGBlocks.PUMPJACK_HEAD_MOVEMENT.attachRender = new PumpjackHeadMovementRender();
+        CDGDisplaySources.PUMPJACK_OIL_AMOUNT.attachRender = new SingleLineDisplaySourceRender();
     }
 
     private static void registerBehaviours() {
