@@ -235,7 +235,7 @@ public class ModularDieselEngineBlock extends HorizontalKineticBlock implements 
     private static class PlacementHelper extends PoleHelper<Direction>{
 
         public PlacementHelper() {
-            super(CDGBlocks.MODULAR_DIESEL_ENGINE::has, state -> state.getValue(FACING).getAxis(), FACING);
+            super(state -> CDGBlocks.MODULAR_DIESEL_ENGINE.has(state), state -> state.getValue(FACING).getAxis(), FACING);
         }
 
         @Override
