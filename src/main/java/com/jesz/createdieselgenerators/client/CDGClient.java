@@ -14,6 +14,8 @@ import com.jesz.createdieselgenerators.client.handler.AndesiteGirderWrenchHandle
 import com.jesz.createdieselgenerators.client.handler.TrackLayersBagPlacementClient;
 import com.jesz.createdieselgenerators.client.tooltip.CDGItemTooltips;
 import com.jesz.createdieselgenerators.content.track_layers_bag.TrackLayersBagComponent;
+import com.jesz.createdieselgenerators.client.ponder.CDGPonderPlugin;
+import com.zurrtum.create.client.ponder.foundation.PonderIndex;
 import com.zurrtum.create.client.AllItemTooltips;
 import com.zurrtum.create.client.AllMenuScreens;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -102,6 +104,8 @@ public class CDGClient implements ClientModInitializer {
         ClientTooltipComponentCallback.EVENT.register(data ->
                 data instanceof TrackLayersBagComponent component ? new TrackLayersBagClientComponent(component) : null);
         ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> CDGItemTooltips.addToItemTooltip(stack, lines));
+
+        PonderIndex.addPlugin(new CDGPonderPlugin());
 
         // item descriptions (hold Shift) and kinetic stats, as Registrate attached to every item of the mod
         for (Item item : BuiltInRegistries.ITEM)
