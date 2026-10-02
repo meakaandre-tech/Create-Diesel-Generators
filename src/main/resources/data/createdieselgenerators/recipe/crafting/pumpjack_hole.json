@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "C": "create:copper_casing",
-    "c": "minecraft:chain",
+    "c": "minecraft:iron_chain",
     "P": "create:fluid_pipe"
   },
   "pattern": [

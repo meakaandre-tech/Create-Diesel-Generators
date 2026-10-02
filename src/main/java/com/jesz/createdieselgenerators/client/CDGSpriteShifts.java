@@ -50,18 +50,20 @@ public class CDGSpriteShifts {
             OIL_BARREL_GREEN = rectangle("oil_barrel/vertical/iron", "oil_barrel/vertical/green_connected"),
             OIL_BARREL_RED = rectangle("oil_barrel/vertical/iron", "oil_barrel/vertical/red_connected"),
             OIL_BARREL_BLACK = rectangle("oil_barrel/vertical/iron", "oil_barrel/vertical/black_connected");
+    // Create Fly stitches one sprite per connection index (<name>_connected/<i>.png); RECTANGLE_WITH_ORIGINAL also
+    // takes the unconnected face from the sheet, as Create's rectangle type did.
     public static void init(){}
     private static CTSpriteShiftEntry horizontal(String name) {
         return CTSpriteShifter.getCT(AllCTTypes.CROSS,  CreateDieselGenerators.rl("block/"+name),
                 CreateDieselGenerators.rl("block/"+name+"_connected"));
     }
     private static CTSpriteShiftEntry rectangle(String name) {
-        return CTSpriteShifter.getCT(AllCTTypes.RECTANGLE,  CreateDieselGenerators.rl("block/"+name),
+        return CTSpriteShifter.getCT(AllCTTypes.RECTANGLE_WITH_ORIGINAL,  CreateDieselGenerators.rl("block/"+name),
                 CreateDieselGenerators.rl("block/"+name+"_connected"));
     }
 
     private static CTSpriteShiftEntry rectangle(String name, String connectedName) {
-        return CTSpriteShifter.getCT(AllCTTypes.RECTANGLE,  CreateDieselGenerators.rl("block/"+name),
+        return CTSpriteShifter.getCT(AllCTTypes.RECTANGLE_WITH_ORIGINAL,  CreateDieselGenerators.rl("block/"+name),
                 CreateDieselGenerators.rl("block/"+connectedName));
     }
 

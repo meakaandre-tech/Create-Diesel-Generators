@@ -5,3 +5,70 @@ time set noon
 forceload add -16 -16 47 31
 fill -6 199 -12 40 199 20 minecraft:stone
 setworldspawn 5 200 -7 0 0
+setblock -10 200 0 createdieselgenerators:burner
+data get block -10 200 0
+setblock -8 200 0 createdieselgenerators:chemical_turret
+data get block -8 200 0
+setblock -6 200 0 createdieselgenerators:diesel_engine
+data get block -6 200 0
+setblock -4 200 0 createdieselgenerators:large_diesel_engine
+data get block -4 200 0
+setblock -2 200 0 createdieselgenerators:huge_diesel_engine
+data get block -2 200 0
+setblock 0 200 0 createdieselgenerators:powered_engine_shaft
+data get block 0 200 0
+setblock 2 200 0 createdieselgenerators:basin_lid
+data get block 2 200 0
+setblock 4 200 0 createdieselgenerators:pumpjack_bearing
+data get block 4 200 0
+setblock 6 200 0 createdieselgenerators:pumpjack_head
+data get block 6 200 0
+setblock 8 200 0 createdieselgenerators:pumpjack_bearing_b
+data get block 8 200 0
+setblock 10 200 0 createdieselgenerators:pumpjack_hole
+data get block 10 200 0
+setblock 12 200 0 createdieselgenerators:pumpjack_crank
+data get block 12 200 0
+setblock 14 200 0 createdieselgenerators:canister
+data get block 14 200 0
+setblock 16 200 0 createdieselgenerators:distillation_tank
+data get block 16 200 0
+setblock 18 200 0 createdieselgenerators:bulk_fermenter
+data get block 18 200 0
+setblock 20 200 0 createdieselgenerators:oil_barrel
+data get block 20 200 0
+setblock 22 200 0 createdieselgenerators:chip_wood_block
+data get block 22 200 0
+setblock 24 200 0 createdieselgenerators:chip_wood_beam
+data get block 24 200 0
+setblock 26 200 0 createdieselgenerators:chip_wood_slab
+data get block 26 200 0
+setblock 28 200 0 createdieselgenerators:chip_wood_stairs
+data get block 28 200 0
+setblock 30 200 0 createdieselgenerators:asphalt_block
+data get block 30 200 0
+setblock 32 200 0 createdieselgenerators:asphalt_slab
+data get block 32 200 0
+setblock 34 200 0 createdieselgenerators:asphalt_stairs
+data get block 34 200 0
+setblock 36 200 0 createdieselgenerators:andesite_girder
+data get block 36 200 0
+setblock 38 200 0 createdieselgenerators:andesite_girder_encased_shaft
+data get block 38 200 0
+setblock 40 200 0 createdieselgenerators:sheet_metal_panel
+data get block 40 200 0
+fill -1 200 5 1 200 7 minecraft:glass
+setblock 0 200 6 createdieselgenerators:plant_oil
+fill 3 200 5 5 200 7 minecraft:glass
+setblock 4 200 6 createdieselgenerators:crude_oil
+fill 7 200 5 9 200 7 minecraft:glass
+setblock 8 200 6 createdieselgenerators:biodiesel
+fill 11 200 5 13 200 7 minecraft:glass
+setblock 12 200 6 createdieselgenerators:diesel
+fill 15 200 5 17 200 7 minecraft:glass
+setblock 16 200 6 createdieselgenerators:gasoline
+fill 19 200 5 21 200 7 minecraft:glass
+setblock 20 200 6 createdieselgenerators:ethanol
+setblock -4 200 6 create:fluid_tank
+data get block -4 200 6
+tick sprint 100

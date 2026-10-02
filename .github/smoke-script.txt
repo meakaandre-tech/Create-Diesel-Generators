@@ -1,6 +1,20 @@
-cmd tp @a 5.5 200 -7.5 0 5
+cmd tp @a 5.5 201 -9.5 0 10
 sleep 5
+shot
+cmd tp @a -6 201 -4 0 15
+sleep 4
+shot
+cmd tp @a 16 201 -4 0 15
+sleep 4
+shot
+cmd tp @a 32 201 -4 0 15
+sleep 4
+shot
+cmd tp @a 10 204 1 0 50
+sleep 4
 shot
 key e
 sleep 3
+click 817 244
+sleep 2
 shot
