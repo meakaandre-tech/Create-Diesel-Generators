@@ -48,7 +48,7 @@ import java.util.function.Supplier;
 
 public class CDGBlocks {
     // Create's SharedProperties
-    private static Properties copperMetal() { return Properties.ofFullCopy(Blocks.COPPER_BLOCK); }
+    private static Properties copperMetal() { return Properties.ofFullCopy(Blocks.COPPER_BLOCK.weathering().unaffected()); }
     private static Properties softMetal() { return Properties.ofFullCopy(Blocks.GOLD_BLOCK); }
     private static Properties stone() { return Properties.ofFullCopy(Blocks.ANDESITE); }
 

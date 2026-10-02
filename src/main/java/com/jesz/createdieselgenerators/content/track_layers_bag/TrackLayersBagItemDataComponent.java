@@ -33,9 +33,12 @@ public record TrackLayersBagItemDataComponent(Identifier itemId, int count) {
     }
 
     public ItemStack toStack() {
-        Item item = BuiltInRegistries.ITEM.get(itemId);
-        if (item == null) return ItemStack.EMPTY;
-        return new ItemStack(item, count);
+        Item item = BuiltInRegistries.ITEM.getValue(itemId);
+        if (item == null || count <= 0) return ItemStack.EMPTY;
+        // the bag holds up to 1024 tracks in one stack
+        ItemStack stack = new ItemStack(item);
+        stack.setCount(count);
+        return stack;
     }
 
     @Override

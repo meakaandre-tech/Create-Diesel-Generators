@@ -56,7 +56,7 @@ public class AndesiteGirderBlock extends GirderBlock {
 
         if (stack.is(AllItems.WRENCH) && !player.isShiftKeyDown()) {
             if (AndesiteGirderWrenchBehaviour.handleClick(level, pos, state, hitResult))
-                return InteractionResult.sidedSuccess(level.isClientSide());
+                return InteractionResult.SUCCESS;
             return InteractionResult.FAIL;
         }
 

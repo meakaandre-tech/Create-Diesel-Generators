@@ -5,7 +5,7 @@ import com.jesz.createdieselgenerators.CDGConfig;
 import java.util.function.Supplier;
 
 public enum EngineTypes {
-    NORMAL(CDGConfig.NORMAL_ENGINES), MODULAR(CDGConfig.MODULAR_ENGINES), HUGE(CDGConfig.HUGE_ENGINES);
+    NORMAL(CDGConfig.NORMAL_ENGINES::get), MODULAR(CDGConfig.MODULAR_ENGINES::get), HUGE(CDGConfig.HUGE_ENGINES::get);
 
     final Supplier<Boolean> isEnabled;
 
