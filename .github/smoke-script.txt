@@ -22,7 +22,7 @@ cmd data get block 38 201 10
 cmd tp @a 42.5 200 6.5 -0.0 1.7
 sleep 4
 shot
-cmd tp @a 1.5 200 9.5 -0.0 -16.3
+cmd tp @a -1.5 201 12.5 -90.0 2.3
 sleep 4
 shot
 cmd tp @a 9.5 200 8.5 -0.0 2.3
@@ -383,6 +383,16 @@ shot
 key 9
 sleep 1
 shot
+cmd say CHECK client canister drop
+cmd setblock 62 200 10 minecraft:air destroy
+sleep 1
+cmd execute positioned 62 200 10 run data get entity @e[type=item,limit=1,sort=nearest] Item
+cmd say CHECK client fermenter drop
+cmd setblock 49 201 11 minecraft:air destroy
+sleep 1
+cmd execute positioned 49 201 11 run data get entity @e[type=item,limit=1,sort=nearest] Item
+cmd say CHECK client S6 fermenter
+cmd data get block 48 200 10
 cmd say CHECK final
 cmd say CHECK client S5b tank 2
 cmd data get block 42 202 10

@@ -82,8 +82,12 @@ public record CompressionMoldingRecipe(List<ProcessingOutput> results, HeatCondi
 
     @Override
     public int getIngredientSize() {
-        // the mold counts as an ingredient, so that molding wins over a crafting recipe with the same items
-        return fluidIngredients.size() + ingredients.size() + 1;
+        // Counted per item, like a crafting recipe is, plus the mold: with a mold in the basin, molding
+        // wins over a crafting recipe made of the same items (4 wood chips: bowl, not a chip wood block).
+        int items = 0;
+        for (SizedIngredient ingredient : ingredients)
+            items += ingredient.getCount();
+        return fluidIngredients.size() + items + 1;
     }
 
     @Override
