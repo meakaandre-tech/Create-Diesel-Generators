@@ -113,6 +113,13 @@ public record BulkFermentingRecipe(int time, List<ProcessingOutput> results, Lis
                 return false;
             }
 
+            boolean itemsAffected = false;
+            for (int extracted : extractedItemsFromSlot)
+                itemsAffected |= extracted > 0;
+            if (!simulate && itemsAffected)
+                // the part inventories save and sync themselves when told about the change
+                availableItems.setChanged();
+
             boolean fluidsAffected = false;
             FluidIngredients:
             for (FluidIngredient fluidIngredient : fluidIngredients) {

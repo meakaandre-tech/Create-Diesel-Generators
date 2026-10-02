@@ -1,0 +1,11 @@
+data/minecraft/villager_trade/*
+data/minecraft/trade_set/*
+data/minecraft/tags/villager_trade/*
+assets/minecraft/items/*
+data/minecraft/recipe/stonecutter.json
+data/minecraft/recipe/oak_planks.json
+data/minecraft/recipe/andesite_slab_from_andesite_stonecutting.json
+data/minecraft/loot_table/blocks/oak_slab.json
+data/minecraft/enchantment/sharpness.json
+data/c/tags/item/*
+data/c/tags/item/*/*

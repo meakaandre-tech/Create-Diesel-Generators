@@ -58,6 +58,22 @@ jobs:
             cp=$(echo $jars | tr ' ' ':')
             (xargs -a .github/dump-bytecode javap -p -c -cp "$cp" 2>/dev/null || true) | gzip -9 > /tmp/ci/bytecode.txt.gz
           fi
+      - name: Dump game data files
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/ci
+          if [ -f .github/dump-data ]; then
+            mkdir -p /tmp/ci-data
+            jars=$(find ~/.gradle/caches/fabric-loom .gradle/loom-cache -name '*.jar' 2>/dev/null | grep -iE 'minecraft' | grep -v sources || true)
+            for j in $jars; do
+              while read -r pattern; do
+                [ -z "$pattern" ] && continue
+                unzip -o -q "$j" "$pattern" -d /tmp/ci-data 2>/dev/null || true
+              done < .github/dump-data
+            done
+            (cd /tmp/ci-data && tar czf /tmp/ci/data.tar.gz . ) || true
+          fi
       - name: Publish build log to the ci-logs branch
         if: always()
         shell: bash

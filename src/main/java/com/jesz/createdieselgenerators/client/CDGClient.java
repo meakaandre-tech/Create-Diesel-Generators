@@ -16,6 +16,9 @@ import com.jesz.createdieselgenerators.client.tooltip.CDGItemTooltips;
 import com.jesz.createdieselgenerators.content.track_layers_bag.TrackLayersBagComponent;
 import com.jesz.createdieselgenerators.client.ponder.CDGPonderPlugin;
 import com.zurrtum.create.client.ponder.foundation.PonderIndex;
+import com.jesz.createdieselgenerators.CDGItems;
+import com.zurrtum.create.client.AllExtensions;
+import net.minecraft.client.model.HumanoidModel;
 import com.zurrtum.create.client.AllItemTooltips;
 import com.zurrtum.create.client.AllMenuScreens;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -106,6 +109,9 @@ public class CDGClient implements ClientModInitializer {
         ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> CDGItemTooltips.addToItemTooltip(stack, lines));
 
         PonderIndex.addPlugin(new CDGPonderPlugin());
+
+        AllExtensions.ARM_POSE.put(CDGItems.CHEMICAL_SPRAYER.get(), HumanoidModel.ArmPose.CROSSBOW_HOLD);
+        AllExtensions.ARM_POSE.put(CDGItems.CHEMICAL_SPRAYER_LIGHTER.get(), HumanoidModel.ArmPose.CROSSBOW_HOLD);
 
         // item descriptions (hold Shift) and kinetic stats, as Registrate attached to every item of the mod
         for (Item item : BuiltInRegistries.ITEM)
