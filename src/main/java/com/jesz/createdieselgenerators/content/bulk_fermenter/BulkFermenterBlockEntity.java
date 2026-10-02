@@ -58,6 +58,8 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
     boolean queuedSync;
 
     public int processingTime = -1;
+    /** Total duration of the running recipe; synced, because recipes are not known to the client. */
+    public int processingDuration;
     BulkFermentingRecipe currentRecipe;
 
     public boolean packagerMode;
@@ -115,13 +117,18 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
         if(currentRecipe == null)
             return;
         processingTime = (currentRecipe.getProcessingDuration());
+        processingDuration = processingTime;
         sendData();
     }
     @Override
     public void tick() {
         assert level != null;
 
-        if (isController()) {
+        if (isController() && level.isClientSide()) {
+            // the server runs the recipe; the client only animates the synced progress
+            if (processingTime > 0)
+                processingTime = (int) Math.max(0, processingTime - Math.sqrt(width * height));
+        } else if (isController()) {
             if (processingTime >= 0) {
                 if (!level.isClientSide() && processingTime % 20 == 0 && new Random().nextInt() % 4 == 0)
                     level.playSound(null, worldPosition.offset(width / 2, height/2, width / 2), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT,
@@ -458,6 +465,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
             tankInventory.readFrom(tag, "TankContent");
 
             processingTime = tag.getIntOr("ProcessingTime", -1);
+            processingDuration = tag.getIntOr("ProcessingDuration", 0);
         }
 
         inventory.read(tag);
@@ -497,6 +505,7 @@ public class BulkFermenterBlockEntity extends SmartBlockEntity implements IMulti
             tag.putInt("Size", width);
             tag.putInt("Height", height);
             tag.putInt("ProcessingTime", processingTime);
+            tag.putInt("ProcessingDuration", processingDuration);
             tag.putInt("Heat", highestHeatLevel.ordinal());
         }
         inventory.write(tag);
