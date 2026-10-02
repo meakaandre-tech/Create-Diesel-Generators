@@ -36,7 +36,7 @@ data get block 70 200 10
 say CHECK S12 barrel
 data get block 75 200 10
 say CHECK S13 turret
-data get block 82 201 10
+data get block 82 202 10
 say CHECK S14 burner
 data get block 88 200 10
 say CHECK restart oil

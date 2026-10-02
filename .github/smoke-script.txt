@@ -22,60 +22,100 @@ cmd data get block 38 201 10
 cmd tp @a 42.5 200 6.5 -0.0 1.7
 sleep 4
 shot
-cmd tp @a 1.5 200 7.5 -0.0 -10.0
+cmd tp @a 1.5 200 9.5 -0.0 -16.3
 sleep 4
 shot
-cmd tp @a 9.5 200 7.5 -0.0 1.7
+cmd tp @a 9.5 200 8.5 -0.0 2.3
 sleep 4
 shot
 cmd tp @a 13.5 200 12.5 -90.0 2.3
 sleep 4
 shot
-cmd tp @a 16.5 200 6.5 -0.0 1.7
+cmd tp @a 16.5 200 7.5 -0.0 2.3
 sleep 4
 shot
-cmd tp @a 48.5 200 6.5 -0.0 1.7
+cmd tp @a 48.5 200 7.5 -0.0 2.3
 sleep 4
 shot
-cmd tp @a 54.5 200 6.5 -0.0 1.7
+cmd tp @a 54.5 200 7.5 -0.0 20.5
 sleep 4
 shot
-cmd tp @a 58.5 200 6.5 -0.0 15.6
+cmd tp @a 58.5 200 7.5 -0.0 20.5
 sleep 4
 shot
-cmd tp @a 62.5 200 6.5 -0.0 15.6
+cmd tp @a 62.5 200 7.5 -0.0 20.5
 sleep 4
 shot
-cmd tp @a 66.5 200 6.5 -0.0 15.6
+cmd tp @a 66.5 200 7.5 -0.0 20.5
 sleep 4
 shot
-cmd tp @a 70.5 200 6.5 -0.0 15.6
+cmd tp @a 70.5 200 7.5 -0.0 20.5
 sleep 4
 shot
-cmd tp @a 75.5 200 6.5 -0.0 1.7
+cmd tp @a 75.5 200 7.5 -0.0 2.3
 sleep 4
 shot
-cmd setblock 81 201 10 minecraft:redstone_block
-cmd tp @a 80.5 200 5.5 -21.8 1.3
+cmd setblock 81 202 10 minecraft:redstone_block
+cmd tp @a 82.5 200 5.5 -0.0 -10.0
 sleep 5
 shot
-cmd setblock 81 201 10 minecraft:air
-cmd tp @a 88.5 200 6.5 -0.0 15.6
+cmd say CHECK client projectiles
+cmd execute if entity @e[type=createdieselgenerators:chemical_sprayer_projectile]
+cmd say CHECK client S13 turret
+cmd data get block 82 202 10
+cmd setblock 81 202 10 minecraft:air
+cmd tp @a 88.5 200 7.5 -0.0 20.5
 sleep 4
 shot
-cmd tp @a 28.5 201 3.5 -0.0 1.4
+cmd tp @a 28.5 201 5.5 -0.0 2.3
 sleep 4
 shot
 cmd say CHECK client S4 hole
 cmd data get block 28 202 8
 cmd data get block 28 202 11
-cmd tp @a 10.5 203 6.5 -180.0 34.5
+cmd tp @a 33.5 200 12.5 90.0 -20.6
 sleep 4
 shot
-cmd tp @a 40.5 203 6.5 -180.0 34.5
+cmd tp @a -5.5 200 3.5 -180.0 20.5
 sleep 4
 shot
-cmd tp @a 14.5 203 -3.5 -180.0 45.8
+cmd tp @a 2.5 200 3.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 10.5 200 3.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 18.5 200 3.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 26.5 200 3.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 34.5 200 3.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 42.5 200 3.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 50.5 200 3.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a -5.5 200 0.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 2.5 200 0.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 10.5 200 0.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 18.5 200 0.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 6.5 200 -4.5 -180.0 20.5
+sleep 4
+shot
+cmd tp @a 18.5 200 -4.5 -180.0 20.5
 sleep 4
 shot
 cmd gamemode survival @a
@@ -119,7 +159,8 @@ cmd item replace entity @a container.35 with createdieselgenerators:wood_chip
 sleep 1
 key e
 sleep 2
-move 700 150
+move 900 150
+sleep 1
 shot
 key Escape
 sleep 1
@@ -163,7 +204,8 @@ cmd item replace entity @a container.35 with createdieselgenerators:pumpjack_bea
 sleep 1
 key e
 sleep 2
-move 700 150
+move 900 150
+sleep 1
 shot
 key Escape
 sleep 1
@@ -179,40 +221,93 @@ cmd item replace entity @a container.7 with createdieselgenerators:yellow_concre
 sleep 1
 key e
 sleep 2
-move 700 150
+move 900 150
+sleep 1
 shot
 key Escape
 sleep 1
 cmd clear @a
 cmd item replace entity @a container.0 with createdieselgenerators:diesel_engine
-cmd item replace entity @a container.1 with createdieselgenerators:pumpjack_crank
 key e
 sleep 2
 move 496 494
 sleep 1
-shot
 keydown w
 sleep 3
 keyup w
-sleep 6
-shot
-sleep 12
+sleep 10
 shot
 key Escape
-sleep 1
-move 532 494
+sleep 2
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:pumpjack_crank
+key e
+sleep 2
+move 496 494
 sleep 1
 keydown w
 sleep 3
 keyup w
-sleep 15
+sleep 10
+shot
+sleep 10
 shot
 key Escape
+sleep 2
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:distillation_controller
+key e
+sleep 2
+move 496 494
 sleep 1
+keydown w
+sleep 3
+keyup w
+sleep 10
+shot
 key Escape
+sleep 2
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:bulk_fermenter
+key e
+sleep 2
+move 496 494
 sleep 1
+keydown w
+sleep 3
+keyup w
+sleep 10
+shot
+key Escape
+sleep 2
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:chemical_turret
+key e
+sleep 2
+move 496 494
+sleep 1
+keydown w
+sleep 3
+keyup w
+sleep 10
+shot
+key Escape
+sleep 2
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:huge_diesel_engine
+key e
+sleep 2
+move 496 494
+sleep 1
+keydown w
+sleep 3
+keyup w
+sleep 10
+shot
+key Escape
+sleep 2
 cmd gamemode creative @a
-cmd tp @a 5.5 200 -20.5 180 0
+cmd tp @a 50.5 200 -6.5 180 0
 cmd clear @a
 cmd item replace entity @a hotbar.0 with createdieselgenerators:hammer
 cmd item replace entity @a weapon.offhand with minecraft:iron_ingot 4
@@ -222,7 +317,7 @@ shot
 mdown 3
 sleep 1
 shot
-sleep 3
+sleep 6
 mup 3
 sleep 1
 cmd say CHECK client hammer
@@ -234,7 +329,7 @@ sleep 2
 mdown 3
 sleep 1
 shot
-sleep 3
+sleep 6
 mup 3
 sleep 1
 cmd say CHECK client wire cutters
@@ -249,7 +344,7 @@ sleep 2
 shot
 mup 3
 cmd say CHECK client sprayer
-cmd data get entity @p SelectedItem
+cmd data get entity @p Inventory[{Slot:2b}]
 cmd item replace entity @a hotbar.3 with createdieselgenerators:chemical_sprayer_lighter[createdieselgenerators:fluid_contents={id:"createdieselgenerators:gasoline",amount:81000}]
 key 4
 sleep 2
@@ -261,15 +356,17 @@ sleep 1
 cmd item replace entity @a hotbar.4 with createdieselgenerators:lighter
 key 5
 sleep 2
+shot
 rclick 640 360
 sleep 1
 shot
 cmd item replace entity @a hotbar.5 with createdieselgenerators:oil_scanner
 key 6
 sleep 2
-rclick 640 360
-sleep 3
+mdown 3
+sleep 4
 shot
+mup 3
 cmd item replace entity @a hotbar.6 with createdieselgenerators:entity_filter
 key 7
 sleep 2
@@ -278,7 +375,7 @@ sleep 3
 shot
 key Escape
 sleep 1
-cmd item replace entity @a hotbar.7 with createdieselgenerators:canister
+cmd item replace entity @a hotbar.7 with createdieselgenerators:canister[createdieselgenerators:fluid_contents={id:"createdieselgenerators:diesel",amount:81000}]
 cmd item replace entity @a hotbar.8 with createdieselgenerators:track_layers_bag
 key 8
 sleep 1

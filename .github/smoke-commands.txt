@@ -141,7 +141,7 @@ setblock 28 202 10 create:mechanical_pump[facing=south]
 setblock 29 202 10 create:cogwheel[axis=z]
 setblock 29 202 11 create:creative_motor[facing=north]
 setblock 28 202 11 create:fluid_tank
-summon create:super_glue 27.0 205.0 8.0 {Box:[0d,0d,0d,3d,1d,9d]}
+summon create:super_glue 28.5 205.0 12.5 {Box:[0d,0d,0d,3d,1d,9d]}
 execute positioned 28 202 8 run cdg oil set infinity
 setblock 31 203 12 minecraft:stone
 setblock 38 200 10 create:blaze_burner[blaze=kindled]{fuelLevel:1,burnTimeRemaining:200000}
@@ -181,13 +181,13 @@ data merge block 78 200 10 {Fluid:{id:"createdieselgenerators:diesel",amount:810
 setblock 77 200 10 create:mechanical_pump[facing=west]
 setblock 77 200 11 create:cogwheel[axis=x]
 setblock 78 200 11 create:creative_motor[facing=west]
-setblock 82 200 10 create:creative_motor[facing=up]
-setblock 82 201 10 createdieselgenerators:chemical_turret
-setblock 84 201 10 create:creative_fluid_tank
-data merge block 84 201 10 {Fluid:{id:"createdieselgenerators:gasoline",amount:81000}}
-setblock 83 201 10 create:mechanical_pump[facing=west]
-setblock 83 201 11 create:cogwheel[axis=x]
-setblock 84 201 11 create:creative_motor[facing=west]
+setblock 82 200 10 create:creative_fluid_tank
+data merge block 82 200 10 {Fluid:{id:"createdieselgenerators:gasoline",amount:81000}}
+setblock 82 201 10 create:mechanical_pump[facing=up]
+setblock 82 202 10 createdieselgenerators:chemical_turret
+setblock 83 200 10 create:creative_motor[facing=up]
+setblock 83 201 10 create:cogwheel[axis=y]
+setblock 83 202 10 create:cogwheel[axis=y]
 setblock 88 200 10 createdieselgenerators:burner
 setblock 90 200 10 create:creative_fluid_tank
 data merge block 90 200 10 {Fluid:{id:"createdieselgenerators:biodiesel",amount:81000}}
@@ -200,11 +200,11 @@ setblock 54 201 10 createdieselgenerators:basin_lid[on_a_basin=true,facing=south
 data merge block 70 202 10 {Tanks:[{TankContent:{id:"create:chocolate",amount:81000}}]}
 summon item 48.5 204 10.5 {Item:{id:"minecraft:sugar",count:16}}
 summon item 48.5 204 10.5 {Item:{id:"minecraft:bone_meal",count:16}}
-setblock 81 201 10 minecraft:redstone_block
+setblock 81 202 10 minecraft:redstone_block
 tick sprint 100
 say CHECK projectiles
 execute if entity @e[type=createdieselgenerators:chemical_sprayer_projectile]
-setblock 81 201 10 minecraft:air
+setblock 81 202 10 minecraft:air
 tick sprint 1100
 say CHECK S1 engine
 data get block 1 202 12
@@ -243,6 +243,6 @@ data get block 70 200 10
 say CHECK S12 barrel
 data get block 75 200 10
 say CHECK S13 turret
-data get block 82 201 10
+data get block 82 202 10
 say CHECK S14 burner
 data get block 88 200 10

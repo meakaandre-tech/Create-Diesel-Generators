@@ -82,7 +82,8 @@ public record CompressionMoldingRecipe(List<ProcessingOutput> results, HeatCondi
 
     @Override
     public int getIngredientSize() {
-        return fluidIngredients.size() + ingredients.size();
+        // the mold counts as an ingredient, so that molding wins over a crafting recipe with the same items
+        return fluidIngredients.size() + ingredients.size() + 1;
     }
 
     @Override
