@@ -1,5 +1,7 @@
 package com.jesz.createdieselgenerators.client.ponder;
 
+import com.zurrtum.create.client.foundation.ponder.CreateSceneBuilder;
+import net.minecraft.world.item.ItemStack;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGBlocks;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackCrankBlockEntity;
@@ -88,7 +90,7 @@ public class PumpjackScene {
                 .placeNearTarget();
         scene.idle(65);
 
-        scene.overlay().showControls(util.vector().topOf(4, 5, 8), Pointing.LEFT, 15).withItem(AllItems.WRENCH.asStack());
+        scene.overlay().showControls(util.vector().topOf(4, 5, 8), Pointing.LEFT, 15).withItem(new ItemStack(AllItems.WRENCH));
         scene.idle(15);
         scene.world().setBlock(new BlockPos(4, 5, 8), CDGBlocks.PUMPJACK_BEARING_B.getDefaultState(), false);
         scene.idle(15);
@@ -101,9 +103,9 @@ public class PumpjackScene {
                 .placeNearTarget();
         scene.idle(65);
 
-        scene.overlay().showControls(util.vector().topOf(4, 5, 8), Pointing.LEFT, 15).withItem(AllItems.SUPER_GLUE.asStack());
+        scene.overlay().showControls(util.vector().topOf(4, 5, 8), Pointing.LEFT, 15).withItem(new ItemStack(AllItems.SUPER_GLUE));
         scene.idle(25);
-        scene.overlay().showControls(util.vector().centerOf(4, 5, 1), Pointing.LEFT, 15).withItem(AllItems.SUPER_GLUE.asStack());
+        scene.overlay().showControls(util.vector().centerOf(4, 5, 1), Pointing.LEFT, 15).withItem(new ItemStack(AllItems.SUPER_GLUE));
         scene.idle(25);
         scene.overlay().chaseBoundingBoxOutline(PonderPalette.GREEN, util.select().fromTo(4, 5, 9, 4, 5, 0), new AABB(4, 6, 9, 5, 5, 0), 30);
         scene.idle(15);
@@ -153,7 +155,7 @@ public class PumpjackScene {
                 .placeNearTarget();
         scene.idle(65);
 
-        scene.world().setBlock(new BlockPos(4, 1, 0), AllBlocks.FLUID_PIPE.getDefaultState().setValue(FluidPipeBlock.EAST, false)
+        scene.world().setBlock(new BlockPos(4, 1, 0), AllBlocks.FLUID_PIPE.defaultBlockState().setValue(FluidPipeBlock.EAST, false)
                 .setValue(FluidPipeBlock.NORTH, false)
                 .setValue(FluidPipeBlock.WEST, false)
                 .setValue(FluidPipeBlock.SOUTH, false), false);
@@ -223,7 +225,7 @@ public class PumpjackScene {
         @Override
         protected void firstTick(PonderScene scene) {
             pumpjackElement = scene.resolve(pumpjackBody);
-            crankBE = scene.getWorld().getBlockEntity(crankPos, CDGBlockEntityTypes.PUMPJACK_CRANK.get()).orElse(null);
+            crankBE = scene.getLevel().getBlockEntity(crankPos, CDGBlockEntityTypes.PUMPJACK_CRANK.get()).orElse(null);
         }
 
         @Override
