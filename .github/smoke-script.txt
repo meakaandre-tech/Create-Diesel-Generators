@@ -1,20 +1,57 @@
-cmd tp @a 5.5 201 -9.5 0 10
+cmd tp @a 3 203 6 0 20
 sleep 5
 shot
-cmd tp @a -6 201 -4 0 15
+cmd tp @a 11 203 6 0 20
 sleep 4
 shot
-cmd tp @a 16 201 -4 0 15
+cmd tp @a 18.5 204 6 0 25
 sleep 4
 shot
-cmd tp @a 32 201 -4 0 15
+cmd tp @a 28.5 204 2 0 5
 sleep 4
 shot
-cmd tp @a 10 204 1 0 50
-sleep 4
-shot
-key e
+key 9
+cmd tp @a 31.5 204 20.5 180 0
 sleep 3
-click 817 244
-sleep 2
+cmd tp @a 31.5 204 12.5 90 0
+sleep 4
+rclick 640 360
+sleep 6
 shot
+cmd tp @a 36.5 204 12.5 90 5
+sleep 5
+shot
+cmd say CHECK hole after assembly
+cmd data get block 28 202 8
+cmd data get block 28 202 11
+cmd data get block 29 205 12
+cmd item replace entity @a hotbar.0 with createdieselgenerators:distillation_controller 8
+key 1
+cmd tp @a 38.5 200 7.5 0 0
+sleep 4
+rclick 640 360
+sleep 3
+cmd data get block 38 201 10
+cmd data merge block 38 201 10 {TankContent:{Fluid:{id:"createdieselgenerators:crude_oil",amount:81000}}}
+sleep 12
+shot
+cmd say CHECK distillation
+cmd data get block 38 201 10
+cmd data get block 38 202 10
+cmd data get block 38 203 10
+cmd item replace entity @a armor.head with create:goggles
+cmd tp @a -1.5 201 12.5 -90 0
+sleep 4
+shot
+cmd tp @a 44.5 201 7.5 0 5
+sleep 4
+shot
+cmd tp @a 52.5 202 6.5 0 15
+sleep 4
+shot
+cmd tp @a 60.5 202 6.5 0 15
+sleep 4
+shot
+cmd say CHECK final
+cmd data get block 28 202 8
+cmd data get block 28 202 11
