@@ -1,12 +1,13 @@
 package com.jesz.createdieselgenerators.content.canister;
 
 import com.jesz.createdieselgenerators.CDGConfig;
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
 import com.zurrtum.create.api.behaviour.spouting.BlockSpoutingBehaviour;
 import com.zurrtum.create.content.fluids.spout.SpoutBlockEntity;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 public class SpoutCanisterFilling implements BlockSpoutingBehaviour {
     @Override
@@ -14,10 +15,10 @@ public class SpoutCanisterFilling implements BlockSpoutingBehaviour {
         if (!CDGConfig.CANISTER_SPOUT_FILLING.get())
             return 0;
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof CanisterBlockEntity){
-            IFluidHandler handler = ((CanisterBlockEntity) blockEntity).tank.getCapability();
-            if(FluidStack.isSameFluidSameComponents(handler.getFluidInTank(0), availableFluid) || handler.getFluidInTank(0).isEmpty())
-                return handler.fill(availableFluid, simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);
+        if (blockEntity instanceof CanisterBlockEntity canister){
+            FluidStack inTank = canister.tank.getFluid();
+            if(inTank.isEmpty() || FluidUtil.isSameFluidSameComponents(inTank, availableFluid))
+                return canister.tank.fill(availableFluid, simulate);
         }
         return 0;
     }

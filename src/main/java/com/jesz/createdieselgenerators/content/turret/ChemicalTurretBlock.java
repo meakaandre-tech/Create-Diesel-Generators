@@ -27,7 +27,12 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class ChemicalTurretBlock extends KineticBlock implements IBE<ChemicalTurretBlockEntity>, ICogWheel {
+public class ChemicalTurretBlock extends KineticBlock implements IBE<ChemicalTurretBlockEntity>, ICogWheel, com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider<ChemicalTurretBlockEntity> {
+    @Override
+    public com.zurrtum.create.infrastructure.fluids.FluidInventory getFluidInventory(net.minecraft.world.level.LevelAccessor world, BlockPos pos, BlockState state, ChemicalTurretBlockEntity be, Direction side) {
+        return be.getFluidInventory(side);
+    }
+
     public ChemicalTurretBlock(Properties properties) {
         super(properties);
     }
@@ -48,18 +53,6 @@ public class ChemicalTurretBlock extends KineticBlock implements IBE<ChemicalTur
         if(blockEntity instanceof ChemicalTurretBlockEntity be)
             be.redstoneSignal = level.getBestNeighborSignal(pos);
         super.onPlace(state, level, pos, oldState, isMoving);
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if ((!state.hasBlockEntity() || state.getBlock() == newState.getBlock()) && !isMoving) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if(blockEntity instanceof ChemicalTurretBlockEntity be)
-                if(be.lighterUpgrade)
-                    Block.popResource(level, pos, CDGItems.LIGHTER.asStack());
-        }
-        IBE.onRemove(state, level, pos, newState);
-        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override

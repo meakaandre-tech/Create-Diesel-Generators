@@ -130,7 +130,7 @@ public class PumpjackHoleBlockEntity extends SmartBlockEntity {
             return;
 
         if (!level.isClientSide() && valid) {
-            ChunkPos chunkPos = new ChunkPos(getBlockPos());
+            ChunkPos chunkPos = ChunkPos.containing(getBlockPos());
             oilAmount = OilChunksSavedData.getChunkOilAmount((ServerLevel) level, chunkPos);
             started = true;
 

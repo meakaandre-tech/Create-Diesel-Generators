@@ -20,6 +20,13 @@ public class ClientHooks {
         void spawn(Level level, BlockPos pos, FluidStack fluid);
     }
 
+    @FunctionalInterface
+    public interface SprayParticle {
+        void spawn(Level level, FluidStack fluid, double x, double y, double z, double dx, double dy, double dz);
+    }
+
+    /** Spawns the fluid particle trailing a chemical sprayer projectile. */
+    public static SprayParticle SPRAY_PARTICLE = (level, fluid, x, y, z, dx, dy, dz) -> {};
     /** Ticks the looping engine sound of an engine block entity. */
     public static Consumer<SmartBlockEntity> ENGINE_SOUND_TICK = be -> {};
     /** Ticks the looping bubbling sound of a pumpjack hole. */

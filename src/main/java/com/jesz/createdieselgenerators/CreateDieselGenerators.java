@@ -1,77 +1,54 @@
 package com.jesz.createdieselgenerators;
 
-import com.cake.struts.StrutYourStuff;
-import com.jesz.createdieselgenerators.compat.EveryCompatCompat;
-import com.jesz.createdieselgenerators.compat.computercraft.CCProxy;
-import com.jesz.createdieselgenerators.compat.strut_your_stuff.StrutYourStuffRegistryEntries;
+import com.jesz.createdieselgenerators.content.bulk_fermenter.BulkFermenterUnpackingHandler;
+import com.jesz.createdieselgenerators.content.canister.SpoutCanisterFilling;
+import com.jesz.createdieselgenerators.content.molds.BasinSpoutCasting;
 import com.jesz.createdieselgenerators.content.molds.MoldType;
-import com.jesz.createdieselgenerators.content.tools.lighter.LighterModel;
+import com.jesz.createdieselgenerators.content.turret.TurretData;
+import com.jesz.createdieselgenerators.events.GameEvents;
+import com.jesz.createdieselgenerators.fuel_type.FuelType;
 import com.jesz.createdieselgenerators.packets.CDGPackets;
-import com.jesz.createdieselgenerators.ponder.CDGPonderPlugin;
-import com.zurrtum.create.compat.Mods;
-import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.zurrtum.create.client.foundation.item.ItemDescription;
-import com.zurrtum.create.client.foundation.item.KineticStats;
-import com.zurrtum.create.client.foundation.item.TooltipModifier;
-import com.zurrtum.create.client.catnip.lang.FontHelper;
-import net.createmod.catnip.platform.CatnipServices;
-import com.zurrtum.create.client.ponder.foundation.PonderIndex;
+import com.zurrtum.create.AllBlockEntityTypes;
+import com.zurrtum.create.api.behaviour.spouting.BlockSpoutingBehaviour;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.CreativeModeTab;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import static com.jesz.createdieselgenerators.CreateDieselGenerators.ID;
-
-@Mod(ID)
-public class CreateDieselGenerators
-{
+public class CreateDieselGenerators implements ModInitializer {
     public static final String ID = "createdieselgenerators";
-    public static final CreateRegistrate REGISTRATE = CreateRegistrate.create(ID)
-            .setTooltipModifierFactory(item ->
-                    new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
-                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))
-            );
-    public CreateDieselGenerators(IEventBus modEventBus, ModContainer container) {
-        REGISTRATE.defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
-        REGISTRATE.registerEventListeners(modEventBus);
+    public static final Logger LOGGER = LogManager.getLogger(ID);
 
-        CDGItems.register();
+    @Override
+    public void onInitialize() {
+        CDGConfig.loadCommon();
+
+        CDGDataComponents.register();
+        CDGMountedStorageTypes.register();
+        CDGDisplaySources.register();
         CDGBlocks.register();
+        CDGItems.register();
         CDGFluids.register();
         CDGBlockEntityTypes.register();
         CDGEntityTypes.register();
-        CDGSoundEvents.register(modEventBus);
-        CDGRecipes.register(modEventBus);
+        CDGSoundEvents.register();
+        CDGRecipes.register();
         CDGMenuTypes.register();
         MoldType.register();
-        CDGMountedStorageTypes.register();
-        CDGCreativeTab.register(modEventBus);
+        CDGCreativeTab.register();
         CDGPackets.register();
-        CDGDataComponents.register(modEventBus);
-        CDGDisplaySources.register();
-        if (ModList.get().isLoaded("struts"))
-            StrutYourStuffRegistryEntries.register();
+        TurretData.init();
 
-        if (ModList.get().isLoaded("moonlight"))
-            EveryCompatCompat.init();
-        Mods.COMPUTERCRAFT.executeIfInstalled(() -> CCProxy::register);
+        // data pack registry of fuel types, synced to clients with the tag-free codec
+        DynamicRegistries.registerSynced(CDGRegistries.FUEL_TYPE, FuelType.CODEC, FuelType.NCODEC);
 
-        CatnipServices.PLATFORM.executeOnClientOnly(() -> () -> onClient(modEventBus, container));
-        container.registerConfig(ModConfig.Type.SERVER, CDGConfig.SERVER_SPEC, ID + "-server.toml");
-        container.registerConfig(ModConfig.Type.COMMON, CDGConfig.COMMON_SPEC, ID + "-common.toml");
-    }
+        BlockSpoutingBehaviour.BY_BLOCK_ENTITY.register(CDGBlockEntityTypes.CANISTER.get(), new SpoutCanisterFilling());
+        BlockSpoutingBehaviour.BY_BLOCK_ENTITY.register(AllBlockEntityTypes.BASIN, new BasinSpoutCasting());
+        BulkFermenterUnpackingHandler.register();
 
-    public static void onClient(IEventBus modEventBus, ModContainer container) {
-        CDGPartialModels.init();
-        container.registerConfig(ModConfig.Type.CLIENT, CDGConfig.CLIENT_SPEC, ID + "-client.toml");
-        modEventBus.addListener(LighterModel::onModelBake);
+        GameEvents.register();
     }
 
     public static Identifier rl(String path){

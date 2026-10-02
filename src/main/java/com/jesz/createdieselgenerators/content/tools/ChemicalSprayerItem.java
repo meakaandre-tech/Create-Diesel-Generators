@@ -1,25 +1,22 @@
 package com.jesz.createdieselgenerators.content.tools;
 
+import com.jesz.createdieselgenerators.CDGFluids;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import java.util.function.Consumer;
+
 import com.jesz.createdieselgenerators.CDGRegistries;
 import com.jesz.createdieselgenerators.content.tools.wire_cutters.WireCuttersItemRenderer;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
-import com.zurrtum.create.AllEnchantments;
 import com.zurrtum.create.AllSoundEvents;
-import com.simibubi.create.foundation.item.CustomArmPoseItem;
-import com.simibubi.create.foundation.item.render.SimpleCustomRenderer;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import com.zurrtum.create.infrastructure.fluids.FluidStack;
@@ -27,7 +24,7 @@ import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import java.util.List;
 import java.util.Random;
 
-public class ChemicalSprayerItem extends Item implements CustomArmPoseItem, FueledToolItem {
+public class ChemicalSprayerItem extends Item implements FueledToolItem {
     boolean lighter;
     public ChemicalSprayerItem(Properties properties, boolean lighter) {
         super(properties);
@@ -35,43 +32,27 @@ public class ChemicalSprayerItem extends Item implements CustomArmPoseItem, Fuel
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, display, tooltipComponents, tooltipFlag);
         createTooltip(tooltipComponents, stack);
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.NONE;
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.NONE;
     }
 
-    @Override
-    public HumanoidModel.ArmPose getArmPose(ItemStack stack, AbstractClientPlayer player, InteractionHand hand) {
-        if (player.swinging)
-            return null;
-        return HumanoidModel.ArmPose.CROSSBOW_HOLD;
-    }
     @Override
     public int getBarColor(ItemStack stack) {
         return 0xEFEFEF;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stackInHand = player.getItemInHand(hand);
         if(getCurrentFillLevel(stackInHand) > 0)
             player.startUsingItem(hand);
         return super.use(level, player, hand);
-    }
-
-    @Override
-    public boolean isEnchantable(ItemStack stack) { return true; }
-
-    @Override
-    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
-        if (enchantment.is(AllEnchantments.CAPACITY))
-            return true;
-        return super.supportsEnchantment(stack, enchantment);
     }
 
     @Override
@@ -86,7 +67,7 @@ public class ChemicalSprayerItem extends Item implements CustomArmPoseItem, Fuel
                     projectile.setPos(player.position().add(0, 1.5f, 0));
                     projectile.shootFromRotation(player, player.getXRot() + new Random().nextFloat(-5, 5), player.getYRot() + new Random().nextFloat(-5, 5), 0.0f, 1.0f, 1.0f);
                     level.addFreshEntity(projectile);
-                    fluidStack.setAmount(fluidStack.getAmount() - 1);
+                    fluidStack.setAmount(Math.max(0, fluidStack.getAmount() - CDGFluids.MB));
                 }
                 if (!(player instanceof Player p && p.isCreative()) && count % 25 == 0)
                     writeFluid(stack, fluidStack);
@@ -112,8 +93,5 @@ public class ChemicalSprayerItem extends Item implements CustomArmPoseItem, Fuel
     @Override
     public int getBarWidth(ItemStack stack) {
         return Math.round(13 * (getCurrentFillLevel(stack) / (float) getCapacity(stack)));
-    }
-    public void registerExtension(RegisterClientExtensionsEvent event) {
-        event.registerItem(SimpleCustomRenderer.create(this, new ChemicalSprayerItemRenderer()), this);
     }
 }

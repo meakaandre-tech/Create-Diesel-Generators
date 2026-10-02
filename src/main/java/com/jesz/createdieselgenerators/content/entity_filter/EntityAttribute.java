@@ -46,7 +46,7 @@ public interface EntityAttribute {
 
     List<EntityAttribute> ALL = new ArrayList<>();
     EntityAttribute STANDARD_TRAITS = register(StandardTraits.IS_HOSTILE);
-    EntityAttribute IS_MOB = register(new IsMob(EntityType.PIG));
+    EntityAttribute IS_MOB = register(new IsMob(net.minecraft.world.entity.EntityTypes.PIG));
 
     static EntityAttribute register(EntityAttribute attribute) {
         ALL.add(attribute);
@@ -184,7 +184,7 @@ public interface EntityAttribute {
         }
         @Override
         public EntityAttribute read(CompoundTag tag) {
-            return new IsMob(BuiltInRegistries.ENTITY_TYPE.get(Identifier.parse(tag.getStringOr("Entity", ""))));
+            return new IsMob(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(tag.getStringOr("Entity", ""))));
         }
 
         @Override

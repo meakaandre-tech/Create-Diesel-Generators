@@ -3,24 +3,20 @@ package com.jesz.createdieselgenerators;
 import com.jesz.createdieselgenerators.content.entity_filter.EntityAttribute;
 import com.jesz.createdieselgenerators.content.tools.lighter.LighterState;
 import com.jesz.createdieselgenerators.content.track_layers_bag.TrackLayersBagItemDataComponent;
-import com.zurrtum.create.infrastructure.component.SandPaperItemComponent;
-import com.zurrtum.create.catnip.codecs.CatnipCodecs;
+import com.jesz.createdieselgenerators.fluid.SimpleFluidContent;
 import com.zurrtum.create.catnip.codecs.stream.CatnipStreamCodecBuilders;
+import com.zurrtum.create.infrastructure.component.SandPaperItemComponent;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.fluids.SimpleFluidContent;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class CDGDataComponents {
-    private static final DeferredRegister.DataComponents DATA_COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, CreateDieselGenerators.ID);
-
     public static final DataComponentType<LighterState> LIGHTER_STATE = register("lighter_state",
             builder -> builder.persistent(LighterState.CODEC).networkSynchronized(LighterState.STREAM_CODEC));
 
@@ -48,13 +44,10 @@ public class CDGDataComponents {
 
 
     private static <T> DataComponentType<T> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
-        DataComponentType<T> type = builder.apply(DataComponentType.builder()).build();
-        DATA_COMPONENTS.register(name, () -> type);
-        return type;
+        return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, CreateDieselGenerators.rl(name),
+                builder.apply(DataComponentType.builder()).build());
     }
 
-    
-    public static void register(IEventBus modEventBus) {
-        DATA_COMPONENTS.register(modEventBus);
+    public static void register() {
     }
 }

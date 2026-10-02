@@ -1,7 +1,6 @@
 package com.jesz.createdieselgenerators.content.molds;
 
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.Identifier;
 
 import java.util.LinkedList;
@@ -16,7 +15,6 @@ public class MoldType {
     public static MoldType BAR_MOLD = new MoldType(CreateDieselGenerators.rl("bar"));
 
     Identifier id;
-    public BakedModel model;
 
     public MoldType(Identifier id) {
         this.id = id;

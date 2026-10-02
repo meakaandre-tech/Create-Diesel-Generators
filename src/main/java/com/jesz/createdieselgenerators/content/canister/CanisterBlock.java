@@ -1,5 +1,14 @@
 package com.jesz.createdieselgenerators.content.canister;
 
+import com.jesz.createdieselgenerators.fluid.SimpleFluidContent;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.LevelAccessor;
+
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.util.RandomSource;
@@ -36,7 +45,12 @@ import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 import java.util.List;
 
-public class CanisterBlock extends Block implements IBE<CanisterBlockEntity>, ProperWaterloggedBlock, IWrenchable {
+public class CanisterBlock extends Block implements IBE<CanisterBlockEntity>, ProperWaterloggedBlock, IWrenchable, FluidInventoryProvider<CanisterBlockEntity> {
+    @Override
+    public FluidInventory getFluidInventory(LevelAccessor world, BlockPos pos, BlockState state, CanisterBlockEntity be, Direction side) {
+        return be.tank;
+    }
+
     public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
     public static final BooleanProperty ENCHANTED = BooleanProperty.create("enchanted");
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -50,7 +64,7 @@ public class CanisterBlock extends Block implements IBE<CanisterBlockEntity>, Pr
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return state.getValue(ENCHANTED) ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.MODEL;
+        return state.getValue(ENCHANTED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override
@@ -63,12 +77,15 @@ public class CanisterBlock extends Block implements IBE<CanisterBlockEntity>, Pr
         if (level.isClientSide())
             return;
 
+        Holder<Enchantment> capacity = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(AllEnchantments.CAPACITY);
+        int capacityLevel = EnchantmentHelper.getItemEnchantmentLevel(capacity, stack);
         withBlockEntityDo(level, pos, be -> {
+            // the enchantment level sets the tank size, so it goes first
+            be.setCapacityEnchantLevel(capacityLevel);
             be.setComponentPatch(stack.getComponentsPatch());
-            be.setCapacityEnchantLevel(stack.getEnchantmentLevel(level.holderOrThrow(AllEnchantments.CAPACITY)));
         });
 
-        if (stack.getEnchantmentLevel(level.holderOrThrow(AllEnchantments.CAPACITY)) != 0)
+        if (capacityLevel != 0)
             level.setBlock(pos, state.setValue(ENCHANTED, true), 2);
     }
 
@@ -96,7 +113,7 @@ public class CanisterBlock extends Block implements IBE<CanisterBlockEntity>, Pr
 
     @Override
     public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbourState, RandomSource random) {
-        updateWater(level, state, pos);
+        updateWater(level, tickView, state, pos);
         return state;
     }
 
@@ -107,7 +124,7 @@ public class CanisterBlock extends Block implements IBE<CanisterBlockEntity>, Pr
         if (!(params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof CanisterBlockEntity be))
             return lootDrops;
 
-        FluidStack contents = be.tank.getCapability().getFluidInTank(0);
+        FluidStack contents = be.tank.getFluid();
 
         DataComponentPatch components = be.getComponentPatch()
                 .forget(c -> c.equals(CDGDataComponents.FLUID_CONTENTS));

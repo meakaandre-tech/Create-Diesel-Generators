@@ -1,6 +1,8 @@
 package com.jesz.createdieselgenerators.mixins;
 
+import com.jesz.createdieselgenerators.CDGFluids;
 import com.jesz.createdieselgenerators.CDGItems;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -22,15 +24,16 @@ public abstract class CreeperMixin extends Monster {
 
     @Shadow public abstract void ignite();
 
-    @Inject(method = "mobInteract", at = @At("TAIL"), remap = false)
+    @Inject(method = "mobInteract(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;", at = @At("TAIL"))
     public void cdg$mobInteract(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir){
         ItemStack stackInHand = player.getItemInHand(hand);
         if(!CDGItems.LIGHTER.isIn(stackInHand))
             return;
-        IFluidHandlerItem fluid = stackInHand.getCapability(Capabilities.FluidHandler.ITEM, null);
-        if (fluid == null || fluid.getFluidInTank(0).isEmpty())
+        FluidStack fluid = CDGItems.LIGHTER.get().readFluid(stackInHand);
+        if (fluid.isEmpty())
             return;
-        fluid.drain(1, false);
+        fluid.setAmount(Math.max(0, fluid.getAmount() - CDGFluids.MB));
+        CDGItems.LIGHTER.get().writeFluid(stackInHand, fluid);
         ignite();
         this.level().playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
 

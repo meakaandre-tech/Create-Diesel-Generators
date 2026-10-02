@@ -3,14 +3,10 @@ package com.jesz.createdieselgenerators.content.turret;
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
 import com.jesz.createdieselgenerators.content.entity_filter.EntityFilterItem;
 import com.jesz.createdieselgenerators.content.entity_filter.EntityFilteringBehaviour;
-import com.jesz.createdieselgenerators.mixin_interfaces.IEntity;
 import com.zurrtum.create.AllSoundEvents;
 import com.zurrtum.create.content.contraptions.actors.seat.SeatEntity;
 import com.zurrtum.create.content.kinetics.base.KineticBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
-import com.zurrtum.create.client.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
-import com.zurrtum.create.client.foundation.utility.CreateLang;
-import dev.ryanhcode.sable.companion.SableCompanion;
 import com.zurrtum.create.catnip.math.AngleHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -69,11 +65,11 @@ public class TurretBlockEntity extends KineticBlockEntity {
             controllingEntity.setYHeadRot(-targetedHorizontalRotation+180);
             if (controllingEntity.getRootVehicle() instanceof SeatEntity seat) {
                 if (Math.sqrt(seat.blockPosition().distSqr(worldPosition)) > 1) {
-                    ((IEntity)controllingEntity).setTurretPos(null);
+                    TurretData.setTurretPos(controllingEntity, null);
                     controllingEntity = null;
                 }
             } else {
-                ((IEntity) controllingEntity).setTurretPos(null);
+                TurretData.setTurretPos(controllingEntity, null);
                 controllingEntity = null;
             }
         } else {
@@ -84,8 +80,8 @@ public class TurretBlockEntity extends KineticBlockEntity {
                         List<Entity> passengers = list.get(0).getPassengers();
                         if(!passengers.isEmpty() && !(passengers.get(0) instanceof Player)) {
                             Entity possibleControllingEntity = passengers.get(0);
-                            if(((IEntity)possibleControllingEntity).getTurretPos() == null) {
-                                ((IEntity)possibleControllingEntity).setTurretPos(worldPosition);
+                            if(TurretData.getTurretPos(possibleControllingEntity) == null) {
+                                TurretData.setTurretPos(possibleControllingEntity, worldPosition);
                                 if (possibleControllingEntity instanceof LivingEntity le) {
                                     controllingEntity = le;
                                     controllingEntityDirection = direction;
@@ -98,7 +94,7 @@ public class TurretBlockEntity extends KineticBlockEntity {
 
         if (controllingEntity != null && controllingPlayer == null && targetedEntity != null) {
             AABB aabb = getTargetBB();
-            Vec3 targetPos = SableCompanion.INSTANCE.projectOutOfSubLevel(targetedEntity.level(), targetedEntity.position());
+            Vec3 targetPos = targetedEntity.position();
             Vec3 turretPos = getWorldPos();
             targetedHorizontalRotation = (float) (Math.atan2(targetPos.x - turretPos.x, targetPos.z - turretPos.z) * 180 / Math.PI) + 180;            targetedVerticalRotation = calculatePitch(targetPos.add(0, 0.5, 0));
 
@@ -220,7 +216,7 @@ public class TurretBlockEntity extends KineticBlockEntity {
     public void remove() {
         super.remove();
         if(controllingEntity != null)
-            ((IEntity)controllingEntity).setTurretPos(null);
+            TurretData.setTurretPos(controllingEntity, null);
     }
 
     public void updateTargetedEntity(){
@@ -243,14 +239,16 @@ public class TurretBlockEntity extends KineticBlockEntity {
     }
 
     public boolean isValidTarget(LivingEntity entity) {
-        Vec3 entityPos = SableCompanion.INSTANCE.projectOutOfSubLevel(entity.level(), entity.position());
+        Vec3 entityPos = entity.position();
 
-        if (!TargetingConditions.forCombat().test(controllingEntity, entity))
+        if (!(level instanceof net.minecraft.server.level.ServerLevel serverLevel))
+            return false;
+        if (!TargetingConditions.forCombat().test(serverLevel, controllingEntity, entity))
             return false;
         if (entity.isRemoved() || !isWithinRange(entityPos) || entityPos.distanceTo(getWorldPos()) < 2)
             return false;
         if (filtering.getFilter().getItem() instanceof SpawnEggItem egg)
-            if (egg.getType(null) != entity.getType())
+            if (SpawnEggItem.getType(filtering.getFilter()) != entity.getType())
                 return false;
         if (filtering.getFilter().getItem() instanceof EntityFilterItem) {
             if (!EntityFilterItem.test(filtering.getFilter(), entity))
@@ -279,10 +277,10 @@ public class TurretBlockEntity extends KineticBlockEntity {
         compound.putFloat("HorizontalRotation", targetedHorizontalRotation);
     }
 
-    private FilteringBehaviour filtering;
+    public EntityFilteringBehaviour filtering;
     @Override
     public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
-        filtering = new EntityFilteringBehaviour(this, new ChemicalTurretBlockEntity.ChemicalTurretValueBox());
+        filtering = new EntityFilteringBehaviour(this);
         behaviours.add(filtering);
     }
 
@@ -290,7 +288,7 @@ public class TurretBlockEntity extends KineticBlockEntity {
         BlockPos worldPos = BlockPos.containing(getWorldPos());
         if(level.isClientSide())
             AllSoundEvents.CONTROLLER_CLICK.play(level, player, worldPos);
-        BlockPos tPos = ((IEntity)player).getTurretPos();
+        BlockPos tPos = TurretData.getTurretPos(player);
         if(tPos != null && level.getBlockEntity(tPos) instanceof TurretBlockEntity be)
             be.removePlayer();
         if(player.distanceToSqr(getWorldPos()) > 9){
@@ -299,9 +297,9 @@ public class TurretBlockEntity extends KineticBlockEntity {
             return;
         }
         if(player instanceof ServerPlayer sp)
-            sp.connection.send(new ClientboundSetActionBarTextPacket(CreateLang.translateDirect("contraption.controls.start_controlling", Component.translatable(getBlockState().getBlock().getDescriptionId()))));
+            sp.connection.send(new ClientboundSetActionBarTextPacket(Component.translatable("create.contraption.controls.start_controlling", Component.translatable(getBlockState().getBlock().getDescriptionId()))));
         controllingPlayer = player;
-        ((IEntity)controllingPlayer).setTurretPos(worldPosition);
+        TurretData.setTurretPos(controllingPlayer, worldPosition);
     }
 
     public void removePlayer() {
@@ -310,11 +308,11 @@ public class TurretBlockEntity extends KineticBlockEntity {
             AllSoundEvents.CONTROLLER_CLICK.play(level, controllingPlayer, worldPos);
         if(controllingPlayer instanceof ServerPlayer sp)
             sp.connection.send(new ClientboundSetActionBarTextPacket(CreateDieselGenerators.lang("actionbar.turret.stopped_controlling", Component.translatable(getBlockState().getBlock().getDescriptionId()))));
-        ((IEntity)controllingPlayer).setTurretPos(null);
+        TurretData.setTurretPos(controllingPlayer, null);
         removePlayer = true;
     }
 
     public Vec3 getWorldPos() {
-        return SableCompanion.INSTANCE.projectOutOfSubLevel(level, Vec3.atCenterOf(worldPosition));
+        return Vec3.atCenterOf(worldPosition);
     }
 }

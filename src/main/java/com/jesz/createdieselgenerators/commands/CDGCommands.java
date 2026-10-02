@@ -6,21 +6,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.zurrtum.create.AllPackets;
-import com.zurrtum.create.client.AllSpecialTextures;
-import com.zurrtum.create.client.catnip.outliner.Outliner;
-import com.zurrtum.create.catnip.theme.Color;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.phys.AABB;
-import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,9 +34,9 @@ public class CDGCommands {
     }
 
     private int getOilChunk(CommandSourceStack source) throws CommandSyntaxException {
-        if (!source.hasPermission(2))
+        if (!Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
             return 0;
-        ChunkPos chunkPos = new ChunkPos(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
+        ChunkPos chunkPos = ChunkPos.containing(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
 
         int amount = OilChunksSavedData.getChunkOilAmount(source.getLevel(), chunkPos);
 
@@ -57,9 +49,9 @@ public class CDGCommands {
     }
 
     private int refreshOilChunk(CommandSourceStack source) throws CommandSyntaxException {
-        if (!source.hasPermission(2))
+        if (!Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
             return 0;
-        ChunkPos chunkPos = new ChunkPos(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
+        ChunkPos chunkPos = ChunkPos.containing(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
 
         OilChunksSavedData.removeChunk(source.getLevel(), chunkPos);
 
@@ -69,9 +61,9 @@ public class CDGCommands {
     }
 
     private int setOilChunk(CommandSourceStack source, CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if (!source.hasPermission(2))
+        if (!Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
             return 0;
-        ChunkPos chunkPos = new ChunkPos(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
+        ChunkPos chunkPos = ChunkPos.containing(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
 
         int amount = IntegerArgumentType.getInteger(ctx, "amount");
         OilChunksSavedData.setChunkOilAmount(source.getLevel(), chunkPos, amount);
@@ -81,9 +73,9 @@ public class CDGCommands {
     }
 
     private int setOilChunkInfinite(CommandSourceStack source, CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if(!source.hasPermission(2))
+        if(!Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
             return 0;
-        ChunkPos chunkPos = new ChunkPos(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
+        ChunkPos chunkPos = ChunkPos.containing(new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z));
 
         OilChunksSavedData.setChunkOilAmount(source.getLevel(), chunkPos, Integer.MAX_VALUE);
         source.sendSuccess(() -> Component.literal("This chunk is now infinite").withStyle(ChatFormatting.GRAY), false);
@@ -92,18 +84,18 @@ public class CDGCommands {
     }
 
     private int locateOilChunk(CommandSourceStack source) throws CommandSyntaxException {
-        if (!source.hasPermission(2))
+        if (!Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
             return 0;
 
         BlockPos sourcePos = BlockPos.containing(source.getPosition());
-        ChunkPos centerChunk = new ChunkPos(sourcePos);
+        ChunkPos centerChunk = ChunkPos.containing(sourcePos);
 
         int radius = 10;
         int dx = 0, dz = -1;
 
         for (int i = 0; i < (radius * 2 + 1) * (radius * 2 + 1); i++) {
-            int cx = centerChunk.x + dx;
-            int cz = centerChunk.z + dz;
+            int cx = centerChunk.x() + dx;
+            int cz = centerChunk.z() + dz;
             ChunkPos currentChunk = new ChunkPos(cx, cz);
 
             int amount = OilChunksSavedData.getChunkOilAmount(source.getLevel(), currentChunk);
@@ -115,8 +107,7 @@ public class CDGCommands {
                         .withStyle(ChatFormatting.GRAY)
                         .append(Component.literal(cx + " " + cz)
                                 .withStyle(ChatFormatting.GOLD)
-                                .withStyle(style -> style.withClickEvent(new ClickEvent(
-                                        ClickEvent.Action.SUGGEST_COMMAND,
+                                .withStyle(style -> style.withClickEvent(new ClickEvent.SuggestCommand(
                                         "/tp @s " + blockX + " ~ " + blockZ))))
                         .append(" with ").withStyle(ChatFormatting.GRAY)
                         .append(Component.literal(String.format("%,1d", amount) + "mB ")

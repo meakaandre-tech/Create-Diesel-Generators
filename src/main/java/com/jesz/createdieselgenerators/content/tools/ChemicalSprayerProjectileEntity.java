@@ -1,10 +1,18 @@
 package com.jesz.createdieselgenerators.content.tools;
 
+import com.jesz.createdieselgenerators.ClientHooks;
+import com.zurrtum.create.AllFluidTags;
+import com.zurrtum.create.AllSynchedDatas;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import java.util.Optional;
+
 import com.jesz.createdieselgenerators.CDGEntityTypes;
 import com.jesz.createdieselgenerators.CDGRegistries;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
 import com.zurrtum.create.AllFluids;
-import com.zurrtum.create.client.content.fluids.FluidFX;
 import com.zurrtum.create.foundation.fluid.FluidHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,7 +20,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,7 +28,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
@@ -55,7 +62,8 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
 
         tag.putBoolean("Fire", fire);
         tag.putBoolean("Cooling", cooling);
-        tag.put("FluidStack", stack.save(level.registryAccess(), new CompoundTag()));
+        if (!stack.isEmpty())
+            tag.put("FluidStack", stack.toNbt(level.registryAccess()));
 
         projectile.getEntityData().set(DATA, tag);
         return projectile;
@@ -65,13 +73,17 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
     protected void onHitEntity(EntityHitResult hit) {
         Entity owner = getOwner();
 
+        if (!(level() instanceof ServerLevel serverLevel)) {
+            super.onHitEntity(hit);
+            return;
+        }
         if (fire) {
             hit.getEntity().setRemainingFireTicks((hit.getEntity().getRemainingFireTicks()) + 100);
-            hit.getEntity().hurt(damageSources().inFire(), 2);
+            hit.getEntity().hurtServer(serverLevel, damageSources().inFire(), 2);
         } else if(cooling) {
             hit.getEntity().clearFire();
-            if (hit.getEntity().getType() == EntityType.ENDERMAN)
-                hit.getEntity().hurt(damageSources().generic(), 0.5f);
+            if (hit.getEntity().getType() == EntityTypes.ENDERMAN)
+                hit.getEntity().hurtServer(serverLevel, damageSources().generic(), 0.5f);
         }
         else if (stack.getFluid().isSame(AllFluids.POTION)) {
             if (hit.getEntity() instanceof LivingEntity le && le.isAffectedByPotions()) {
@@ -80,40 +92,40 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
                     for (MobEffectInstance effectInstance : potionContents.getAllEffects()){
                         MobEffect effect = effectInstance.getEffect().value();
 
-                        if (effect.isInstantenous()) {
-                            effect.applyInstantenousEffect(owner, owner, le, effectInstance.getAmplifier(), 0.5d);
+                        if (effect.isInstantaneous()) {
+                            effect.applyInstantaneousEffect(serverLevel, owner, owner, le, effectInstance.getAmplifier(), 0.5d);
                         } else {
                             le.addEffect(new MobEffectInstance(effectInstance), owner);
                         }
                     }
             }
-        } else if (FluidHelper.isTag(stack, Tags.Fluids.MILK)) {
+        } else if (FluidHelper.isTag(stack, AllFluidTags.MILK)) {
             if (hit.getEntity() instanceof LivingEntity le && le.isAffectedByPotions())
-                le.removeEffectsCuredBy(net.neoforged.neoforge.common.EffectCures.MILK);
+                le.removeAllEffects();
         } else {
             if (owner instanceof LivingEntity)
                 ((LivingEntity) owner).setLastHurtMob(hit.getEntity());
-            hit.getEntity().hurt(damageSources().generic(), 0.5f);
+            hit.getEntity().hurtServer(serverLevel, damageSources().generic(), 0.5f);
         }
         super.onHitEntity(hit);
         remove(RemovalReason.DISCARDED);
     }
 
     @Override
-    public void load(CompoundTag compound) {
+    protected void readAdditionalSaveData(ValueInput compound) {
+        super.readAdditionalSaveData(compound);
         if (stack == null)
-            stack = FluidStack.parseOptional(level().registryAccess(), compound.getCompound("FluidStack"));
-        super.load(compound);
+            stack = compound.read("FluidStack", FluidStack.OPTIONAL_CODEC).orElse(FluidStack.EMPTY);
     }
 
     @Override
-    public CompoundTag saveWithoutId(CompoundTag compound) {
+    protected void addAdditionalSaveData(ValueOutput compound) {
+        super.addAdditionalSaveData(compound);
         if (stack != null)
-            stack.save(level().registryAccess(), compound.getCompound("FluidStack"));
-        return super.saveWithoutId(compound);
+            compound.store("FluidStack", FluidStack.OPTIONAL_CODEC, stack);
     }
 
-    static final EntityDataAccessor<CompoundTag> DATA = SynchedEntityData.defineId(ChemicalSprayerProjectileEntity.class, EntityDataSerializers.COMPOUND_TAG);
+    static final EntityDataAccessor<CompoundTag> DATA = SynchedEntityData.defineId(ChemicalSprayerProjectileEntity.class, AllSynchedDatas.NBT_COMPOUND_HANDLER);
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
@@ -130,11 +142,11 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
     @Override
     public void tick() {
         if (level().isClientSide()) {
-            stack = FluidStack.parseOptional(level().registryAccess(), getEntityData().get(DATA).getCompound("FluidStack"));
+            stack = FluidStack.fromNbt(level().registryAccess(), getEntityData().get(DATA).getCompound("FluidStack"));
             fire = getEntityData().get(DATA).getBooleanOr("Fire", false);
             cooling = getEntityData().get(DATA).getBooleanOr("Cooling", false);
             if (stack != null && !stack.isEmpty() && !fire)
-                level().addParticle(FluidFX.getFluidParticle(stack), position().x+random.nextDouble()-0.5, position().y+0.3, position().z+random.nextDouble()-0.5, getDeltaMovement().x, getDeltaMovement().y - 0.1, getDeltaMovement().z);
+                ClientHooks.SPRAY_PARTICLE.spawn(level(), stack, position().x+random.nextDouble()-0.5, position().y+0.3, position().z+random.nextDouble()-0.5, getDeltaMovement().x, getDeltaMovement().y - 0.1, getDeltaMovement().z);
             if (t >= 1) {
                 if (fire) {
                     level().addParticle(ParticleTypes.LAVA, position().x, position().y, position().z, getDeltaMovement().x, getDeltaMovement().y - 0.1, getDeltaMovement().z);
@@ -157,7 +169,9 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
                 fire = false;
                 if(stack.getFluid().isSame(Fluids.LAVA))
                     remove(RemovalReason.DISCARDED);
-                getEntityData().get(DATA).putBoolean("Fire", false);
+                CompoundTag data = getEntityData().get(DATA).copy();
+                data.putBoolean("Fire", false);
+                getEntityData().set(DATA, data);
             }
         }
 
@@ -172,7 +186,7 @@ public class ChemicalSprayerProjectileEntity extends AbstractHurtingProjectile {
             if (hitresult.getType() != HitResult.Type.MISS)
                 this.onHit(hitresult);
 
-            this.checkInsideBlocks();
+            this.applyEffectsFromBlocks();
             ProjectileUtil.rotateTowardsMovement(this, 0.2F);
 
             Vec3 deltaMovement = this.getDeltaMovement();

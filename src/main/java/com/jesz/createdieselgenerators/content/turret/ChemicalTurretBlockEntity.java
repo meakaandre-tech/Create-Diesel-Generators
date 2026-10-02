@@ -1,25 +1,24 @@
 package com.jesz.createdieselgenerators.content.turret;
 
+import com.jesz.createdieselgenerators.CDGFluids;
+import com.jesz.createdieselgenerators.CDGItems;
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import net.minecraft.world.level.block.Block;
+
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGRegistries;
-import com.jesz.createdieselgenerators.compat.computercraft.CCProxy;
 import com.jesz.createdieselgenerators.content.tools.ChemicalSprayerProjectileEntity;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
 import com.zurrtum.create.AllSoundEvents;
-import com.zurrtum.create.compat.Mods;
-import com.zurrtum.create.compat.computercraft.AbstractComputerBehaviour;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
-import com.zurrtum.create.client.foundation.blockEntity.behaviour.ValueBoxTransform;
 import com.zurrtum.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
-import dan200.computercraft.api.peripheral.PeripheralCapability;
-import com.zurrtum.create.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -52,33 +51,18 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
     }
 
     public SmartFluidTankBehaviour tank;
-    public AbstractComputerBehaviour computerBehaviour;
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                CDGBlockEntityTypes.CHEMICAL_TURRET.get(),
-                (be, side) -> {
-                    if (side == null || side == Direction.DOWN) {
-                        return be.tank.getCapability();
-                    }
-                    return null;
-                }
-        );
-
-        if (Mods.COMPUTERCRAFT.isLoaded()) {
-            event.registerBlockEntity(
-                    PeripheralCapability.get(),
-                    CDGBlockEntityTypes.CHEMICAL_TURRET.get(),
-                    (be, context) -> be.computerBehaviour.getPeripheralCapability()
-            );
-        }
+    public FluidInventory getFluidInventory(Direction side) {
+        if (side == null || side == Direction.DOWN)
+            return tank.getCapability();
+        return null;
     }
 
     @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        super.addToGoggleTooltip(tooltip, isPlayerSneaking);
-        return containedFluidTooltip(tooltip, isPlayerSneaking, tank.getCapability());
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        if (lighterUpgrade && level != null)
+            Block.popResource(level, pos, CDGItems.LIGHTER.asStack());
     }
 
     public int redstoneSignal;
@@ -139,8 +123,7 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
-        behaviours.add(computerBehaviour = CCProxy.behaviour(this));
-        tank = SmartFluidTankBehaviour.single(this, 1000);
+        tank = SmartFluidTankBehaviour.single(this, 1000 * CDGFluids.MB);
         behaviours.add(tank);
         super.addBehaviours(behaviours);
     }
@@ -175,20 +158,8 @@ public class ChemicalTurretBlockEntity extends TurretBlockEntity {
 
             level.addFreshEntity(projectile);
             if (t == 1) {
-                tank.getPrimaryHandler().drain(3, false);
+                FluidUtil.drain(tank.getPrimaryHandler(), 3 * CDGFluids.MB, false);
             }
-        }
-    }
-
-    public static class ChemicalTurretValueBox extends ValueBoxTransform.Sided {
-
-        @Override
-        protected Vec3 getSouthLocation() {
-            return VecHelper.voxelSpace(8, 3, 16.05);
-        }
-        @Override
-        protected boolean isSideActive(BlockState state, Direction direction) {
-            return direction.getAxis().isHorizontal();
         }
     }
 }
