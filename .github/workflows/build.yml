@@ -55,6 +55,7 @@ jobs:
           fi
           if [ -f .github/dump-bytecode ]; then
             jars=$(find ~/.gradle/caches/fabric-loom .gradle/loom-cache -name '*.jar' 2>/dev/null | grep -iE 'minecraft' | grep -v sources || true)
+            jars="$jars $(find ~/.gradle/caches/modules-2 -name 'fabric-*.jar' 2>/dev/null | grep -v sources | tr '\n' ' ')"
             cp=$(echo $jars | tr ' ' ':')
             (xargs -a .github/dump-bytecode javap -p -c -cp "$cp" 2>/dev/null || true) | gzip -9 > /tmp/ci/bytecode.txt.gz
           fi
