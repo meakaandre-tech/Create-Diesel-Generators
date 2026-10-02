@@ -1,0 +1,43 @@
+tick sprint 200
+say CHECK S1 engine
+data get block 1 202 12
+say CHECK S2 engine
+data get block 9 201 11
+say CHECK S2 engine b
+data get block 9 201 12
+say CHECK S3 engine
+data get block 16 201 10
+say CHECK S3 shaft
+data get block 16 201 12
+say CHECK S4 hole
+data get block 28 202 8
+say CHECK S4 crank
+data get block 28 202 16
+say CHECK S5b tank 1
+data get block 42 201 10
+say CHECK S5b tank 2
+data get block 42 202 10
+say CHECK S5b tank 3
+data get block 42 203 10
+say CHECK S6 fermenter
+data get block 48 200 10
+say CHECK S7 basin
+data get block 54 200 10
+say CHECK S7 lid
+data get block 54 201 10
+say CHECK S8 basin
+data get block 58 200 10
+say CHECK S9 canister
+data get block 62 200 10
+say CHECK S10 basin
+data get block 66 200 10
+say CHECK S11 basin
+data get block 70 200 10
+say CHECK S12 barrel
+data get block 75 200 10
+say CHECK S13 turret
+data get block 82 201 10
+say CHECK S14 burner
+data get block 88 200 10
+say CHECK restart oil
+execute positioned 28 202 8 run cdg oil get

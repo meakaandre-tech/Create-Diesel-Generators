@@ -2,47 +2,68 @@ gamerule minecraft:respawn_radius 0
 gamerule minecraft:advance_time false
 gamerule minecraft:spawn_mobs false
 time set noon
-forceload add -16 -16 79 31
-fill -10 199 -12 70 199 24 minecraft:stone
+forceload add -16 -16 111 31
+fill -12 199 -12 100 199 24 minecraft:stone
 setworldspawn 5 200 -7 0 0
-setblock -10 200 0 createdieselgenerators:burner
-setblock -8 200 0 createdieselgenerators:chemical_turret
-setblock -6 200 0 createdieselgenerators:diesel_engine
-setblock -4 200 0 createdieselgenerators:large_diesel_engine
-setblock -2 200 0 createdieselgenerators:huge_diesel_engine
-setblock 0 200 0 createdieselgenerators:powered_engine_shaft
+setblock -10 200 0 createdieselgenerators:andesite_girder
+setblock -8 200 0 createdieselgenerators:andesite_girder_encased_shaft
+setblock -6 200 0 createdieselgenerators:andesite_girder_strut
+setblock -4 200 0 createdieselgenerators:asphalt_block
+setblock -2 200 0 createdieselgenerators:asphalt_slab
+setblock 0 200 0 createdieselgenerators:asphalt_stairs
 setblock 2 200 0 createdieselgenerators:basin_lid
-setblock 4 200 0 createdieselgenerators:pumpjack_bearing
-setblock 6 200 0 createdieselgenerators:pumpjack_head
-setblock 8 200 0 createdieselgenerators:pumpjack_bearing_b
-setblock 10 200 0 createdieselgenerators:pumpjack_hole
-setblock 12 200 0 createdieselgenerators:pumpjack_crank
+setblock 4 200 0 createdieselgenerators:black_concrete_encased_fluid_pipe
+setblock 6 200 0 createdieselgenerators:blue_concrete_encased_fluid_pipe
+setblock 8 200 0 createdieselgenerators:brown_concrete_encased_fluid_pipe
+setblock 10 200 0 createdieselgenerators:bulk_fermenter
+setblock 12 200 0 createdieselgenerators:burner
 setblock 14 200 0 createdieselgenerators:canister
-setblock 16 200 0 createdieselgenerators:distillation_tank
-setblock 18 200 0 createdieselgenerators:bulk_fermenter
-setblock 20 200 0 createdieselgenerators:oil_barrel
-setblock 22 200 0 createdieselgenerators:chip_wood_block
-setblock 24 200 0 createdieselgenerators:chip_wood_beam
-setblock 26 200 0 createdieselgenerators:chip_wood_slab
-setblock 28 200 0 createdieselgenerators:chip_wood_stairs
-setblock 30 200 0 createdieselgenerators:asphalt_block
-setblock 32 200 0 createdieselgenerators:asphalt_slab
-setblock 34 200 0 createdieselgenerators:asphalt_stairs
-setblock 36 200 0 createdieselgenerators:andesite_girder
-setblock 38 200 0 createdieselgenerators:andesite_girder_encased_shaft
-setblock 40 200 0 createdieselgenerators:sheet_metal_panel
-fill -1 200 5 1 200 7 minecraft:glass
-setblock 0 200 6 createdieselgenerators:plant_oil
-fill 3 200 5 5 200 7 minecraft:glass
-setblock 4 200 6 createdieselgenerators:crude_oil
-fill 7 200 5 9 200 7 minecraft:glass
-setblock 8 200 6 createdieselgenerators:biodiesel
-fill 11 200 5 13 200 7 minecraft:glass
-setblock 12 200 6 createdieselgenerators:diesel
-fill 15 200 5 17 200 7 minecraft:glass
-setblock 16 200 6 createdieselgenerators:gasoline
-fill 19 200 5 21 200 7 minecraft:glass
-setblock 20 200 6 createdieselgenerators:ethanol
+setblock 16 200 0 createdieselgenerators:chemical_turret
+setblock 18 200 0 createdieselgenerators:chip_wood_beam
+setblock 20 200 0 createdieselgenerators:chip_wood_block
+setblock 22 200 0 createdieselgenerators:chip_wood_slab
+setblock 24 200 0 createdieselgenerators:chip_wood_stairs
+setblock 26 200 0 createdieselgenerators:cyan_concrete_encased_fluid_pipe
+setblock 28 200 0 createdieselgenerators:diesel_engine
+setblock 30 200 0 createdieselgenerators:distillation_tank
+setblock 32 200 0 createdieselgenerators:gray_concrete_encased_fluid_pipe
+setblock 34 200 0 createdieselgenerators:green_concrete_encased_fluid_pipe
+setblock 36 200 0 createdieselgenerators:huge_diesel_engine
+setblock 38 200 0 createdieselgenerators:large_diesel_engine
+setblock 40 200 0 createdieselgenerators:light_blue_concrete_encased_fluid_pipe
+setblock 42 200 0 createdieselgenerators:light_gray_concrete_encased_fluid_pipe
+setblock 44 200 0 createdieselgenerators:lime_concrete_encased_fluid_pipe
+setblock 46 200 0 createdieselgenerators:magenta_concrete_encased_fluid_pipe
+setblock 48 200 0 createdieselgenerators:oil_barrel
+setblock -10 200 -3 createdieselgenerators:orange_concrete_encased_fluid_pipe
+setblock -8 200 -3 createdieselgenerators:pink_concrete_encased_fluid_pipe
+setblock -6 200 -3 createdieselgenerators:powered_engine_shaft
+setblock -4 200 -3 createdieselgenerators:pumpjack_bearing
+setblock -2 200 -3 createdieselgenerators:pumpjack_bearing_b
+setblock 0 200 -3 createdieselgenerators:pumpjack_crank
+setblock 2 200 -3 createdieselgenerators:pumpjack_head
+setblock 4 200 -3 createdieselgenerators:pumpjack_hole
+setblock 6 200 -3 createdieselgenerators:purple_concrete_encased_fluid_pipe
+setblock 8 200 -3 createdieselgenerators:red_concrete_encased_fluid_pipe
+setblock 10 200 -3 createdieselgenerators:sheet_metal_panel
+setblock 12 200 -3 createdieselgenerators:white_concrete_encased_fluid_pipe
+setblock 14 200 -3 createdieselgenerators:yellow_concrete_encased_fluid_pipe
+fill -1 200 -9 1 200 -7 minecraft:glass
+setblock 0 200 -8 createdieselgenerators:plant_oil
+fill 3 200 -9 5 200 -7 minecraft:glass
+setblock 4 200 -8 createdieselgenerators:crude_oil
+fill 7 200 -9 9 200 -7 minecraft:glass
+setblock 8 200 -8 createdieselgenerators:biodiesel
+fill 11 200 -9 13 200 -7 minecraft:glass
+setblock 12 200 -8 createdieselgenerators:diesel
+fill 15 200 -9 17 200 -7 minecraft:glass
+setblock 16 200 -8 createdieselgenerators:gasoline
+fill 19 200 -9 21 200 -7 minecraft:glass
+setblock 20 200 -8 createdieselgenerators:ethanol
+fill 23 200 -9 25 200 -7 minecraft:glass
+setblock 24 200 -8 createdieselgenerators:white_cement
+fill 27 200 -9 29 200 -7 minecraft:glass
+setblock 28 200 -8 createdieselgenerators:red_cement
 setblock 1 201 12 create:fluid_pipe[east=true,waterlogged=false,south=false,north=false,west=false,up=true,down=false]
 setblock 2 201 12 create:fluid_pipe[east=true,waterlogged=false,south=false,north=false,west=true,up=false,down=false]
 setblock 3 201 12 create:mechanical_pump[waterlogged=false,facing=west]
@@ -56,7 +77,7 @@ setblock 1 202 11 create:shaft[waterlogged=false,axis=z]
 setblock 1 202 12 createdieselgenerators:diesel_engine[waterlogged=false,powered=false,facing=north]
 setblock 1 202 13 create:shaft[waterlogged=false,axis=z]
 setblock 1 202 14 create:shaft[waterlogged=false,axis=z]
-data merge block 4 201 11 {TankContent:{Fluid:{id:"createdieselgenerators:diesel",amount:81000}}}
+data merge block 4 201 11 {Fluid:{id:"createdieselgenerators:diesel",amount:81000}}
 setblock 9 201 11 createdieselgenerators:large_diesel_engine[powered=false,facing=south,pipe=true]
 setblock 9 201 12 createdieselgenerators:large_diesel_engine[powered=false,facing=south,pipe=false]
 setblock 9 201 13 createdieselgenerators:large_diesel_engine[powered=false,facing=south,pipe=false]
@@ -70,16 +91,16 @@ setblock 12 201 13 create:creative_fluid_tank
 setblock 13 201 12 create:creative_motor[facing=west]
 setblock 9 202 11 create:fluid_pipe[east=true,waterlogged=false,south=false,north=false,west=false,up=false,down=true]
 setblock 10 202 11 create:fluid_pipe[east=false,waterlogged=false,south=false,north=false,west=true,up=false,down=true]
-data merge block 12 201 13 {TankContent:{Fluid:{id:"createdieselgenerators:gasoline",amount:81000}}}
-setblock 16 201 10 createdieselgenerators:huge_diesel_engine[east=false,south=false,north=false,west=false,facing=south,up=true,down=false]
+data merge block 12 201 13 {Fluid:{id:"createdieselgenerators:gasoline",amount:81000}}
+setblock 16 201 10 createdieselgenerators:huge_diesel_engine[facing=south]
 setblock 16 201 12 createdieselgenerators:powered_engine_shaft[waterlogged=false,axis=x]
-setblock 16 201 14 createdieselgenerators:huge_diesel_engine[east=false,south=false,north=false,west=false,facing=north,up=true,down=false]
-setblock 17 201 10 createdieselgenerators:huge_diesel_engine[east=false,south=false,north=false,west=false,facing=south,up=true,down=false]
+setblock 16 201 14 createdieselgenerators:huge_diesel_engine[facing=north]
+setblock 17 201 10 createdieselgenerators:huge_diesel_engine[facing=south]
 setblock 17 201 12 createdieselgenerators:powered_engine_shaft[waterlogged=false,axis=x]
-setblock 17 201 14 createdieselgenerators:huge_diesel_engine[east=false,south=false,north=false,west=false,facing=north,up=true,down=false]
-setblock 18 201 10 createdieselgenerators:huge_diesel_engine[east=false,south=false,north=false,west=false,facing=south,up=true,down=false]
+setblock 17 201 14 createdieselgenerators:huge_diesel_engine[facing=north]
+setblock 18 201 10 createdieselgenerators:huge_diesel_engine[facing=south]
 setblock 18 201 12 createdieselgenerators:powered_engine_shaft[waterlogged=false,axis=x]
-setblock 18 201 14 createdieselgenerators:huge_diesel_engine[east=false,south=false,north=false,west=false,facing=north,up=true,down=false]
+setblock 18 201 14 createdieselgenerators:huge_diesel_engine[facing=north]
 setblock 16 202 10 create:fluid_pipe[east=true,waterlogged=false,south=false,north=false,west=false,up=false,down=true]
 setblock 16 202 14 create:fluid_pipe[east=true,waterlogged=false,south=false,north=false,west=false,up=false,down=true]
 setblock 17 202 10 create:fluid_pipe[east=true,waterlogged=false,south=false,north=false,west=true,up=false,down=true]
@@ -93,7 +114,7 @@ setblock 19 202 13 create:mechanical_pump[waterlogged=false,facing=west]
 setblock 20 202 13 create:creative_fluid_tank
 setblock 19 203 13 create:cogwheel[axis=x]
 setblock 20 203 13 create:creative_motor[facing=west]
-data merge block 20 202 13 {TankContent:{Fluid:{id:"createdieselgenerators:biodiesel",amount:81000}}}
+data merge block 20 202 13 {Fluid:{id:"createdieselgenerators:biodiesel",amount:81000}}
 setblock 27 205 12 create:zinc_block
 setblock 28 205 9 create:industrial_iron_block
 setblock 28 205 12 create:industrial_iron_block
@@ -120,56 +141,108 @@ setblock 28 202 10 create:mechanical_pump[facing=south]
 setblock 29 202 10 create:cogwheel[axis=z]
 setblock 29 202 11 create:creative_motor[facing=north]
 setblock 28 202 11 create:fluid_tank
-summon create:super_glue 28 205 8 {Box:[0d,0d,0d,1d,1d,9d]}
+summon create:super_glue 27.0 205.0 8.0 {Box:[0d,0d,0d,3d,1d,9d]}
 execute positioned 28 202 8 run cdg oil set infinity
 setblock 31 203 12 minecraft:stone
 setblock 38 200 10 create:blaze_burner[blaze=kindled]{fuelLevel:1,burnTimeRemaining:200000}
 fill 38 201 10 38 203 10 create:fluid_tank
-fill 44 200 10 45 201 11 createdieselgenerators:bulk_fermenter
-setblock 44 202 10 create:chute
-setblock 50 200 10 create:basin
-summon item 50.5 201 10.5 {Item:{id:"minecraft:sugar",count:4}}
-summon item 50.5 201 10.5 {Item:{id:"minecraft:bone_meal",count:4}}
+setblock 42 200 10 create:blaze_burner[blaze=kindled]{fuelLevel:1,burnTimeRemaining:200000}
+setblock 42 201 10 createdieselgenerators:distillation_tank
+setblock 42 202 10 createdieselgenerators:distillation_tank
+setblock 42 203 10 createdieselgenerators:distillation_tank
+setblock 44 201 10 create:creative_fluid_tank
+data merge block 44 201 10 {Fluid:{id:"createdieselgenerators:crude_oil",amount:81000}}
+setblock 43 201 10 create:mechanical_pump[facing=west]
+setblock 43 201 11 create:cogwheel[axis=x]
+setblock 44 201 11 create:creative_motor[facing=west]
+fill 48 200 10 49 201 11 createdieselgenerators:bulk_fermenter
+setblock 48 202 10 create:chute
 setblock 54 200 10 create:basin
-setblock 54 202 10 create:mechanical_press[facing=east]
-setblock 55 202 10 create:creative_motor[facing=west]
-summon item 54.5 201 10.5 {Item:{id:"minecraft:wheat_seeds",count:16}}
-setblock 58 200 10 createdieselgenerators:canister
-setblock 58 202 10 create:spout
-data merge block 58 202 10 {Tanks:[{TankContent:{id:"createdieselgenerators:diesel",amount:81000}}]}
-fill 62 200 10 63 201 11 createdieselgenerators:oil_barrel
-tick sprint 60
-setblock 50 201 10 createdieselgenerators:basin_lid[on_a_basin=true,facing=south]
-summon item 44.5 204 10.5 {Item:{id:"minecraft:sugar",count:16}}
-summon item 44.5 204 10.5 {Item:{id:"minecraft:bone_meal",count:16}}
-tick sprint 1200
+summon item 54.5 201 10.5 {Item:{id:"minecraft:sugar",count:4}}
+summon item 54.5 201 10.5 {Item:{id:"minecraft:bone_meal",count:4}}
+setblock 58 200 10 create:basin
+setblock 58 202 10 create:mechanical_press[facing=east]
+setblock 59 202 10 create:creative_motor[facing=west]
+summon item 58.5 201 10.5 {Item:{id:"minecraft:wheat_seeds",count:16}}
+setblock 62 200 10 createdieselgenerators:canister
+setblock 62 202 10 create:spout
+data merge block 62 202 10 {Tanks:[{TankContent:{id:"createdieselgenerators:diesel",amount:81000}}]}
+setblock 66 200 10 create:basin
+setblock 66 202 10 create:mechanical_press[facing=east]
+setblock 67 202 10 create:creative_motor[facing=west]
+summon item 66.5 201 10.5 {Item:{id:"createdieselgenerators:mold",count:1,components:{"createdieselgenerators:mold_type":"createdieselgenerators:bowl"}}}
+summon item 66.5 201 10.5 {Item:{id:"createdieselgenerators:wood_chip",count:8}}
+setblock 70 200 10 create:basin
+summon item 70.5 201 10.5 {Item:{id:"createdieselgenerators:mold",count:1,components:{"createdieselgenerators:mold_type":"createdieselgenerators:bar"}}}
+setblock 70 202 10 create:spout
+fill 75 200 10 76 201 11 createdieselgenerators:oil_barrel
+setblock 78 200 10 create:creative_fluid_tank
+data merge block 78 200 10 {Fluid:{id:"createdieselgenerators:diesel",amount:81000}}
+setblock 77 200 10 create:mechanical_pump[facing=west]
+setblock 77 200 11 create:cogwheel[axis=x]
+setblock 78 200 11 create:creative_motor[facing=west]
+setblock 82 200 10 create:creative_motor[facing=up]
+setblock 82 201 10 createdieselgenerators:chemical_turret
+setblock 84 201 10 create:creative_fluid_tank
+data merge block 84 201 10 {Fluid:{id:"createdieselgenerators:gasoline",amount:81000}}
+setblock 83 201 10 create:mechanical_pump[facing=west]
+setblock 83 201 11 create:cogwheel[axis=x]
+setblock 84 201 11 create:creative_motor[facing=west]
+setblock 88 200 10 createdieselgenerators:burner
+setblock 90 200 10 create:creative_fluid_tank
+data merge block 90 200 10 {Fluid:{id:"createdieselgenerators:biodiesel",amount:81000}}
+setblock 89 200 10 create:mechanical_pump[facing=west]
+setblock 89 200 11 create:cogwheel[axis=x]
+setblock 90 200 11 create:creative_motor[facing=west]
+setblock 88 201 10 create:basin
+tick sprint 40
+setblock 54 201 10 createdieselgenerators:basin_lid[on_a_basin=true,facing=south]
+data merge block 70 202 10 {Tanks:[{TankContent:{id:"create:chocolate",amount:81000}}]}
+summon item 48.5 204 10.5 {Item:{id:"minecraft:sugar",count:16}}
+summon item 48.5 204 10.5 {Item:{id:"minecraft:bone_meal",count:16}}
+setblock 81 201 10 minecraft:redstone_block
+tick sprint 100
+say CHECK projectiles
+execute if entity @e[type=createdieselgenerators:chemical_sprayer_projectile]
+setblock 81 201 10 minecraft:air
+tick sprint 1100
 say CHECK S1 engine
 data get block 1 202 12
-say CHECK S1 creative tank
-data get block 4 201 11
 say CHECK S2 engine
 data get block 9 201 11
+say CHECK S2 engine b
+data get block 9 201 12
 say CHECK S3 engine
 data get block 16 201 10
 say CHECK S3 shaft
 data get block 16 201 12
-say CHECK S5 burner
-data get block 38 200 10
-say CHECK S6 fermenter
-data get block 44 200 10
-say CHECK S7 basin
-data get block 50 200 10
-say CHECK S7 lid
-data get block 50 201 10
-say CHECK S8 basin
-data get block 54 200 10
-say CHECK S9 canister
-data get block 58 200 10
-say CHECK S9 spout
-data get block 58 202 10
-say CHECK S12 barrel
-data get block 62 200 10
 say CHECK S4 hole
 data get block 28 202 8
 say CHECK S4 crank
 data get block 28 202 16
+say CHECK S5b tank 1
+data get block 42 201 10
+say CHECK S5b tank 2
+data get block 42 202 10
+say CHECK S5b tank 3
+data get block 42 203 10
+say CHECK S6 fermenter
+data get block 48 200 10
+say CHECK S7 basin
+data get block 54 200 10
+say CHECK S7 lid
+data get block 54 201 10
+say CHECK S8 basin
+data get block 58 200 10
+say CHECK S9 canister
+data get block 62 200 10
+say CHECK S10 basin
+data get block 66 200 10
+say CHECK S11 basin
+data get block 70 200 10
+say CHECK S12 barrel
+data get block 75 200 10
+say CHECK S13 turret
+data get block 82 201 10
+say CHECK S14 burner
+data get block 88 200 10

@@ -41,11 +41,7 @@ public class CDGPartialModels {
     public static final PartialModel SMALL_GAUGE_DIAL = model("block/basin_lid/gauge_dial");
     public static final PartialModel DISTILLATION_GAUGE = model("block/distillation_tank/gauge");
     public static final PartialModel BULK_FERMENTER_GAUGE = model("block/bulk_fermenter_gauge");
-    public static final PartialModel JEI_DISTILLER_TOP = model("block/jei_distiller/top");
-    public static final PartialModel JEI_DISTILLER_MIDDLE = model("block/jei_distiller/middle");
-    public static final PartialModel JEI_DISTILLER_BOTTOM = model("block/jei_distiller/bottom");
     public static final PartialModel JEI_ENGINE_PISTON = model("block/huge_diesel_engine/jei_piston");
-    public static final PartialModel JEI_BULK_FERMENTER = model("block/bulk_fermenter_jei");
 
     public static final PartialModel CHEMICAL_TURRET_CONNECTOR = model("block/chemical_turret/connector");
     public static final PartialModel CHEMICAL_TURRET_LIGHTER = model("block/chemical_turret/lighter");

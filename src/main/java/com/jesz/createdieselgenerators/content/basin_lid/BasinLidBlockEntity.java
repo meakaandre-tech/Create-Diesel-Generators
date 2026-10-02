@@ -75,6 +75,9 @@ public class BasinLidBlockEntity extends BasinOperatingBlockEntity {
         } else if (currentRecipe != null)
             progress = (float) processingTime / Math.max(1, ((BasinFermentingRecipe) currentRecipe).time());
         else {
+            if (processingTime != -1 && !running)
+                // a lid that is not running has nothing to resume; leaving this at 0 would never start it
+                processingTime = -1;
             if (processingTime != -1) {
                 Recipe<?> recipe = this.getMatchingRecipes();
                 if (recipe != null)

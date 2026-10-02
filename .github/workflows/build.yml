@@ -120,7 +120,7 @@ jobs:
                 Xvfb :99 -screen 0 1280x720x24 >/dev/null 2>&1 &
                 export DISPLAY=:99
                 sleep 2
-                (env -u CI timeout 840 ./gradlew runClient --no-daemon -Dorg.gradle.console=plain --args="--quickPlayMultiplayer localhost --width 1280 --height 720" > client-gradle.log 2>&1; echo "EXIT $?" >> client-gradle.log) &
+                (env -u CI timeout 1500 ./gradlew runClient --no-daemon -Dorg.gradle.console=plain --args="--quickPlayMultiplayer localhost --width 1280 --height 720" > client-gradle.log 2>&1; echo "EXIT $?" >> client-gradle.log) &
                 for i in $(seq 1 130); do
                   if grep -q 'joined the game' server/server.log || grep -q '^EXIT' client-gradle.log; then break; fi
                   sleep 5
@@ -141,6 +141,8 @@ jobs:
                         sleep) sleep "$arg";;
                         shot) shot;;
                         move) xdotool mousemove $arg;;
+                        mdown) xdotool mousedown $arg;;
+                        mup) xdotool mouseup $arg;;
                         click) xdotool mousemove $arg; sleep 0.3; xdotool click 1; sleep 0.4;;
                         rclick) xdotool mousemove $arg; sleep 0.3; xdotool click 3; sleep 0.4;;
                       esac

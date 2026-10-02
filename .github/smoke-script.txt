@@ -1,57 +1,292 @@
-cmd tp @a 3 203 6 0 20
-sleep 5
-shot
-cmd tp @a 11 203 6 0 20
-sleep 4
-shot
-cmd tp @a 18.5 204 6 0 25
-sleep 4
-shot
-cmd tp @a 28.5 204 2 0 5
-sleep 4
-shot
-key 9
+cmd item replace entity @a armor.head with create:goggles
 cmd tp @a 31.5 204 20.5 180 0
 sleep 3
 cmd tp @a 31.5 204 12.5 90 0
 sleep 4
 rclick 640 360
-sleep 6
+sleep 8
 shot
 cmd tp @a 36.5 204 12.5 90 5
 sleep 5
 shot
-cmd say CHECK hole after assembly
-cmd data get block 28 202 8
-cmd data get block 28 202 11
 cmd data get block 29 205 12
-cmd item replace entity @a hotbar.0 with createdieselgenerators:distillation_controller 8
+cmd item replace entity @a hotbar.0 with createdieselgenerators:distillation_controller
 key 1
 cmd tp @a 38.5 200 7.5 0 0
 sleep 4
 rclick 640 360
 sleep 3
+shot
+cmd say CHECK client S5 converted
 cmd data get block 38 201 10
-cmd data merge block 38 201 10 {TankContent:{Fluid:{id:"createdieselgenerators:crude_oil",amount:81000}}}
+cmd tp @a 42.5 200 6.5 -0.0 1.7
+sleep 4
+shot
+cmd tp @a 1.5 200 7.5 -0.0 -10.0
+sleep 4
+shot
+cmd tp @a 9.5 200 7.5 -0.0 1.7
+sleep 4
+shot
+cmd tp @a 13.5 200 12.5 -90.0 2.3
+sleep 4
+shot
+cmd tp @a 16.5 200 6.5 -0.0 1.7
+sleep 4
+shot
+cmd tp @a 48.5 200 6.5 -0.0 1.7
+sleep 4
+shot
+cmd tp @a 54.5 200 6.5 -0.0 1.7
+sleep 4
+shot
+cmd tp @a 58.5 200 6.5 -0.0 15.6
+sleep 4
+shot
+cmd tp @a 62.5 200 6.5 -0.0 15.6
+sleep 4
+shot
+cmd tp @a 66.5 200 6.5 -0.0 15.6
+sleep 4
+shot
+cmd tp @a 70.5 200 6.5 -0.0 15.6
+sleep 4
+shot
+cmd tp @a 75.5 200 6.5 -0.0 1.7
+sleep 4
+shot
+cmd setblock 81 201 10 minecraft:redstone_block
+cmd tp @a 80.5 200 5.5 -21.8 1.3
+sleep 5
+shot
+cmd setblock 81 201 10 minecraft:air
+cmd tp @a 88.5 200 6.5 -0.0 15.6
+sleep 4
+shot
+cmd tp @a 28.5 201 3.5 -0.0 1.4
+sleep 4
+shot
+cmd say CHECK client S4 hole
+cmd data get block 28 202 8
+cmd data get block 28 202 11
+cmd tp @a 10.5 203 6.5 -180.0 34.5
+sleep 4
+shot
+cmd tp @a 40.5 203 6.5 -180.0 34.5
+sleep 4
+shot
+cmd tp @a 14.5 203 -3.5 -180.0 45.8
+sleep 4
+shot
+cmd gamemode survival @a
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:biodiesel_bucket
+cmd item replace entity @a container.1 with createdieselgenerators:black_cement_bucket
+cmd item replace entity @a container.2 with createdieselgenerators:blue_cement_bucket
+cmd item replace entity @a container.3 with createdieselgenerators:brown_cement_bucket
+cmd item replace entity @a container.4 with createdieselgenerators:chemical_sprayer
+cmd item replace entity @a container.5 with createdieselgenerators:chemical_sprayer_lighter
+cmd item replace entity @a container.6 with createdieselgenerators:crude_oil_bucket
+cmd item replace entity @a container.7 with createdieselgenerators:cyan_cement_bucket
+cmd item replace entity @a container.8 with createdieselgenerators:diesel_bucket
+cmd item replace entity @a container.9 with createdieselgenerators:distillation_controller
+cmd item replace entity @a container.10 with createdieselgenerators:engine_piston
+cmd item replace entity @a container.11 with createdieselgenerators:engine_silencer
+cmd item replace entity @a container.12 with createdieselgenerators:engine_turbocharger
+cmd item replace entity @a container.13 with createdieselgenerators:entity_filter
+cmd item replace entity @a container.14 with createdieselgenerators:ethanol_bucket
+cmd item replace entity @a container.15 with createdieselgenerators:gasoline_bucket
+cmd item replace entity @a container.16 with createdieselgenerators:gray_cement_bucket
+cmd item replace entity @a container.17 with createdieselgenerators:green_cement_bucket
+cmd item replace entity @a container.18 with createdieselgenerators:hammer
+cmd item replace entity @a container.19 with createdieselgenerators:kelp_handle
+cmd item replace entity @a container.20 with createdieselgenerators:light_blue_cement_bucket
+cmd item replace entity @a container.21 with createdieselgenerators:light_gray_cement_bucket
+cmd item replace entity @a container.22 with createdieselgenerators:lighter
+cmd item replace entity @a container.23 with createdieselgenerators:lime_cement_bucket
+cmd item replace entity @a container.24 with createdieselgenerators:magenta_cement_bucket
+cmd item replace entity @a container.25 with createdieselgenerators:mold
+cmd item replace entity @a container.26 with createdieselgenerators:oil_scanner
+cmd item replace entity @a container.27 with createdieselgenerators:orange_cement_bucket
+cmd item replace entity @a container.28 with createdieselgenerators:pink_cement_bucket
+cmd item replace entity @a container.29 with createdieselgenerators:plant_oil_bucket
+cmd item replace entity @a container.30 with createdieselgenerators:purple_cement_bucket
+cmd item replace entity @a container.31 with createdieselgenerators:red_cement_bucket
+cmd item replace entity @a container.32 with createdieselgenerators:track_layers_bag
+cmd item replace entity @a container.33 with createdieselgenerators:white_cement_bucket
+cmd item replace entity @a container.34 with createdieselgenerators:wire_cutters
+cmd item replace entity @a container.35 with createdieselgenerators:wood_chip
+sleep 1
+key e
+sleep 2
+move 700 150
+shot
+key Escape
+sleep 1
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:yellow_cement_bucket
+cmd item replace entity @a container.1 with createdieselgenerators:andesite_girder
+cmd item replace entity @a container.2 with createdieselgenerators:andesite_girder_encased_shaft
+cmd item replace entity @a container.3 with createdieselgenerators:andesite_girder_strut
+cmd item replace entity @a container.4 with createdieselgenerators:asphalt_block
+cmd item replace entity @a container.5 with createdieselgenerators:asphalt_slab
+cmd item replace entity @a container.6 with createdieselgenerators:asphalt_stairs
+cmd item replace entity @a container.7 with createdieselgenerators:basin_lid
+cmd item replace entity @a container.8 with createdieselgenerators:black_concrete_encased_fluid_pipe
+cmd item replace entity @a container.9 with createdieselgenerators:blue_concrete_encased_fluid_pipe
+cmd item replace entity @a container.10 with createdieselgenerators:brown_concrete_encased_fluid_pipe
+cmd item replace entity @a container.11 with createdieselgenerators:bulk_fermenter
+cmd item replace entity @a container.12 with createdieselgenerators:burner
+cmd item replace entity @a container.13 with createdieselgenerators:canister
+cmd item replace entity @a container.14 with createdieselgenerators:chemical_turret
+cmd item replace entity @a container.15 with createdieselgenerators:chip_wood_beam
+cmd item replace entity @a container.16 with createdieselgenerators:chip_wood_block
+cmd item replace entity @a container.17 with createdieselgenerators:chip_wood_slab
+cmd item replace entity @a container.18 with createdieselgenerators:chip_wood_stairs
+cmd item replace entity @a container.19 with createdieselgenerators:cyan_concrete_encased_fluid_pipe
+cmd item replace entity @a container.20 with createdieselgenerators:diesel_engine
+cmd item replace entity @a container.21 with createdieselgenerators:distillation_tank
+cmd item replace entity @a container.22 with createdieselgenerators:gray_concrete_encased_fluid_pipe
+cmd item replace entity @a container.23 with createdieselgenerators:green_concrete_encased_fluid_pipe
+cmd item replace entity @a container.24 with createdieselgenerators:huge_diesel_engine
+cmd item replace entity @a container.25 with createdieselgenerators:large_diesel_engine
+cmd item replace entity @a container.26 with createdieselgenerators:light_blue_concrete_encased_fluid_pipe
+cmd item replace entity @a container.27 with createdieselgenerators:light_gray_concrete_encased_fluid_pipe
+cmd item replace entity @a container.28 with createdieselgenerators:lime_concrete_encased_fluid_pipe
+cmd item replace entity @a container.29 with createdieselgenerators:magenta_concrete_encased_fluid_pipe
+cmd item replace entity @a container.30 with createdieselgenerators:oil_barrel
+cmd item replace entity @a container.31 with createdieselgenerators:orange_concrete_encased_fluid_pipe
+cmd item replace entity @a container.32 with createdieselgenerators:pink_concrete_encased_fluid_pipe
+cmd item replace entity @a container.33 with createdieselgenerators:powered_engine_shaft
+cmd item replace entity @a container.34 with createdieselgenerators:pumpjack_bearing
+cmd item replace entity @a container.35 with createdieselgenerators:pumpjack_bearing_b
+sleep 1
+key e
+sleep 2
+move 700 150
+shot
+key Escape
+sleep 1
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:pumpjack_crank
+cmd item replace entity @a container.1 with createdieselgenerators:pumpjack_head
+cmd item replace entity @a container.2 with createdieselgenerators:pumpjack_hole
+cmd item replace entity @a container.3 with createdieselgenerators:purple_concrete_encased_fluid_pipe
+cmd item replace entity @a container.4 with createdieselgenerators:red_concrete_encased_fluid_pipe
+cmd item replace entity @a container.5 with createdieselgenerators:sheet_metal_panel
+cmd item replace entity @a container.6 with createdieselgenerators:white_concrete_encased_fluid_pipe
+cmd item replace entity @a container.7 with createdieselgenerators:yellow_concrete_encased_fluid_pipe
+sleep 1
+key e
+sleep 2
+move 700 150
+shot
+key Escape
+sleep 1
+cmd clear @a
+cmd item replace entity @a container.0 with createdieselgenerators:diesel_engine
+cmd item replace entity @a container.1 with createdieselgenerators:pumpjack_crank
+key e
+sleep 2
+move 496 494
+sleep 1
+shot
+keydown w
+sleep 3
+keyup w
+sleep 6
+shot
 sleep 12
 shot
-cmd say CHECK distillation
-cmd data get block 38 201 10
-cmd data get block 38 202 10
-cmd data get block 38 203 10
-cmd item replace entity @a armor.head with create:goggles
-cmd tp @a -1.5 201 12.5 -90 0
-sleep 4
+key Escape
+sleep 1
+move 532 494
+sleep 1
+keydown w
+sleep 3
+keyup w
+sleep 15
 shot
-cmd tp @a 44.5 201 7.5 0 5
-sleep 4
+key Escape
+sleep 1
+key Escape
+sleep 1
+cmd gamemode creative @a
+cmd tp @a 5.5 200 -20.5 180 0
+cmd clear @a
+cmd item replace entity @a hotbar.0 with createdieselgenerators:hammer
+cmd item replace entity @a weapon.offhand with minecraft:iron_ingot 4
+key 1
+sleep 2
 shot
-cmd tp @a 52.5 202 6.5 0 15
-sleep 4
+mdown 3
+sleep 1
 shot
-cmd tp @a 60.5 202 6.5 0 15
-sleep 4
+sleep 3
+mup 3
+sleep 1
+cmd say CHECK client hammer
+cmd data get entity @p Inventory
+cmd item replace entity @a hotbar.1 with createdieselgenerators:wire_cutters
+cmd item replace entity @a weapon.offhand with minecraft:oak_planks 4
+key 2
+sleep 2
+mdown 3
+sleep 1
+shot
+sleep 3
+mup 3
+sleep 1
+cmd say CHECK client wire cutters
+cmd data get entity @p Inventory
+cmd item replace entity @a weapon.offhand with minecraft:air
+cmd item replace entity @a hotbar.2 with createdieselgenerators:chemical_sprayer[createdieselgenerators:fluid_contents={id:"minecraft:water",amount:81000}]
+key 3
+sleep 2
+shot
+mdown 3
+sleep 2
+shot
+mup 3
+cmd say CHECK client sprayer
+cmd data get entity @p SelectedItem
+cmd item replace entity @a hotbar.3 with createdieselgenerators:chemical_sprayer_lighter[createdieselgenerators:fluid_contents={id:"createdieselgenerators:gasoline",amount:81000}]
+key 4
+sleep 2
+mdown 3
+sleep 2
+shot
+mup 3
+sleep 1
+cmd item replace entity @a hotbar.4 with createdieselgenerators:lighter
+key 5
+sleep 2
+rclick 640 360
+sleep 1
+shot
+cmd item replace entity @a hotbar.5 with createdieselgenerators:oil_scanner
+key 6
+sleep 2
+rclick 640 360
+sleep 3
+shot
+cmd item replace entity @a hotbar.6 with createdieselgenerators:entity_filter
+key 7
+sleep 2
+rclick 640 360
+sleep 3
+shot
+key Escape
+sleep 1
+cmd item replace entity @a hotbar.7 with createdieselgenerators:canister
+cmd item replace entity @a hotbar.8 with createdieselgenerators:track_layers_bag
+key 8
+sleep 1
+shot
+key 9
+sleep 1
 shot
 cmd say CHECK final
-cmd data get block 28 202 8
+cmd say CHECK client S5b tank 2
+cmd data get block 42 202 10
 cmd data get block 28 202 11
