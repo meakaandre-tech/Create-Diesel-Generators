@@ -1,17 +1,22 @@
 package com.jesz.createdieselgenerators.content.oil_barrel;
 
+import com.jesz.createdieselgenerators.CDGFluids;
+import com.zurrtum.create.content.fluids.tank.FluidTankBlockEntity;
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
+import com.jesz.createdieselgenerators.fluid.SmartFluidTank;
+import com.zurrtum.create.foundation.fluid.FluidTank;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.content.distillation.DistillationTankBlockEntity;
 import com.zurrtum.create.AllBlockEntityTypes;
 import com.zurrtum.create.api.connectivity.ConnectivityHandler;
-import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.foundation.blockEntity.IMultiBlockEntityContainer;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
-import com.simibubi.create.foundation.fluid.SmartFluidTank;
 import com.zurrtum.create.infrastructure.config.AllConfigs;
-import com.zurrtum.create.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -19,7 +24,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,10 +35,10 @@ import java.util.Objects;
 
 import static com.jesz.createdieselgenerators.content.oil_barrel.OilBarrelBlock.AXIS;
 
-public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBlockEntityContainer.Fluid, IHaveGoggleInformation {
+public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBlockEntityContainer.Fluid {
 
-    protected IFluidHandler fluidCapability;
-    protected FluidTank tankInventory;
+    public FluidInventory fluidCapability;
+    public SmartFluidTank tankInventory;
     protected BlockPos controller;
     protected BlockPos lastKnownPos;
     protected boolean updateConnectivity;
@@ -109,6 +113,13 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
     public boolean isController() {
         return controller == null || worldPosition.getX() == controller.getX()
                 && worldPosition.getY() == controller.getY() && worldPosition.getZ() == controller.getZ();
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        level.removeBlockEntity(pos);
+        ConnectivityHandler.splitMulti(this);
     }
 
     @Override
@@ -203,12 +214,11 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
         sendData();
     }
 
-    void refreshCapability() {
+    public void refreshCapability() {
         fluidCapability = handlerForCapability();
-        invalidateCapabilities();
     }
 
-    private IFluidHandler handlerForCapability() {
+    private FluidInventory handlerForCapability() {
         return isController() ? tankInventory
                 : getControllerBE() != null ? getControllerBE().handlerForCapability() : new FluidTank(0);
     }
@@ -219,14 +229,6 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
     }
 
     @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        OilBarrelBlockEntity controllerBE = getControllerBE();
-        if (controllerBE == null)
-            return false;
-        return containedFluidTooltip(tooltip, isPlayerSneaking,
-                level.getCapability(Capabilities.FluidHandler.BLOCK, controllerBE.getBlockPos(), null));
-    }
-    @Override
     protected void read(ValueInput tag, boolean clientPacket) {
         super.read(tag, clientPacket);
 
@@ -234,18 +236,15 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
         int prevSize = width;
         int prevHeight = height;
 
-        updateConnectivity = tag.contains("Uninitialized");
+        updateConnectivity = tag.getBooleanOr("Uninitialized", false);
         controller = null;
         lastKnownPos = null;
-
-        if (tag.contains("LastKnownPos"))
-            lastKnownPos = NBTHelper.readBlockPos(tag,"LastKnownPos");
-        if (tag.contains("Controller"))
+            lastKnownPos = tag.read("LastKnownPos", BlockPos.CODEC).orElse(null);
             controller = tag.read("Controller", BlockPos.CODEC).orElse(null);
 
         if (isController()) {
-            width = tag.getIntOr("Size", 0);
-            height = tag.getIntOr("Height", 0);
+            width = tag.getIntOr("Size", 1);
+            height = tag.getIntOr("Height", 1);
             tankInventory.setCapacity(getTotalTankSize() * getCapacityMultiplier());
             tankInventory.readFrom(tag, "TankContent");
 //            if (tankInventory.getSpace() < 0)
@@ -290,24 +289,12 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
             tag.putBoolean("LazySync", true);
     }
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                CDGBlockEntityTypes.OIL_BARREL.get(),
-                (be, context) -> {
-                    if (be.fluidCapability == null)
-                        be.refreshCapability();
-                    return be.fluidCapability;
-                }
-        );
-    }
-
     public int getTotalTankSize() {
         return width * width * height;
     }
 
     public static int getCapacityMultiplier() {
-        return AllConfigs.server().fluids.fluidTankCapacity.get() * 1000;
+        return FluidTankBlockEntity.getCapacityMultiplier();
     }
 
     @Override
@@ -372,7 +359,7 @@ public class OilBarrelBlockEntity extends SmartBlockEntity implements IMultiBloc
     }
 
     @Override
-    public IFluidTank getTank(int tank) {
+    public FluidTank getTank(int tank) {
         return tankInventory;
     }
 

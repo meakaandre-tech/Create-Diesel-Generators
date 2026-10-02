@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators;
 
+import com.jesz.createdieselgenerators.content.distillation.DistillationTankBlockEntity;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackCrankBlockEntity;
 import com.jesz.createdieselgenerators.content.pumpjack.PumpjackHoleBlockEntity;
 import com.zurrtum.create.content.contraptions.behaviour.MovementContext;
@@ -31,6 +32,8 @@ public class ClientHooks {
     public static Consumer<SmartBlockEntity> ENGINE_SOUND_TICK = be -> {};
     /** Ticks the looping bubbling sound of a pumpjack hole. */
     public static Consumer<PumpjackHoleBlockEntity> PUMPJACK_SOUND_TICK = be -> {};
+    /** Ticks the bubbling sound of a running distillation tower. */
+    public static Consumer<DistillationTankBlockEntity> DISTILLATION_SOUND_TICK = be -> {};
     /** Ticks the sounds of a pumpjack crank. */
     public static Consumer<PumpjackCrankBlockEntity> CRANK_SOUND_TICK = be -> {};
     /** Ticks the engine sound of a diesel engine riding on a train. */

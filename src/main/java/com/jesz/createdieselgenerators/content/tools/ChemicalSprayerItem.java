@@ -8,7 +8,6 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import java.util.function.Consumer;
 
 import com.jesz.createdieselgenerators.CDGRegistries;
-import com.jesz.createdieselgenerators.content.tools.wire_cutters.WireCuttersItemRenderer;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
 import com.zurrtum.create.AllSoundEvents;
 import net.minecraft.network.chat.Component;

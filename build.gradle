@@ -13,6 +13,11 @@ repositories {
     mavenCentral()
 }
 
+loom {
+    // Create Fly's own class tweaker, extracted from its jar by CI; compile-time only (Create Fly applies it at runtime)
+    accessWidenerPath = file("libs/create.classtweaker")
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"

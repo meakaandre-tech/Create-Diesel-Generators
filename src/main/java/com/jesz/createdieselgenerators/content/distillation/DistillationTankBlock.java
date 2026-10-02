@@ -1,5 +1,10 @@
 package com.jesz.createdieselgenerators.content.distillation;
 
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
+import com.zurrtum.create.foundation.fluid.FluidHelper;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.util.RandomSource;
@@ -47,7 +52,12 @@ import java.util.List;
 
 import static com.jesz.createdieselgenerators.CDGItems.DISTILLATION_CONTROLLER;
 
-public class DistillationTankBlock extends Block implements IBE<DistillationTankBlockEntity>, IWrenchable, SpecialBlockItemRequirement {
+public class DistillationTankBlock extends Block implements IBE<DistillationTankBlockEntity>, IWrenchable, SpecialBlockItemRequirement, FluidInventoryProvider<DistillationTankBlockEntity> {
+    @Override
+    public FluidInventory getFluidInventory(LevelAccessor world, BlockPos pos, BlockState state, DistillationTankBlockEntity be, Direction side) {
+        return be.getFluidInventory(side);
+    }
+
     public static final BooleanProperty TOP = BooleanProperty.create("top");
     public static final BooleanProperty BOTTOM = BooleanProperty.create("bottom");
     public static final EnumProperty<FluidTankBlock.Shape> SHAPE = EnumProperty.create("shape", FluidTankBlock.Shape.class);
@@ -66,8 +76,8 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
         if (context.getLevel().getBlockEntity(context.getClickedPos()) instanceof DistillationTankBlockEntity dtbe){
             int width = dtbe.getControllerBE().getWidth();
             BlockPos pos = dtbe.getController();
-            IFluidHandler tank = context.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, dtbe.getBlockPos(), null);
-            FluidStack stackInTank = tank == null ? FluidStack.EMPTY : tank.getFluidInTank(0);
+            FluidInventory tank = FluidHelper.getFluidInventory(context.getLevel(), dtbe.getBlockPos(), null);
+            FluidStack stackInTank = FluidUtil.getFluidInTank(tank, 0).copy();
 
             for (int x = 0; x < width; x++) {
                 for (int z = 0; z < width; z++) {
@@ -77,7 +87,7 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
                         for (int i = 0; i < 30; i++) {
                             Vec3 offset = VecHelper.offsetRandomly(VecHelper.getCenterOf(pos.offset(x, 0, z)), context.getLevel().getRandom(), .3f);
                             Vec3 motion = VecHelper.offsetRandomly(Vec3.ZERO, context.getLevel().getRandom(), .1f);
-                            context.getLevel().addParticle(new ItemParticleOption(ParticleTypes.ITEM, DISTILLATION_CONTROLLER.asStack()), offset.x(), offset.y(),
+                            context.getLevel().addParticle(new ItemParticleOption(ParticleTypes.ITEM, DISTILLATION_CONTROLLER.get()), offset.x(), offset.y(),
                                     offset.z(), motion.x(), motion.y(), motion.z());
                         }
                     }
@@ -85,9 +95,9 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
             }
             AllSoundEvents.WRENCH_REMOVE.playAt(context.getLevel(), pos.getX() + (double) width / 2, pos.getY() + 0.5, pos.getZ() + (double) width / 2, 2f, 1f, false);
             if (!stackInTank.isEmpty() && context.getLevel().getBlockEntity(pos) instanceof FluidTankBlockEntity be){
-                IFluidHandler fTank = context.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, be.getBlockPos(), null);
+                FluidInventory fTank = FluidHelper.getFluidInventory(context.getLevel(), be.getBlockPos(), null);
                 if (fTank != null)
-                    fTank.fill(stackInTank, false);
+                    FluidUtil.fill(fTank, stackInTank, false);
             }
             if (!context.getPlayer().isCreative())
                 context.getPlayer().getInventory().placeItemBackInInventory(DISTILLATION_CONTROLLER.asStack(width*width));
@@ -128,19 +138,7 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
         return InteractionResult.SUCCESS;
     }
     @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (state.hasBlockEntity() && (state.getBlock() != newState.getBlock() || !newState.hasBlockEntity())) {
-            BlockEntity be = world.getBlockEntity(pos);
-            if (!(be instanceof DistillationTankBlockEntity))
-                return;
-            DistillationTankBlockEntity tankBE = (DistillationTankBlockEntity) be;
-            world.removeBlockEntity(pos);
-            ConnectivityHandler.splitMulti(tankBE);
-        }
-    }
-
-    @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
         return new ItemStack(AllBlocks.FLUID_TANK);
     }
 

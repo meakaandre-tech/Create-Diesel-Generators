@@ -1,5 +1,8 @@
 package com.jesz.createdieselgenerators.content.distillation;
 
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
+import com.zurrtum.create.foundation.fluid.FluidHelper;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
 import com.jesz.createdieselgenerators.CDGBlocks;
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.zurrtum.create.AllBlocks;
@@ -48,8 +51,8 @@ public class DistillationControllerItem extends Item {
             return InteractionResult.FAIL;
         }
 
-        IFluidHandler tank = context.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, ftbe.getBlockPos(), null);
-        FluidStack fluidInTank = tank.getFluidInTank(0);
+        FluidInventory tank = FluidHelper.getFluidInventory(context.getLevel(), ftbe.getBlockPos(), null);
+        FluidStack fluidInTank = FluidUtil.getFluidInTank(tank, 0).copy();
         List<BlockPos> positions = new ArrayList<>();
 
         for (int y = 0; y < height; y++) {
@@ -77,7 +80,7 @@ public class DistillationControllerItem extends Item {
                 for (int i = 0; i < 30; i++) {
                     Vec3 offset = VecHelper.offsetRandomly(VecHelper.getCenterOf(pos), context.getLevel().getRandom(), .3f);
                     Vec3 motion = VecHelper.offsetRandomly(Vec3.ZERO, context.getLevel().getRandom(), .1f);
-                    context.getLevel().addParticle(new ItemParticleOption(ParticleTypes.ITEM, itemInHand), offset.x(), offset.y(),
+                    context.getLevel().addParticle(new ItemParticleOption(ParticleTypes.ITEM, this), offset.x(), offset.y(),
                             offset.z(), motion.x(), motion.y(), motion.z());
                 }
             }
@@ -92,9 +95,9 @@ public class DistillationControllerItem extends Item {
             be.updateConnectivity();
             be.updateVerticalMulti();
             be.updateTemperature();
-            IFluidHandler distillerTank = context.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, controllerPos, null);
+            FluidInventory distillerTank = FluidHelper.getFluidInventory(context.getLevel(), controllerPos, null);
             if (distillerTank != null)
-                distillerTank.fill(fluidInTank, false);
+                FluidUtil.fill(distillerTank, fluidInTank, false);
         }
 
         return InteractionResult.SUCCESS;

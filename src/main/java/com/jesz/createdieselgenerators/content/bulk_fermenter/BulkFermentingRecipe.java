@@ -1,55 +1,65 @@
 package com.jesz.createdieselgenerators.content.bulk_fermenter;
 
 import com.jesz.createdieselgenerators.CDGRecipes;
-import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
-import com.zurrtum.create.content.processing.recipe.ProcessingOutput;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
-import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.zurrtum.create.catnip.data.Iterate;
-import net.minecraft.core.NonNullList;
+import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
+import com.zurrtum.create.content.processing.recipe.HeatCondition;
+import com.zurrtum.create.content.processing.recipe.ProcessingOutput;
+import com.zurrtum.create.foundation.fluid.FluidIngredient;
+import com.zurrtum.create.foundation.fluid.FluidTank;
+import com.zurrtum.create.foundation.recipe.CreateRecipe;
+import com.zurrtum.create.foundation.recipe.TimedRecipe;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import com.zurrtum.create.infrastructure.fluids.FluidStack;
-import com.zurrtum.create.foundation.fluid.FluidTank;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
-public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> {
-    public BulkFermentingRecipe(ProcessingRecipeParams params){
-        super(CDGRecipes.BULK_FERMENTING, params);
-    }
-    @Override
-    protected int getMaxInputCount() {
-        return 9;
+/**
+ * Items and fluids in, items and fluids out, inside a Bulk Fermenter. Fluid amounts are droplets (81 per mB).
+ * Ingredients are listed one entry per consumed item, as in the original format.
+ */
+public record BulkFermentingRecipe(int time, List<ProcessingOutput> results, List<FluidStack> fluidResults,
+                                   HeatCondition heat, List<FluidIngredient> fluidIngredients,
+                                   List<Ingredient> ingredients) implements CreateRecipe<RecipeInput>, TimedRecipe {
+    public static final MapCodec<BulkFermentingRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.INT.optionalFieldOf("processing_time", 100).forGetter(BulkFermentingRecipe::time),
+            ProcessingOutput.CODEC.listOf(0, 4).optionalFieldOf("results", List.of()).forGetter(BulkFermentingRecipe::results),
+            FluidStack.CODEC.listOf(0, 2).optionalFieldOf("fluid_results", List.of()).forGetter(BulkFermentingRecipe::fluidResults),
+            HeatCondition.CODEC.optionalFieldOf("heat_requirement", HeatCondition.NONE).forGetter(BulkFermentingRecipe::heat),
+            FluidIngredient.CODEC.listOf(0, 2).optionalFieldOf("fluid_ingredients", List.of()).forGetter(BulkFermentingRecipe::fluidIngredients),
+            Ingredient.CODEC.listOf(0, 9).optionalFieldOf("ingredients", List.of()).forGetter(BulkFermentingRecipe::ingredients)
+    ).apply(instance, BulkFermentingRecipe::new));
+    public static final StreamCodec<RegistryFriendlyByteBuf, BulkFermentingRecipe> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT, BulkFermentingRecipe::time,
+            ProcessingOutput.STREAM_CODEC.apply(ByteBufCodecs.list()), BulkFermentingRecipe::results,
+            FluidStack.PACKET_CODEC.apply(ByteBufCodecs.list()), BulkFermentingRecipe::fluidResults,
+            HeatCondition.PACKET_CODEC, BulkFermentingRecipe::heat,
+            FluidIngredient.PACKET_CODEC.apply(ByteBufCodecs.list()), BulkFermentingRecipe::fluidIngredients,
+            Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()), BulkFermentingRecipe::ingredients,
+            BulkFermentingRecipe::new
+    );
+    public static final RecipeSerializer<BulkFermentingRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+
+    public int getProcessingDuration() {
+        return time;
     }
 
-    @Override
-    protected int getMaxOutputCount() {
-        return 4;
-    }
-
-    @Override
-    protected int getMaxFluidInputCount() {
-        return 2;
-    }
-
-    @Override
-    protected int getMaxFluidOutputCount() {
-        return 2;
-    }
-
-    @Override
-    protected boolean canRequireHeat() {
-        return true;
-    }
-
-    @Override
-    protected boolean canSpecifyDuration() {
-        return true;
+    public HeatCondition getRequiredHeat() {
+        return heat;
     }
 
     @Override
@@ -57,12 +67,16 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
         return false;
     }
 
+    @Override
+    public ItemStack assemble(RecipeInput input) {
+        return ItemStack.EMPTY;
+    }
+
     public boolean apply(BulkFermenterBlockEntity be, boolean test) {
-        IItemHandler availableItems = be.itemHandler;
-        IFluidHandler fluidCap = be.fluidCapability;
+        Container availableItems = be.itemHandler;
 
         if (availableItems == null ||
-                !(fluidCap instanceof BulkFermenterBlockEntity.BulkFermenterFluidHandler availableFluids))
+                !(be.fluidCapability instanceof BulkFermenterBlockEntity.BulkFermenterFluidHandler availableFluids))
             return false;
 
 
@@ -73,29 +87,25 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
         List<ItemStack> recipeOutputItems = new ArrayList<>();
         List<FluidStack> recipeOutputFluids = new ArrayList<>();
 
-        List<Ingredient> ingredients = new LinkedList<>(getIngredients());
-        List<SizedFluidIngredient> fluidIngredients = getFluidIngredients();
-
         for (boolean simulate : Iterate.trueAndFalse) {
 
             if (!simulate && test)
                 return true;
 
-            int[] extractedItemsFromSlot = new int[availableItems.getSlots()];
-            int[] extractedFluidsFromTank = new int[availableFluids.getTanks()];
+            int[] extractedItemsFromSlot = new int[availableItems.getContainerSize()];
+            int[] extractedFluidsFromTank = new int[availableFluids.size()];
 
             Ingredients:
             for (Ingredient ingredient : ingredients) {
-                for (int slot = 0; slot < availableItems.getSlots(); slot++) {
-                    if (simulate && availableItems.getStackInSlot(slot)
-                            .getCount() <= extractedItemsFromSlot[slot])
+                for (int slot = 0; slot < availableItems.getContainerSize(); slot++) {
+                    ItemStack inSlot = availableItems.getItem(slot);
+                    if (simulate && inSlot.getCount() <= extractedItemsFromSlot[slot])
                         continue;
 
-                    ItemStack extracted = availableItems.extractItem(slot, 1, true);
-                    if (!ingredient.test(extracted))
+                    if (inSlot.isEmpty() || !ingredient.test(inSlot))
                         continue;
                     if (!simulate)
-                        availableItems.extractItem(slot, 1, false);
+                        availableItems.removeItem(slot, 1);
                     extractedItemsFromSlot[slot]++;
                     continue Ingredients;
                 }
@@ -105,18 +115,21 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
 
             boolean fluidsAffected = false;
             FluidIngredients:
-            for (SizedFluidIngredient fluidIngredient : fluidIngredients) {
+            for (FluidIngredient fluidIngredient : fluidIngredients) {
                 int amountRequired = fluidIngredient.amount();
 
-                for (int tank = 0; tank < availableFluids.getTanks(); tank++) {
-                    FluidStack fluidStack = availableFluids.getFluidInTank(tank);
+                for (int tank = 0; tank < availableFluids.size(); tank++) {
+                    FluidStack fluidStack = availableFluids.getStack(tank);
                     if (simulate && fluidStack.getAmount() <= extractedFluidsFromTank[tank])
                         continue;
-                    if (!fluidIngredient.test(fluidStack))
+                    if (fluidStack.isEmpty() || !fluidIngredient.test(fluidStack))
                         continue;
                     int drainedAmount = Math.min(amountRequired, fluidStack.getAmount());
                     if (!simulate) {
-                        fluidStack.shrink(drainedAmount);
+                        if (drainedAmount >= fluidStack.getAmount())
+                            availableFluids.tanks.get(tank).setFluid(FluidStack.EMPTY);
+                        else
+                            fluidStack.setAmount(fluidStack.getAmount() - drainedAmount);
                         fluidsAffected = true;
                     }
                     amountRequired -= drainedAmount;
@@ -133,9 +146,9 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
                 be.onFluidStackChanged();
 
             if (simulate) {
-                recipeOutputItems.addAll(rollResults(be.getLevel().random));
+                ProcessingOutput.rollOutput(be.getLevel().getRandom(), results, recipeOutputItems::add);
 
-                for (FluidStack fluidStack : getFluidResults())
+                for (FluidStack fluidStack : fluidResults)
                     if (!fluidStack.isEmpty())
                         recipeOutputFluids.add(fluidStack);
             }
@@ -148,24 +161,23 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
     }
 
     private boolean applyOutputs(BulkFermenterBlockEntity be, List<ItemStack> outputItems, List<FluidStack> outputFluids, boolean test) {
-        IItemHandler availableItems = be.itemHandler;
-        IFluidHandler fluidCap = be.fluidCapability;
+        Container availableItems = be.itemHandler;
 
-        if (availableItems == null || !(fluidCap instanceof BulkFermenterBlockEntity.BulkFermenterFluidHandler availableFluids))
+        if (availableItems == null || !(be.fluidCapability instanceof BulkFermenterBlockEntity.BulkFermenterFluidHandler availableFluids))
             return false;
 
         List<ItemStack> items = new ArrayList<>();
-        for (int i = 0; i < availableItems.getSlots(); i++)
-            items.add(availableItems.getStackInSlot(i).copy());
+        for (int i = 0; i < availableItems.getContainerSize(); i++)
+            items.add(availableItems.getItem(i).copy());
 
 
-        for (ProcessingOutput result : getRollableResults()) {
-            ItemStack stack = result.getStack().copy();
+        for (ProcessingOutput result : results) {
+            ItemStack stack = result.create();
 
             int left = stack.getCount();
             for (ItemStack slot : items) {
                 if (ItemStack.isSameItemSameComponents(slot, stack)) {
-                    if ((availableItems.getSlotLimit(0) - slot.getCount()) >= left) {
+                    if ((availableItems.getMaxStackSize() - slot.getCount()) >= left) {
                         left = 0;
                         break;
                     } else
@@ -185,14 +197,14 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
             }
         }
 
-        boolean[] emptyTanksFilled = new boolean[availableFluids.tankCount];
-        for (FluidStack result : getFluidResults()) {
+        boolean[] emptyTanksFilled = new boolean[availableFluids.size()];
+        for (FluidStack result : fluidResults) {
             result = result.copy();
 
             boolean filled = false;
             for (FluidTank tank : availableFluids.tanks) {
-                if (FluidStack.isSameFluidSameComponents(tank.getFluid(), result)) {
-                    if (tank.fill(result, true) < result.getAmount())
+                if (FluidUtil.isSameFluidSameComponents(tank.getFluid(), result)) {
+                    if (FluidUtil.fill(tank, result, true) < result.getAmount())
                         return false;
                     else
                         filled = true;
@@ -200,12 +212,12 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
             }
 
             if (!filled) {
-                NonNullList<FluidTank> tanks = availableFluids.tanks;
+                List<FluidTank> tanks = availableFluids.tanks;
                 for (int i = 0; i < tanks.size(); i++) {
                     FluidTank tank = tanks.get(i);
 
                     if (tank.getFluid().isEmpty() && !emptyTanksFilled[i]) {
-                        if (tank.fill(result, true) < result.getAmount())
+                        if (FluidUtil.fill(tank, result, true) < result.getAmount())
                             return false;
                         else
                             emptyTanksFilled[i] = true;
@@ -217,14 +229,22 @@ public class BulkFermentingRecipe extends StandardProcessingRecipe<RecipeInput> 
         if (test)
             return true;
 
-        for (ItemStack stack : outputItems) {
-            stack = stack.copy();
-            ItemHandlerHelper.insertItemStacked(availableItems, stack, false);
-        }
+        for (ItemStack stack : outputItems)
+            be.insertStacked(stack.copy());
 
         for (FluidStack output : outputFluids)
-            availableFluids.fill(output.copy(), false);
+            availableFluids.insert(output.copy());
 
         return true;
+    }
+
+    @Override
+    public RecipeSerializer<BulkFermentingRecipe> getSerializer() {
+        return CDGRecipes.BULK_FERMENTING.getSerializer();
+    }
+
+    @Override
+    public RecipeType<BulkFermentingRecipe> getType() {
+        return CDGRecipes.BULK_FERMENTING.getType();
     }
 }

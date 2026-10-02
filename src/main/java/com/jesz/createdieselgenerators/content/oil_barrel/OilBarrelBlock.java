@@ -1,5 +1,9 @@
 package com.jesz.createdieselgenerators.content.oil_barrel;
 
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.level.LevelAccessor;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.zurrtum.create.api.connectivity.ConnectivityHandler;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
@@ -31,7 +35,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.Locale;
 
-public class OilBarrelBlock extends Block implements IBE<OilBarrelBlockEntity>, IWrenchable {
+public class OilBarrelBlock extends Block implements IBE<OilBarrelBlockEntity>, IWrenchable, FluidInventoryProvider<OilBarrelBlockEntity> {
 
     public static final EnumProperty<OilBarrelColor> OIL_BARREL_COLOR = EnumProperty.create("color", OilBarrelColor.class);
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
@@ -64,18 +68,6 @@ public class OilBarrelBlock extends Block implements IBE<OilBarrelBlockEntity>, 
     }
 
     @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (state.hasBlockEntity() && (state.getBlock() != newState.getBlock() || !newState.hasBlockEntity())) {
-            BlockEntity be = world.getBlockEntity(pos);
-            if (!(be instanceof OilBarrelBlockEntity))
-                return;
-            OilBarrelBlockEntity tankBE = (OilBarrelBlockEntity) be;
-            world.removeBlockEntity(pos);
-            ConnectivityHandler.splitMulti(tankBE);
-        }
-    }
-
-    @Override
     public InteractionResult onWrenched(BlockState state, UseOnContext context) {
         if (context.getClickedFace().getAxis() != state.getValue(AXIS)) {
             BlockEntity be = context.getLevel().getBlockEntity(context.getClickedPos());
@@ -89,9 +81,10 @@ public class OilBarrelBlock extends Block implements IBE<OilBarrelBlockEntity>, 
 
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (!(stack.getItem() instanceof DyeItem di))
+        DyeColor dyeColor = stack.get(DataComponents.DYE);
+        if (!(stack.getItem() instanceof DyeItem) || dyeColor == null)
             return InteractionResult.TRY_WITH_EMPTY_HAND;
-        OilBarrelColor color = OilBarrelColor.getForDyeColor(di.getDyeColor());
+        OilBarrelColor color = OilBarrelColor.getForDyeColor(dyeColor);
 
         if (state.getValue(OIL_BARREL_COLOR) == color) {
             if (level.getBlockEntity(pos) instanceof OilBarrelBlockEntity be){
@@ -137,18 +130,11 @@ public class OilBarrelBlock extends Block implements IBE<OilBarrelBlockEntity>, 
         return CDGBlockEntityTypes.OIL_BARREL.get();
     }
 
-    // Tanks are less noisy when placed in batch
-    public static final SoundType SILENCED_METAL =
-            new DeferredSoundType(0.1F, 1.5F, () -> SoundEvents.METAL_BREAK, () -> SoundEvents.METAL_STEP,
-                    () -> SoundEvents.METAL_PLACE, () -> SoundEvents.METAL_HIT, () -> SoundEvents.METAL_FALL);
-
     @Override
-    public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, Entity entity) {
-        SoundType soundType = super.getSoundType(state, world, pos, entity);
-        if (entity != null && entity.getPersistentData()
-                .contains("SilenceTankSound"))
-            return SILENCED_METAL;
-        return soundType;
+    public FluidInventory getFluidInventory(LevelAccessor world, BlockPos pos, BlockState state, OilBarrelBlockEntity be, Direction side) {
+        if (be.fluidCapability == null)
+            be.refreshCapability();
+        return be.fluidCapability;
     }
 
     public enum OilBarrelColor implements StringRepresentable{

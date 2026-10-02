@@ -3,7 +3,7 @@ package com.jesz.createdieselgenerators.packets;
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
 import com.jesz.createdieselgenerators.content.entity_filter.EntityAttribute;
 import com.jesz.createdieselgenerators.content.entity_filter.EntityFilterMenu;
-import com.zurrtum.create.content.logistics.filter.AttributeFilterWhitelistMode;
+import com.zurrtum.create.infrastructure.component.AttributeFilterWhitelistMode;
 import com.zurrtum.create.infrastructure.packet.c2s.FilterScreenPacket;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;

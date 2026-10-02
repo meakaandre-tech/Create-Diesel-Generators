@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import com.jesz.createdieselgenerators.*;
 import com.jesz.createdieselgenerators.content.tools.FueledToolItem;
 import com.jesz.createdieselgenerators.fuel_type.FuelType;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.storage.ValueInput;

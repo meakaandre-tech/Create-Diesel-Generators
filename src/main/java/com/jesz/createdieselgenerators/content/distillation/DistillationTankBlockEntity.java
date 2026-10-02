@@ -1,30 +1,31 @@
 package com.jesz.createdieselgenerators.content.distillation;
 
+import com.jesz.createdieselgenerators.CDGFluids;
+import com.zurrtum.create.content.fluids.tank.FluidTankBlockEntity;
+import com.jesz.createdieselgenerators.ClientHooks;
+import net.minecraft.server.level.ServerLevel;
+import java.util.ArrayList;
+import org.jspecify.annotations.Nullable;
+import com.jesz.createdieselgenerators.fluid.FluidUtil;
+import com.jesz.createdieselgenerators.fluid.SmartFluidTank;
+import com.zurrtum.create.foundation.fluid.FluidTank;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.jesz.createdieselgenerators.CDGRecipes;
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
 import com.zurrtum.create.api.connectivity.ConnectivityHandler;
-import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
-import com.zurrtum.create.client.api.goggles.IHaveHoveringInformation;
 import com.zurrtum.create.content.fluids.tank.FluidTankBlock;
 import com.zurrtum.create.content.processing.basin.BasinBlockEntity;
 import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
 import com.zurrtum.create.foundation.blockEntity.IMultiBlockEntityContainer;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
-import com.simibubi.create.foundation.fluid.SmartFluidTank;
-import com.zurrtum.create.client.foundation.item.TooltipHelper;
 import com.zurrtum.create.foundation.recipe.RecipeFinder;
-import com.zurrtum.create.client.foundation.utility.CreateLang;
 import com.zurrtum.create.infrastructure.config.AllConfigs;
 import com.zurrtum.create.catnip.animation.LerpedFloat;
-import com.zurrtum.create.client.catnip.lang.FontHelper;
-import com.zurrtum.create.client.catnip.lang.Lang;
-import com.zurrtum.create.catnip.nbt.NBTHelper;
-import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -32,17 +33,14 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import com.zurrtum.create.foundation.fluid.FluidTank;
 
@@ -51,13 +49,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class DistillationTankBlockEntity extends SmartBlockEntity implements IMultiBlockEntityContainer.Fluid, IHaveGoggleInformation, IHaveHoveringInformation {
+public class DistillationTankBlockEntity extends SmartBlockEntity implements IMultiBlockEntityContainer.Fluid {
     private static final int MAX_SIZE = 3;
 
     public float progress;
-    protected IFluidHandler fluidCapability;
+    public FluidInventory fluidCapability;
     protected boolean forceFluidLevelUpdate;
-    public FluidTank tankInventory;
+    public SmartFluidTank tankInventory;
     protected BlockPos controller;
     protected BlockPos lastKnownPos;
     protected boolean updateConnectivity;
@@ -66,7 +64,7 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
     protected int luminosity;
     protected int width;
     protected int height;
-    boolean tanksFull = false;
+    public boolean tanksFull = false;
 
     private static final int SYNC_RATE = 8;
     protected int syncCooldown;
@@ -132,12 +130,15 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
         ConnectivityHandler.formMulti(this);
     }
 
-    int processingTime = -1;
-    DistillationRecipe currentRecipe;
+    public int processingTime = -1;
+    /** Total duration of the running recipe; synced, because recipes are not known to the client. */
+    public int processingDuration;
+    public DistillationRecipe currentRecipe;
     private void startProcessing() {
         if(currentRecipe == null)
             return;
         processingTime = (currentRecipe.getProcessingDuration());
+        processingDuration = processingTime;
         if(!level.isClientSide())
             sendData();
     }
@@ -145,8 +146,14 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
     @Override
     public void tick() {
         boolean prevTanksFull = tanksFull;
+        if (level.isClientSide()) {
+            // the server runs the recipe; the client only animates the synced progress
+            if (isController() && processingTime > 0 && !tanksFull)
+                processingTime--;
+            progress = processingDuration > 0 && processingTime >= 0 ? (float) processingTime / processingDuration : 0;
+        } else
         tanksFull = false;
-        if (isController() && isBottom()) {
+        if (!level.isClientSide() && isController() && isBottom()) {
             if (processingTime >= 0 && currentRecipe == null) {
                 List<Recipe<?>> r = getMatchingRecipes();
                 if (!r.isEmpty())
@@ -250,7 +257,7 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
             fluidLevel.tickChaser();
 
         if (level.isClientSide())
-            CatnipServices.PLATFORM.executeOnClientOnly(() -> this::tickClient);
+            ClientHooks.DISTILLATION_SOUND_TICK.accept(this);
     }
 
     @Override
@@ -281,7 +288,9 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
     }
     protected List<Recipe<?>> getMatchingRecipes() {
 
-        List<RecipeHolder<? extends Recipe<?>>> list = RecipeFinder.get(getRecipeCacheKey(), level, recipe -> recipe.value().getType() == CDGRecipes.DISTILLATION.getType());
+        if (!(level instanceof ServerLevel serverLevel))
+            return new ArrayList<>();
+        List<RecipeHolder<?>> list = RecipeFinder.get(getRecipeCacheKey(), serverLevel, recipe -> recipe.value().getType() == CDGRecipes.DISTILLATION.getType());
         return list.stream()
                 .map(RecipeHolder::value)
                 .sorted((r1, r2) -> {
@@ -310,10 +319,9 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
         if(!tankInventory.isEmpty() && isController() && isBottom())
             checkForRecipes();
 
-        FluidType attributes = newFluidStack.getFluid()
-                .getFluidType();
-        int luminosity = (int) (attributes.getLightLevel(newFluidStack) / 1.2f);
-        boolean reversed = attributes.isLighterThanAir();
+        int luminosity = (int) (newFluidStack.getFluid().defaultFluidState().createLegacyBlock()
+                .getLightEmission() / 1.2f);
+        boolean reversed = false;
         int maxY = (int) ((getFillState() * height) + 1);
 
         for (int yOffset = 0; yOffset < height; yOffset++) {
@@ -462,12 +470,11 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
         sendData();
     }
 
-    private void refreshCapability() {
+    public void refreshCapability() {
         fluidCapability = handlerForCapability();
-        invalidateCapabilities();
     }
 
-    private IFluidHandler handlerForCapability() {
+    private FluidInventory handlerForCapability() {
         return isController() ? tankInventory
                 : getControllerBE() != null ? getControllerBE().handlerForCapability() : new FluidTank(0);
     }
@@ -486,15 +493,6 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
     }
 
     @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        DistillationTankBlockEntity controllerBE = getControllerBE();
-        if (controllerBE == null)
-            return false;
-        return containedFluidTooltip(tooltip, isPlayerSneaking,
-                level.getCapability(Capabilities.FluidHandler.BLOCK, controllerBE.getBlockPos(), null));
-    }
-
-    @Override
     protected void read(ValueInput tag, boolean clientPacket) {
         super.read(tag, clientPacket);
 
@@ -504,26 +502,24 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
         int prevLum = luminosity;
         tanksFull = tag.getBooleanOr("TanksFull", false);
 
-        updateConnectivity = tag.contains("Uninitialized");
+        updateConnectivity = tag.getBooleanOr("Uninitialized", false);
         luminosity = tag.getIntOr("Luminosity", 0);
         controller = null;
         lastKnownPos = null;
-
-        if (tag.contains("LastKnownPos"))
             lastKnownPos = tag.read("LastKnownPos", BlockPos.CODEC).orElse(null);
-        if (tag.contains("Controller"))
             controller = tag.read("Controller", BlockPos.CODEC).orElse(null);
 
         if (isController()) {
             window = tag.getBooleanOr("Window", false);
-            width = tag.getIntOr("Size", 0);
-            height = tag.getIntOr("Height", 0);
+            width = tag.getIntOr("Size", 1);
+            height = tag.getIntOr("Height", 1);
             tankInventory.setCapacity(getTotalTankSize() * getCapacityMultiplier());
             tankInventory.readFrom(tag, "TankContent");
             if (tankInventory.getSpace() < 0)
                 tankInventory.drain(-tankInventory.getSpace(), false);
         }
-        if (tag.contains("ForceFluidLevel") || fluidLevel == null)
+        boolean forceFluidLevel = tag.getBooleanOr("ForceFluidLevel", false);
+        if (forceFluidLevel || fluidLevel == null)
             fluidLevel = LerpedFloat.linear()
                     .startWithValue(getFillState());
 
@@ -543,26 +539,20 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
         }
         if (isController()) {
             float fillState = getFillState();
-            if (tag.contains("ForceFluidLevel") || fluidLevel == null)
+            if (forceFluidLevel || fluidLevel == null)
                 fluidLevel = LerpedFloat.linear()
                         .startWithValue(fillState);
             fluidLevel.chase(fillState, 0.5f, LerpedFloat.Chaser.EXP);
             processingTime = tag.getIntOr("Progress", 0);
+            processingDuration = tag.getIntOr("ProcessingDuration", 0);
         }
         if (luminosity != prevLum && hasLevel())
             level.getChunkSource()
                     .getLightEngine()
                     .checkBlock(worldPosition);
 
-        if (tag.contains("LazySync"))
+        if (tag.getBooleanOr("LazySync", false))
             fluidLevel.chase(fluidLevel.getChaseTarget(), 0.125f, LerpedFloat.Chaser.EXP);
-        updateTemperature();
-        List<Recipe<?>> r = getMatchingRecipes();
-        if (!r.isEmpty()) {
-            currentRecipe = (DistillationRecipe) r.get(0);
-            if(processingTime <= 0)
-                startProcessing();
-        }
     }
 
     public float getFillState() {
@@ -586,6 +576,7 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
             tag.putInt("Size", width);
             tag.putInt("Height", height);
             tag.putInt("Progress", processingTime);
+            tag.putInt("ProcessingDuration", processingDuration);
 
         }
         tag.putInt("Luminosity", luminosity);
@@ -597,18 +588,6 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
         if (queuedSync)
             tag.putBoolean("LazySync", true);
         forceFluidLevelUpdate = false;
-    }
-
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                CDGBlockEntityTypes.DISTILLATION_TANK.get(),
-                (be, context) -> {
-                    if (be.fluidCapability == null)
-                        be.refreshCapability();
-                    return be.fluidCapability;
-                }
-        );
     }
 
     @Override
@@ -626,7 +605,7 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
     }
 
     public static int getCapacityMultiplier() {
-        return AllConfigs.server().fluids.fluidTankCapacity.get()*1000;
+        return FluidTankBlockEntity.getCapacityMultiplier();
     }
 
     public LerpedFloat getFluidLevel() {
@@ -737,7 +716,7 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
     }
 
     @Override
-    public IFluidTank getTank(int tank) {
+    public FluidTank getTank(int tank) {
         return tankInventory;
     }
 
@@ -786,41 +765,8 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
         return false;
     }
 
-    @Override
-    public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        if (!isController()) {
-            DistillationTankBlockEntity controller = getControllerBE();
-            if (controller == null)
-                return false;
-            return controller.addToTooltip(tooltip, isPlayerSneaking);
-        }
-
-        DistillationTankBlockEntity bottomBe = level.getBlockEntity(getBlockPos().below(), CDGBlockEntityTypes.DISTILLATION_TANK.get()).orElse(null);
-
-        if (bottomBe != null && bottomBe.width == width && bottomBe.getController().equals(getController().below())) {
-            return bottomBe.addToTooltip(tooltip, isPlayerSneaking);
-        }
-
-        if (currentRecipe == null || !tanksFull)
-            return false;
-
-        Lang.builder(CreateDieselGenerators.ID)
-                .translate("hint.distiller_full.title")
-                .style(ChatFormatting.GOLD)
-                .forGoggles(tooltip);
-        Component hint =
-                Lang.builder(CreateDieselGenerators.ID)
-                .translate("hint.distiller_full")
-                .component();
-        List<Component> cutComponent = TooltipHelper.cutTextComponent(hint, FontHelper.Palette.GRAY_AND_WHITE);
-        for (Component component : cutComponent)
-            CreateLang.builder().add(component).forGoggles(tooltip);
-        return true;
-    }
-
-
     public void updateTemperature() {
-        if (!isBottom())
+        if (level == null || !isBottom())
             return;
         if (isController()) {
             highestHeatLevel = getHeat();
@@ -834,37 +780,16 @@ public class DistillationTankBlockEntity extends SmartBlockEntity implements IMu
             return;
         be.updateTemperature();
     }
-    protected DistillationSoundInstance soundInstance;
-    protected void tickClient() {
-        boolean isProcessing = isController() && isBottom() && processingTime > -1;
-
-        if (isProcessing) {
-            if (soundInstance == null || soundInstance.isStopped()) {
-                soundInstance = new DistillationSoundInstance(
-                        Vec3.atCenterOf(getBlockPos().offset(width / 2, height / 2, width / 2)));
-                Minecraft.getInstance().getSoundManager().play(soundInstance);
-            }
-        } else {
-            if (soundInstance != null) {
-                Minecraft.getInstance().getSoundManager().stop(soundInstance);
-                soundInstance = null;
-            }
-        }
+    public @Nullable FluidInventory getFluidInventory(@Nullable Direction side) {
+        if (fluidCapability == null)
+            refreshCapability();
+        return fluidCapability;
     }
-    public static class DistillationSoundInstance extends AbstractTickableSoundInstance {
-        public DistillationSoundInstance(Vec3 pos) {
-            super(SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.BLOCKS, RandomSource.create());
-            this.x = pos.x;
-            this.y = pos.y;
-            this.z = pos.z;
-            this.volume = 0.5f;
-            this.pitch = 0.45f;
-            this.looping = true;
-            this.delay = 0;
-            this.attenuation = Attenuation.LINEAR;
-        }
 
-        @Override
-        public void tick() {}
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        level.removeBlockEntity(pos);
+        ConnectivityHandler.splitMulti(this);
     }
 }

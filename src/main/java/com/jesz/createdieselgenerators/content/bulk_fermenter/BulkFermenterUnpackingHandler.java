@@ -5,7 +5,7 @@ import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.api.packager.unpacking.UnpackingHandler;
 import com.zurrtum.create.infrastructure.component.PackageOrderWithCrafts;
 import com.zurrtum.create.content.processing.basin.BasinBlockEntity;
-import com.zurrtum.create.impl.unpacking.BasinUnpackingHandler;
+import com.zurrtum.create.AllUnpackingHandlers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
@@ -29,7 +29,7 @@ public enum BulkFermenterUnpackingHandler implements UnpackingHandler {
         fermenter.packagerMode = true;
 
         try {
-            return UnpackingHandler.DEFAULT.unpack(level, pos, state, side, items, orderContext, simulate);
+            return AllUnpackingHandlers.DEFAULT.unpack(level, pos, state, side, items, orderContext, simulate);
         } finally {
             fermenter.packagerMode = false;
         }

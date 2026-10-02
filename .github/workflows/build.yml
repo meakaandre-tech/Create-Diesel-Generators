@@ -24,6 +24,8 @@ jobs:
         run: |
           mkdir -p libs
           curl -fsSL -o libs/create-fly-26.2.jar https://github.com/meakaandre-tech/Create-Fly/releases/download/pack-26.2-latest/create-fly-26.2.jar
+          # compile with Create Fly's class tweaker, so its injected interfaces and widened members are visible
+          unzip -o -j libs/create-fly-26.2.jar create.classtweaker -d libs/
           ls -l libs
       - name: Build
         shell: bash

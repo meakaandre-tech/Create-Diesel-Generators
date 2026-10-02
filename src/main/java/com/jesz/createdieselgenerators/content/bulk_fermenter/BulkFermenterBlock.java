@@ -7,21 +7,21 @@ import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
 import com.zurrtum.create.api.connectivity.ConnectivityHandler;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
-import com.zurrtum.create.foundation.item.ItemHelper;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider;
+import com.zurrtum.create.infrastructure.items.ItemInventoryProvider;
+import net.minecraft.world.Container;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class BulkFermenterBlock extends Block implements IBE<BulkFermenterBlockEntity>, IWrenchable {
+public class BulkFermenterBlock extends Block implements IBE<BulkFermenterBlockEntity>, IWrenchable, ItemInventoryProvider<BulkFermenterBlockEntity>, FluidInventoryProvider<BulkFermenterBlockEntity> {
     public BulkFermenterBlock(Properties properties) {
         super(properties);
     }
@@ -43,18 +43,6 @@ public class BulkFermenterBlock extends Block implements IBE<BulkFermenterBlockE
         withBlockEntityDo(world, pos, BulkFermenterBlockEntity::updateHeat);
     }
     @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (state.hasBlockEntity() && (state.getBlock() != newState.getBlock() || !newState.hasBlockEntity())) {
-            BlockEntity be = world.getBlockEntity(pos);
-            if (!(be instanceof BulkFermenterBlockEntity))
-                return;
-            BulkFermenterBlockEntity tankBE = (BulkFermenterBlockEntity) be;
-            ItemHelper.dropContents(world, pos, tankBE.inventory);
-            world.removeBlockEntity(pos);
-            ConnectivityHandler.splitMulti(tankBE);
-        }
-    }
-    @Override
     public Class<BulkFermenterBlockEntity> getBlockEntityClass() {
         return BulkFermenterBlockEntity.class;
     }
@@ -64,17 +52,16 @@ public class BulkFermenterBlock extends Block implements IBE<BulkFermenterBlockE
         return CDGBlockEntityTypes.BULK_FERMENTER.get();
     }
 
-    // Tanks are less noisy when placed in batch
-    public static final SoundType SILENCED_METAL =
-            new DeferredSoundType(0.1F, 1.5F, () -> SoundEvents.METAL_BREAK, () -> SoundEvents.METAL_STEP,
-                    () -> SoundEvents.METAL_PLACE, () -> SoundEvents.METAL_HIT, () -> SoundEvents.METAL_FALL);
+    @Override
+    public Container getInventory(LevelAccessor world, BlockPos pos, BlockState state, BulkFermenterBlockEntity be, Direction context) {
+        be.initCapability();
+        return be.itemHandler;
+    }
 
     @Override
-    public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, Entity entity) {
-        SoundType soundType = super.getSoundType(state, world, pos, entity);
-        if (entity != null && entity.getPersistentData()
-                .contains("SilenceTankSound"))
-            return SILENCED_METAL;
-        return soundType;
+    public FluidInventory getFluidInventory(LevelAccessor world, BlockPos pos, BlockState state, BulkFermenterBlockEntity be, Direction side) {
+        if (be.fluidCapability == null)
+            be.refreshCapability();
+        return be.fluidCapability;
     }
 }

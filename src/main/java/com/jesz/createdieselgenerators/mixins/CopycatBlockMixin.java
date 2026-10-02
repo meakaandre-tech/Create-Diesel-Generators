@@ -23,10 +23,11 @@ public class CopycatBlockMixin {
     @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true, remap = false)
     public void use(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
 
-        if (stack.getItem() instanceof DyeItem di) {
+        net.minecraft.world.item.DyeColor dyeColor = stack.get(net.minecraft.core.component.DataComponents.DYE);
+        if (stack.getItem() instanceof DyeItem && dyeColor != null) {
             if (level.getBlockEntity(pos) instanceof CopycatBlockEntity be){
                 if(CDGBlocks.OIL_BARREL.has(be.getMaterial()))
-                    be.setMaterial(be.getMaterial().setValue(OilBarrelBlock.OIL_BARREL_COLOR, OilBarrelBlock.OilBarrelColor.getForDyeColor(di.getDyeColor())));
+                    be.setMaterial(be.getMaterial().setValue(OilBarrelBlock.OIL_BARREL_COLOR, OilBarrelBlock.OilBarrelColor.getForDyeColor(dyeColor)));
             }
             if (!player.isCreative())
                 stack.shrink(1);
