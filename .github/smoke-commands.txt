@@ -1,0 +1,7 @@
+gamerule minecraft:respawn_radius 0
+gamerule minecraft:advance_time false
+gamerule minecraft:spawn_mobs false
+time set noon
+forceload add -16 -16 47 31
+fill -6 199 -12 40 199 20 minecraft:stone
+setworldspawn 5 200 -7 0 0

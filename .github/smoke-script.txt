@@ -1,0 +1,6 @@
+cmd tp @a 5.5 200 -7.5 0 5
+sleep 5
+shot
+key e
+sleep 3
+shot
