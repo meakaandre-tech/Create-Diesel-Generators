@@ -39,5 +39,7 @@ say CHECK S13 turret
 data get block 82 202 10
 say CHECK S14 burner
 data get block 88 200 10
+say CHECK S15 furnace
+data get block 94 200 10
 say CHECK restart oil
 execute positioned 28 202 8 run cdg oil get

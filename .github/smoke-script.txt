@@ -406,3 +406,10 @@ cmd say CHECK final
 cmd say CHECK client S5b tank 2
 cmd data get block 42 202 10
 cmd data get block 28 202 11
+cmd setblock 62 200 10 createdieselgenerators:canister
+cmd data merge block 62 200 10 {CapacityEnchantment:1}
+cmd tp @a 62.5 200 7.5 -0.0 20.5
+sleep 4
+shot
+cmd say CHECK client enchanted canister
+cmd data get block 62 200 10

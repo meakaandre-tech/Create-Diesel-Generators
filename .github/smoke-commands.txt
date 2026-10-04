@@ -195,6 +195,8 @@ setblock 89 200 10 create:mechanical_pump[facing=west]
 setblock 89 200 11 create:cogwheel[axis=x]
 setblock 90 200 11 create:creative_motor[facing=west]
 setblock 88 201 10 create:basin
+setblock 94 200 10 minecraft:furnace
+data merge block 94 200 10 {Items:[{Slot:0b,id:"minecraft:raw_iron",count:1},{Slot:1b,id:"createdieselgenerators:wood_chip",count:2}]}
 say CHECK natural oil
 execute positioned 300 100 300 run cdg oil get
 execute positioned 5 200 0 run cdg oil locate
@@ -249,3 +251,5 @@ say CHECK S13 turret
 data get block 82 202 10
 say CHECK S14 burner
 data get block 88 200 10
+say CHECK S15 furnace
+data get block 94 200 10
