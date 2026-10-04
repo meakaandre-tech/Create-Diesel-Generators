@@ -18,6 +18,6 @@ public class CanisterRenderer extends PartsRenderer<CanisterBlockEntity> {
         out.add(CachedBuffers.block(be.getBlockState()));
         SuperByteBufferRenderState glint = CachedBuffers.block(be.getBlockState())
                 .light(out.lightCoords).extractRenderState();
-        out.parts.add((matrices, queue) -> glint.submit(RenderTypes.glint(), matrices, queue));
+        out.parts.add((matrices, queue) -> glint.submit(RenderTypes.patternedShieldGlint(), matrices, queue));
     }
 }

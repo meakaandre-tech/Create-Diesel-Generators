@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.world;
 
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import com.jesz.createdieselgenerators.CDGConfig;
 import com.jesz.createdieselgenerators.CDGTags;
 import com.jesz.createdieselgenerators.CreateDieselGenerators;
@@ -85,12 +86,39 @@ public class OilChunksSavedData extends SavedData {
         load(level).removeChunk(chunk);
     }
 
+    private static long noiseSeed;
+    private static PerlinNoise[] noiseOctaves;
+
+    /**
+     * Four octaves (-2..1) of Perlin noise, seeded and weighted exactly like the octave noise
+     * {@code PerlinNoise.create(RandomSource.create(seed), List.of(-2, -1, 0, 1))} of older game versions,
+     * so a world keeps its oil map.
+     */
+    private static synchronized float oilNoise(long seed, double x, double z) {
+        if (noiseOctaves == null || noiseSeed != seed) {
+            PositionalRandomFactory random = RandomSource.create(seed).forkPositional();
+            PerlinNoise[] octaves = new PerlinNoise[4];
+            for (int i = 0; i < 4; i++)
+                octaves[i] = new PerlinNoise(random.fromHashOf("octave_" + (i - 2)));
+            noiseOctaves = octaves;
+            noiseSeed = seed;
+        }
+        double value = 0;
+        double frequency = 0.25;
+        double amplitude = 8.0 / 15.0;
+        for (PerlinNoise octave : noiseOctaves) {
+            value += amplitude * octave.get(x * frequency, 0, z * frequency);
+            frequency *= 2;
+            amplitude /= 2;
+        }
+        return (float) value;
+    }
+
     public static int getBaseOilAmount(ServerLevel level, ChunkPos chunk) {
         long seed = level.getSeed();
         List<Holder<Biome>> biomes = getBiomesInChunk(level, chunk);
         double scale = CDGConfig.OIL_CHUNK_SCALE.get();
-        PerlinNoise noise = PerlinNoise.create(RandomSource.create(seed), List.of(-2, -1, 0, 1));
-        float amount = (float) (noise.getValue(chunk.x() * scale, 0, chunk.z() * scale) + 1) / 1.6f;
+        float amount = (oilNoise(seed, chunk.x() * scale, chunk.z() * scale) + 1) / 1.6f;
 
         boolean isHighInOil = false;
         boolean isDenied = false;

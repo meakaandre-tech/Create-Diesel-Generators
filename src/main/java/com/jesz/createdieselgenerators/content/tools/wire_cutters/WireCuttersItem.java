@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.content.tools.wire_cutters;
 
+import net.minecraft.util.Prediction;
 import com.jesz.createdieselgenerators.CDGDataComponents;
 import com.jesz.createdieselgenerators.CDGRecipes;
 import com.zurrtum.create.catnip.math.VecHelper;
@@ -78,11 +79,11 @@ public class WireCuttersItem extends Item {
         stack.remove(CDGDataComponents.PROCESSING_ITEM);
 
         if (recipe.isEmpty()) {
-            player.getInventory().placeItemBackInInventory(processingItem);
+            player.getInventory().placeItemBackInInventory(processingItem, Prediction.SERVER_ONLY);
             return stack;
         }
         for (ItemStack result : recipe.get().value().rollResults(level.getRandom()))
-            player.getInventory().placeItemBackInInventory(result);
+            player.getInventory().placeItemBackInInventory(result, Prediction.SERVER_ONLY);
         stack.hurtAndBreak(1, entity, entity.getUsedItemHand().asEquipmentSlot());
         return stack;
     }
@@ -120,7 +121,7 @@ public class WireCuttersItem extends Item {
             return false;
 
         ItemStack processingItem = stack.get(CDGDataComponents.PROCESSING_ITEM).item();
-        player.getInventory().placeItemBackInInventory(processingItem);
+        player.getInventory().placeItemBackInInventory(processingItem, Prediction.SERVER_ONLY);
         stack.remove(CDGDataComponents.PROCESSING_ITEM);
         return false;
     }

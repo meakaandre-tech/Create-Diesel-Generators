@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.content.distillation;
 
+import net.minecraft.util.Prediction;
 import com.jesz.createdieselgenerators.fluid.FluidUtil;
 import com.zurrtum.create.foundation.fluid.FluidHelper;
 import com.zurrtum.create.infrastructure.fluids.FluidInventory;
@@ -100,7 +101,7 @@ public class DistillationTankBlock extends Block implements IBE<DistillationTank
                     FluidUtil.fill(fTank, stackInTank, false);
             }
             if (!context.getPlayer().isCreative())
-                context.getPlayer().getInventory().placeItemBackInInventory(DISTILLATION_CONTROLLER.asStack(width*width));
+                context.getPlayer().getInventory().placeItemBackInInventory(DISTILLATION_CONTROLLER.asStack(width*width), Prediction.SERVER_ONLY);
         }
 
         return InteractionResult.SUCCESS;

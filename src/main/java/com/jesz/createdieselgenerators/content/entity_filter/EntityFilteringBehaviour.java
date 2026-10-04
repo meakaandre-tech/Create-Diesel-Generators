@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.content.entity_filter;
 
+import net.minecraft.util.Prediction;
 import com.zurrtum.create.AllSoundEvents;
 import com.zurrtum.create.catnip.math.VecHelper;
 import com.zurrtum.create.content.logistics.filter.FilterItem;
@@ -45,7 +46,7 @@ public class EntityFilteringBehaviour extends ServerFilteringBehaviour {
         if (filter.getItem() instanceof EntityFilterItem) {
             Inventory inventory = player.getInventory();
             if (!player.isCreative() || inventory.count(filter, 1) == 0)
-                inventory.placeItemBackInInventory(filter.copy());
+                inventory.placeItemBackInInventory(filter.copy(), Prediction.SERVER_ONLY);
         }
 
         if (toApply.getItem() instanceof EntityFilterItem)

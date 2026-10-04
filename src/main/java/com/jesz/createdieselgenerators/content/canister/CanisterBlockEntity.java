@@ -66,13 +66,8 @@ public class CanisterBlockEntity extends SmartBlockEntity {
 
     public void setComponentPatch(DataComponentPatch componentPatch) {
         this.componentPatch = componentPatch;
-        for (java.util.Map.Entry<net.minecraft.core.component.DataComponentType<?>, Optional<?>> entry : componentPatch.entrySet()) {
-            if (entry.getKey() != CDGDataComponents.FLUID_CONTENTS)
-                continue;
-            if (entry.getValue().isPresent() && entry.getValue().get() instanceof SimpleFluidContent content)
-                this.tank.setFluid(content.copy());
-            return;
-        }
+        if (componentPatch.split().added().get(CDGDataComponents.FLUID_CONTENTS) instanceof SimpleFluidContent content)
+            this.tank.setFluid(content.copy());
     }
 
     public DataComponentPatch getComponentPatch() {

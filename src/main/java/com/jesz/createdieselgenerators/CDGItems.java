@@ -32,7 +32,7 @@ public class CDGItems {
 
     public static final ItemEntry<Item> KELP_HANDLE = item("kelp_handle", Item::new);
 
-    public static final ItemEntry<FurnaceBurnItem> WOOD_CHIPS = item("wood_chip", p -> new FurnaceBurnItem(p, 200));
+    public static final ItemEntry<FurnaceBurnItem> WOOD_CHIPS = item("wood_chip", p -> new FurnaceBurnItem(p, "time_wood_chip"));
 
     public static final ItemEntry<Item> ENGINE_PISTON = item("engine_piston", Item::new);
 

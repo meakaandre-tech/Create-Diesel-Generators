@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.content.diesel_engine.modular;
 
+import net.minecraft.util.Prediction;
 import com.jesz.createdieselgenerators.content.diesel_engine.normal.DieselEngineBlock;
 import com.zurrtum.create.foundation.block.RedStoneConnectBlock;
 import com.zurrtum.create.infrastructure.fluids.FluidInventory;
@@ -166,7 +167,7 @@ public class ModularDieselEngineBlock extends HorizontalKineticBlock implements 
                 return;
 
             if (!context.getPlayer().isCreative())
-                context.getPlayer().getInventory().placeItemBackInInventory(controller.upgrade.getItem());
+                context.getPlayer().getInventory().placeItemBackInInventory(controller.upgrade.getItem(), Prediction.SERVER_ONLY);
 
             controller.upgrade = EngineUpgrades.EMPTY;
             controller.sendData();

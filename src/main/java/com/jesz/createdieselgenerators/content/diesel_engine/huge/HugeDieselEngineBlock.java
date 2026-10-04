@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.content.diesel_engine.huge;
 
+import net.minecraft.util.Prediction;
 import net.minecraft.world.level.redstone.Orientation;
 import org.jspecify.annotations.Nullable;
 import com.jesz.createdieselgenerators.content.diesel_engine.normal.DieselEngineBlock;
@@ -113,7 +114,7 @@ public class HugeDieselEngineBlock extends Block implements IBE<HugeDieselEngine
             if(be.upgrade != EngineUpgrades.EMPTY){
                 if(!context.getLevel().isClientSide()) {
                     if (!context.getPlayer().isCreative())
-                        context.getPlayer().getInventory().placeItemBackInInventory(be.upgrade.getItem());
+                        context.getPlayer().getInventory().placeItemBackInInventory(be.upgrade.getItem(), Prediction.SERVER_ONLY);
                     be.upgrade = EngineUpgrades.EMPTY;
                     be.sendData();
                     IWrenchable.playRotateSound(context.getLevel(), context.getClickedPos());

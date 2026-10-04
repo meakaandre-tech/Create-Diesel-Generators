@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.content.turret;
 
+import net.minecraft.util.Prediction;
 import net.minecraft.world.level.redstone.Orientation;
 import org.jspecify.annotations.Nullable;
 import com.jesz.createdieselgenerators.CDGBlockEntityTypes;
@@ -92,7 +93,7 @@ public class ChemicalTurretBlock extends KineticBlock implements IBE<ChemicalTur
                 if(!context.getLevel().isClientSide())
                     be.notifyUpdate();
                 if(!context.getPlayer().isCreative())
-                    context.getPlayer().getInventory().placeItemBackInInventory(CDGItems.LIGHTER.asStack());
+                    context.getPlayer().getInventory().placeItemBackInInventory(CDGItems.LIGHTER.asStack(), Prediction.SERVER_ONLY);
                 IWrenchable.playRotateSound(context.getLevel(), context.getClickedPos());
                 return InteractionResult.SUCCESS;
             }

@@ -1,5 +1,6 @@
 package com.jesz.createdieselgenerators.content.diesel_engine.normal;
 
+import net.minecraft.util.Prediction;
 import com.jesz.createdieselgenerators.CDGFluids;
 import com.jesz.createdieselgenerators.fluid.FluidUtil;
 import com.zurrtum.create.AllFluids;
@@ -91,7 +92,7 @@ public class DieselEngineBlock extends DirectionalKineticBlock implements Specia
             if(be.upgrade != EngineUpgrades.EMPTY){
                 if(!context.getLevel().isClientSide()) {
                     if (!context.getPlayer().isCreative())
-                        context.getPlayer().getInventory().placeItemBackInInventory(be.upgrade.getItem());
+                        context.getPlayer().getInventory().placeItemBackInInventory(be.upgrade.getItem(), Prediction.SERVER_ONLY);
                     be.upgrade = EngineUpgrades.EMPTY;
                     be.sendData();
                     IWrenchable.playRotateSound(context.getLevel(), context.getClickedPos());
