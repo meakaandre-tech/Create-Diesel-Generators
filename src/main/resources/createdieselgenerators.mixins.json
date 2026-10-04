@@ -18,6 +18,7 @@
   "client": [
     "client.BasinRenderStateMixin",
     "client.BasinRendererMixin",
+    "client.DebugRenderPassMixin",
     "client.RenderPipelineBuilderMixin",
     "client.TurretOperatorHatMixin"
   ],
