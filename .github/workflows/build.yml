@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: ["fabric-26.2"]
+    branches: ["fabric-26.3"]
   workflow_dispatch:
 
 permissions:
@@ -23,9 +23,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p libs
-          curl -fsSL -o libs/create-fly-26.2.jar https://github.com/meakaandre-tech/Create-Fly/releases/download/pack-26.2-latest/create-fly-26.2.jar
+          curl -fsSL -o libs/create-fly-26.3.jar https://github.com/meakaandre-tech/Create-Fly/releases/download/pack-26.3-latest/create-fly-26.3.jar
           # compile with Create Fly's class tweaker, so its injected interfaces and widened members are visible
-          unzip -o -j libs/create-fly-26.2.jar create.classtweaker -d libs/
+          unzip -o -j libs/create-fly-26.3.jar create.classtweaker -d libs/
           ls -l libs
       - name: Build
         shell: bash
@@ -91,14 +91,17 @@ jobs:
             root=$PWD
             mkdir -p server/mods && cd server
             inst=$(curl -fsSL https://meta.fabricmc.net/v2/versions/installer | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['version'])")
-            curl -fsSL -o server.jar "https://meta.fabricmc.net/v2/versions/loader/26.2/0.19.5/$inst/server/jar"
-            curl -fsSL -o mods/fabric-api.jar "https://cdn.modrinth.com/data/P7dR8mSH/versions/ewUK83HI/fabric-api-0.161.0%2B26.2.jar"
-            cp ../libs/create-fly-26.2.jar mods/
+            curl -fsSL -o server.jar "https://meta.fabricmc.net/v2/versions/loader/26.3/0.19.5/$inst/server/jar"
+            fapi=$(grep '^fabric_version' $root/gradle.properties | sed 's/.*= *//')
+            fapiurl=$(curl -fsSL "https://api.modrinth.com/v2/project/fabric-api/version" | python3 -c "import json,sys; v=[x for x in json.load(sys.stdin) if x['version_number']=='$fapi']; print(v[0]['files'][0]['url'])")
+            echo "fabric api: $fapiurl"
+            curl -fsSL -o mods/fabric-api.jar "$fapiurl"
+            cp ../libs/create-fly-26.3.jar mods/
             cp $(ls ../build/libs/*.jar | grep -v sources | head -1) mods/
             echo "eula=true" > eula.txt
-            printf 'level-seed=12345\nonline-mode=false\nmax-tick-time=-1\nview-distance=5\ngamemode=creative\ndifficulty=peaceful\nspawn-protection=0\n' > server.properties
+            printf 'level-seed=12345\nwhite-list=false\nenforce-whitelist=false\nonline-mode=false\nmax-tick-time=-1\nview-distance=5\ngamemode=creative\ndifficulty=peaceful\nspawn-protection=0\n' > server.properties
             mkfifo in.fifo
-            (java -Xmx3G -jar server.jar --nogui < in.fifo > server.log 2>&1; echo "EXIT $?" >> server.log) &
+            (java -Xmx3G -Dcreate.mixin.audit=true -jar server.jar --nogui < in.fifo > server.log 2>&1; echo "EXIT $?" >> server.log) &
             exec 3> in.fifo
             for i in $(seq 1 120); do
               if grep -q 'Done (' server.log || grep -q '^EXIT' server.log; then break; fi
@@ -112,15 +115,17 @@ jobs:
               if [ -f $root/.github/smoke-client ]; then
                 cd $root
                 sudo apt-get update -q >/dev/null 2>&1
-                sudo apt-get install -y -q xvfb xdotool imagemagick libgl1-mesa-dri >/dev/null 2>&1
+                sudo apt-get install -y -q xvfb xdotool imagemagick libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 libgles2 mesa-utils >/dev/null 2>&1
                 mkdir -p run/mods
-                cp libs/create-fly-26.2.jar run/mods/
+                cp libs/create-fly-26.3.jar run/mods/
                 printf 'pauseOnLostFocus:false\nonboardAccessibility:false\ntutorialStep:none\nnarrator:0\nrenderDistance:5\nguiScale:2\nmaxFps:30\nsoundCategory_master:0.0\n' > run/options.txt
                 export LIBGL_ALWAYS_SOFTWARE=1
+                # MC 26.3 (SDL3) asks for an sRGB-capable framebuffer; Xvfb's GLX visuals have none, EGL does
+                export SDL_VIDEO_FORCE_EGL=1
                 Xvfb :99 -screen 0 1280x720x24 >/dev/null 2>&1 &
                 export DISPLAY=:99
                 sleep 2
-                (env -u CI timeout 1500 ./gradlew runClient --no-daemon -Dorg.gradle.console=plain --args="--quickPlayMultiplayer localhost --width 1280 --height 720" > client-gradle.log 2>&1; echo "EXIT $?" >> client-gradle.log) &
+                (env -u CI JAVA_TOOL_OPTIONS=-Dcreate.mixin.audit=true timeout 1500 ./gradlew runClient --no-daemon -Dorg.gradle.console=plain --args="--quickPlayMultiplayer localhost --width 1280 --height 720" > client-gradle.log 2>&1; echo "EXIT $?" >> client-gradle.log) &
                 for i in $(seq 1 130); do
                   if grep -q 'joined the game' server/server.log || grep -q '^EXIT' client-gradle.log; then break; fi
                   sleep 5
@@ -167,7 +172,7 @@ jobs:
             if [ -f $root/.github/smoke-commands-restart.txt ] && grep -q 'Done (' server.log; then
               # second start on the saved world: checks that everything written above loads again
               rm -f in.fifo; mkfifo in.fifo
-              (java -Xmx3G -jar server.jar --nogui < in.fifo > server2.log 2>&1; echo "EXIT $?" >> server2.log) &
+              (java -Xmx3G -Dcreate.mixin.audit=true -jar server.jar --nogui < in.fifo > server2.log 2>&1; echo "EXIT $?" >> server2.log) &
               exec 3> in.fifo
               for i in $(seq 1 120); do
                 if grep -q 'Done (' server2.log || grep -q '^EXIT' server2.log; then break; fi
@@ -203,7 +208,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: createdieselgenerators-fabric-26.2
+          name: createdieselgenerators-fabric-26.3
           path: build/libs/*.jar
       - name: Publish the jar as a release
         if: success()
@@ -211,8 +216,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          gh release delete fabric-26.2-latest -y --cleanup-tag -R "${{ github.repository }}" || true
+          gh release delete fabric-26.3-latest -y --cleanup-tag -R "${{ github.repository }}" || true
           sleep 3
           jar=$(ls build/libs/*.jar | grep -v sources | head -1)
-          cp "$jar" createdieselgenerators-fabric-26.2.jar
-          gh release create fabric-26.2-latest createdieselgenerators-fabric-26.2.jar -R "${{ github.repository }}" --target "${GITHUB_SHA}" --title "Create: Diesel Generators for Fabric 26.2 (pack build)" --notes "Built from the fabric-26.2 branch at ${GITHUB_SHA}. Needs Create Fly and Fabric API."
+          cp "$jar" createdieselgenerators-fabric-26.3.jar
+          gh release create fabric-26.3-latest createdieselgenerators-fabric-26.3.jar -R "${{ github.repository }}" --target "${GITHUB_SHA}" --title "Create: Diesel Generators for Fabric 26.3 (pack build)" --notes "Built from the fabric-26.3 branch at ${GITHUB_SHA}. Needs Create Fly and Fabric API."
