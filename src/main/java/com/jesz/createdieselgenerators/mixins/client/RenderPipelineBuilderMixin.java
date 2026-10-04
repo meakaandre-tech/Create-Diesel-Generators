@@ -14,7 +14,7 @@ import java.util.Optional;
 /**
  * Since 26.3 a render pipeline has no colour target unless one is declared, and a render pass refuses a pipeline
  * whose colour target count differs from its attachments. Create Fly's opaque block-model pipelines
- * (create:pipeline/entity_block_solid, ..._cutout and the light/nether variants), which every model drawn through
+ * (ponder:pipeline/entity_block_solid, ..._cutout and the light/nether variants), which every model drawn through
  * a SuperByteBuffer uses, declare none and crash the frame. Give those the default colour target, as the game's own
  * opaque pipelines have. Does nothing once Create Fly declares the target itself.
  */
@@ -30,7 +30,10 @@ public abstract class RenderPipelineBuilderMixin {
 
     @Inject(method = "build()Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;", at = @At("HEAD"))
     private void cdg$defaultColorTarget(CallbackInfoReturnable<RenderPipeline> cir) {
-        if (activeColorTargetStateCount == 0 && location.isPresent() && "create".equals(location.get().getNamespace()))
+        if (activeColorTargetStateCount != 0 || location.isEmpty())
+            return;
+        String namespace = location.get().getNamespace();
+        if (namespace.equals("ponder") || namespace.equals("create"))
             withColorTargetState(ColorTargetState.DEFAULT);
     }
 }
