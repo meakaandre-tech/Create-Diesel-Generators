@@ -163,6 +163,20 @@ public class OilChunksSavedData extends SavedData {
                 }
             }
         }
+        // A world taller than the vanilla overworld (floating islands at any altitude, with their biome only around
+        // them) may have nothing between y 60 and 110: there, look at the whole column as well, one sample per biome
+        // cell in x/z and every 16 blocks in y.
+        if (level.getMinY() < -64 || level.getMaxY() > 320) {
+            for (int x = chunkPos.getMinBlockX() + 2; x <= chunkPos.getMaxBlockX(); x += 4) {
+                for (int z = chunkPos.getMinBlockZ() + 2; z <= chunkPos.getMaxBlockZ(); z += 4) {
+                    for (int y = level.getMinY() + 8; y <= level.getMaxY(); y += 16) {
+                        Holder<Biome> biome = level.getBiome(new BlockPos(x, y, z));
+                        if (!list.contains(biome))
+                            list.add(biome);
+                    }
+                }
+            }
+        }
         return list;
     }
 }
